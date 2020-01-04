@@ -1,0 +1,315 @@
+﻿@model EBMS.Models.T_offer
+@{
+    ViewBag.Title = "ViewReissueAdd";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<script type="text/javascript">
+    var grid; //定义全局变量datagrid
+    var editRow = -1;
+    function op(name, url) {
+        self.parent.addTab(name, url, '');
+        getContextmenu()
+    }
+    //加载数据
+    $(function () {
+        grid = $('#List').datagrid({
+            width: $(window).width() - 10,
+            height: $(window).height() * 0.65,
+            fitColumns: true,
+            showFooter: true,
+            sortName: 'ID',
+            sortOrder: 'desc',
+            idField: 'ID',
+            pageSize: 10,
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                { field: 'code', title: '产品编码', width: 100, align: 'center' },
+                    { field: 'create_Name', title: '产品名称', width: 140, align: 'center' },
+                       { field: 'cost_price', title: '成本价格', width: 140, align: 'center' },
+                    { field: 'Num', title: '数量', width: 80, align: 'center', editor: { type: 'numberbox' } },
+                     { field: 'offerCost', title: '客户单个报价', width: 80, align: 'center', editor: { type: 'numberbox' } },
+                    {
+                      field: 'action', title: '操作', width: 100, align: 'center', formatter: function (value, row, index) {
+                       return '<div class="btn-bar"><a herf="#"  onclick="removeRow(' + index + ')" class="icon-remove">删除</a></div>';
+                       }
+
+                       }
+            ]],
+            onClickCell: function (index, field) {
+
+                //只有数量可以编辑
+                if (field == 'Num' || field == 'offerCost')
+                    editCell(index, field);
+                else if (field == "code" || field == "create_Name") {
+                    $('#openIframeproduct')[0].src = "../ExchangeCenter/ViewProduct?index=" + index;
+                    $('#productDiv').dialog('open');
+                    grid.datagrid('endEdit', index);
+                } else {
+                    CopelPays();
+                    grid.datagrid('endEdit', index);
+                }
+
+            }, onAfterEdit: function (value, row) {
+                CopelPays();
+                saveJson();
+            }
+        });
+        add("@ViewData["code"]");
+
+        $("#btnSubmit").click(function () {
+            Save()
+        });
+        var sign = 0;
+        function Save() {
+            if ($("#inquirerName").val().trim() == "") {
+                $.messager.alert('提示', "客户名称必须填写", "info")
+                return false;
+            }
+            if ($("#EditForm").valid()) {
+                grid.datagrid("endEdit", editRow);
+                var rows = $('#List').datagrid("getRows");
+                for (var i = 0; i < rows.length; i++) {
+                    if (rows[i].Num == undefined || rows[i].Num == "") {
+                        $.messager.alert('提示', "数量不能为空", "info")
+                        return false;
+                    }
+                    if (rows[i].create_Name == undefined || rows[i].create_Name == "") {
+                        $.messager.alert('提示', "产品不能为空", "info")
+                        return false;
+                    }
+                    if (rows[i].offerCost == undefined || rows[i].offerCost == "") {
+                        $.messager.alert('提示', "客户报价不能为空", "info")
+                        return false;
+                    }
+                }
+                if (sign == 0) {
+                    sign++;
+                    loading(0);
+                    var zong = $('#zje').val();
+                    var KHofferCost = $('#KHofferCost').val();
+                    $.ajax({
+                        url: "ViewofferAddSave?detailList=" + $("#jsonStr").val() + "&costTotal=" + zong + "&offerTotal=" + KHofferCost,
+                        type: "Post",
+                        data: $("#EditForm").serialize(),
+                        success: function (data) {
+                            loading(1);
+                            if (data.State == "Success") {
+                                $.messager.alert('提示', '@Lib.MessageRes.SaveOK', "info", function () {
+                                    addTab()
+                                    sign = 0
+                                });
+                            } else {
+                                $.messager.alert('提示', data.Message, "info", function () {
+                                    addTab();
+                                    sign = 0
+                                });
+                            }
+                        },
+                        error: function () {
+                            loading(1);
+                            sign = 0;
+                        }
+                    });
+                }
+            }
+        }
+
+        //新增明细
+        $('#btnAdd').bind('click', function () {
+            if (editRow != -1) {
+                grid.datagrid("endEdit", editRow);
+                editRow = -1;
+            }
+            else {
+                $('#List').datagrid('appendRow', {
+                    code: "",
+                    create_Name: "",
+                    cost_price: "",
+                    offerCost: "",
+                    Num: "",
+                  
+                })
+            }
+        });
+
+    });
+
+    function removeRow(index) {
+        $('#List').datagrid('deleteRow', index);
+        var rows = $('#List').datagrid("getRows");
+        $('#List').datagrid("loadData", rows);
+        saveJson();
+    }
+
+    function addproduct(row, index) {
+        $('#productDiv').dialog('close');
+        $('#List').datagrid('updateRow', {
+            index: index,
+            row: {
+                code: row.code,
+                create_Name: row.name,
+                cost_price: isnull(row.cost_price)
+            }
+        });
+        saveJson();
+    }
+    
+    function isnull(num)
+    {
+        
+        if (num == null)
+        {
+            num = 0;
+        }
+        return num;
+    }
+    
+    function add(code) {
+        grid.datagrid('loadData', { total: 0, rows: [] });
+        $.post("../ExchangeCenter/GetOrderDetail", { "oid": code }, function (data) {
+            $(data).each(function (i, item) {
+                $('#List').datagrid('appendRow', { code: item.item_code, create_Name: item.item_name, cost_price: item.cost_price })
+            });
+        });
+    }
+    function CopelPays() {
+        var rows = $('#List').datagrid('getRows');
+        var pay = 0;
+        var offerCost = 0;
+        for (var i = 0; i < rows.length; i++) {
+            if (rows[i].Num != null && rows[i].cost_price != null)
+                pay += rows[i].Num * rows[i].cost_price;
+
+            if (rows[i].Num != null && rows[i].offerCost != null)
+                offerCost += rows[i].Num * rows[i].offerCost;
+            pay = Math.round(pay * 100) * 0.01;
+            offerCost = Math.round(offerCost * 100) * 0.01;
+        }
+        $('#zje').val(pay.toFixed(2))
+        $('#KHofferCost').val(offerCost.toFixed(2))
+    }
+    //关闭当前页面
+    function closeCurTab(name) {
+        var parentTab = parent.$('#mainTab').tabs('select', name);
+        var curTab = self.parent.$('#mainTab').tabs('getSelected');// 当前tab
+        var index = self.parent.$('#mainTab').tabs('getTabIndex', curTab);
+        self.parent.$('#mainTab').tabs('close', index);
+    }
+
+    function addTab() {
+        op("补发货新增订单", "../Reissue/ViewOrderList");
+        closeCurTab("补发货新增");//关闭当前页面
+    }
+
+    function saveJson() {
+        CopelPays();
+        JsonText = "[";
+        var rows = $('#List').datagrid('getRows');
+
+        for (var i = 0; i < rows.length; i++) {
+            JsonText += '{';
+            JsonText += '"code":' + '"' + rows[i].code + '",';
+            JsonText += '"create_Name":' + '"' + rows[i].create_Name + '",';
+            JsonText += '"offerCost":' + '"' + rows[i].offerCost + '",';
+            JsonText += '"cost_price":' + '"' + rows[i].cost_price + '",';
+            JsonText += '"Num":' + '"' + rows[i].Num + '"},';
+        }
+        JsonText = JsonText.substring(0, JsonText.length - 1);
+        JsonText += "]";
+        if (rows.length == 0)
+            JsonText = "";
+        $("#jsonStr").val(JsonText);
+    }
+
+    function editCell(index, field) {
+
+        CopelPays();
+
+        grid.datagrid('endEdit', editRow);
+        editRow = index;
+        grid.datagrid('selectRow', index);
+        grid.datagrid('beginEdit', index);
+        var editor = grid.datagrid('getEditor', { index: index, field: field });
+        //numberbox 特殊处理
+        setTimeout(function () {
+            editor.target.focus();
+        }, 0);
+
+        var editors = grid.datagrid('getEditors', index);
+        for (var i = 0; i < editors.length; i++) {
+            editors[i].target.bind('keydown', { field: editors[i].field }, function (e) {
+                if (e.keyCode == 13) {
+                    grid.datagrid('endEdit', index);
+                    editRow = -1;;
+                } else if (e.keyCode == 38) {	// up
+
+                    if (editRow > 0) {
+                        editCell(editRow - 1, e.data.field);
+                    }
+                } else if (e.keyCode == 40) {	// down
+
+                    if (editRow < grid.datagrid('getRows').length - 1) {
+                        editCell(parseInt(editRow) + 1, e.data.field);
+                    }
+                }
+                if (i < 2) {
+                    if (!(event.keyCode == 46) && !(event.keyCode == 9) && !(event.keyCode == 8) && !(event.keyCode == 37) && !(event.keyCode == 39))
+                        if (!((event.keyCode >= 48 && event.keyCode <= 57) || (event.keyCode >= 96 && event.keyCode <= 105)))
+                            event.returnValue = false;
+                }
+            });
+        }
+    }
+    $(document).not(grid).on("click", function () {
+        CopelPays();
+        grid.datagrid("endEdit", editRow);
+        grid.datagrid('unselectAll');
+    });
+</script>
+<div class="mvctool">
+       <input id="btnSubmit" class="modal-btn modal-btn-save" type="submit" value="提交">
+    <a href="#" class="easyui-linkbutton" plain="true" iconcls="icon-add" id="btnAdd">添加详情</a>
+ 
+</div>
+@using (Html.BeginForm("EditForm", "Controller", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+    <table class="fromEditTable setTextWidth300">
+        <tr>
+            <td style="width: 16.5%; text-align: right">
+                <input type="hidden" id="jsonStr" />
+                @Html.HiddenFor(model => model.ID)
+                客户名称（旺旺号）：
+            </td>
+            <td style="width: 16.5%;">@Html.TextBoxFor(model => model.inquirerName)</td>
+            <td style="width: 16.5%;">@Html.ValidationMessageFor(model => model.inquirerName)</td>
+         
+           
+        </tr>
+        <tr>
+         
+              <td style="width: 16.5%; text-align: right">
+                成本总金额：
+            </td>
+            <td style="width: 16.5%;"><input  type="text" id="zje" readonly="readonly" /> </td>
+
+        </tr>
+         <tr>
+         
+              <td style="width: 16.5%; text-align: right">
+                客户报价总金额：
+            </td>
+            <td style="width: 16.5%;"><input  type="text" id="KHofferCost" readonly="readonly" /> </td>
+
+        </tr>
+    </table>
+}
+<table id="List"></table>
+<div id="productDiv" class="easyui-dialog" closed="true" modal="true" title="选择需发产品" style="width: 500px; height: 420px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIframeproduct' frameborder="0" src="" style="width: 98%; height: 98%;"></iframe>
+</div>
+<div id="openOrder" class="easyui-dialog" closed="true" modal="true" title="选择订单信息" style="width: 750px; height: 400px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIframeOrder' frameborder="0" src="" style="width: 100%; height: 98%;"></iframe>
+</div>

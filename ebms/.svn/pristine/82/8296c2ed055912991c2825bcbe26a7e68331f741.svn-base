@@ -1,0 +1,45 @@
+﻿@{
+    ViewBag.Title = "ViewReissueDetail";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<script type="text/javascript">
+    $(function () {
+        var url = "GetViewofferDetails?pId=" + "@ViewData["pId"]";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() * 0.65,
+            fitColumns: true,
+            sortName: 'ID',
+            sortOrder: 'desc',
+            idField: 'ID',
+            pageSize: 10,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                { field: 'code', title: '产品编码', width: 50, align: 'center' },
+                { field: 'create_Name', title: '产品名称', width: 90, align: 'center' },
+                { field: 'cost_price', title: '成本价', width: 80, align: 'center' },
+            { field: 'offerCost', title: '客户报价', width: 50, align: 'center' },
+              { field: 'Num', title: '数量', width: 80, align: 'center' }
+            ]]
+        });
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            });
+        });
+    });
+</script>
+<table id="List"></table>
+<hr style="height: 1px; border: none; border-top: 1px dashed #0066CC;" />
+@Html.Raw(ViewData["history"])

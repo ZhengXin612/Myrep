@@ -1,0 +1,27 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <title></title>
+   <script src="@Url.Content("~/Content/blue/js/jquery-1-7-1-min.js")" type="text/javascript"></script>
+       <script src="@Url.Content("~/Scripts/jquery.form.js")" type="text/javascript"></script>
+     <script src="@Url.Content("~/Scripts/jquery.easyui-min.js")" type="text/javascript"></script>
+      <script src="@Url.Content("~/Scripts/jquery.validate.min.js")" type="text/javascript"></script>
+     <script src="@Url.Content("~/Scripts/jquery.validate.unobtrusive.min.js")" type="text/javascript"></script>
+     <script src="@Url.Content("~/Scripts/easyui-lang-zh_CN.js")"></script>
+     <script src="@Url.Content("~/Scripts/home.js")" type="text/javascript"></script>
+     <script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+   <link href="/Content/Site.css" rel="stylesheet"/>
+    <link href="/Content/blue/js/themes/default/easyui.css" rel="stylesheet"/>
+     <link href="../Content/blue/css/EBMS.css" rel="stylesheet"/>
+     <link rel="stylesheet" type="text/css" href="../Content/icons/iconfont.css">
+    <script type="text/javascript">
+        $(function () {
+            $(".combo-text").css("width", "100px");
+        })
+    </script>
+</head>
+<body style="width:100%;display:table;">
+        @RenderBody()
+</body>
+</html>

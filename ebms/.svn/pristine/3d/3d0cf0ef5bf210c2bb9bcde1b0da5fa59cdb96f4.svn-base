@@ -1,0 +1,265 @@
+﻿@model EBMS.Models.T_Receipt
+@{
+    ViewBag.Title = "ViewReceiptAdd";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<script type="text/javascript">
+    var grid; //定义全局变量datagrid
+    var editRow = -1;
+    function op(name, url) {
+        self.parent.addTab(name, url, '');
+        getContextmenu()
+    }
+    //加载数据
+    $(function () {
+        grid = $('#List').datagrid({
+            width: $(window).width() - 10,
+            height: $(window).height() - 170,
+            fitColumns: true,
+            showFooter: true,
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                    { field: 'ProductName', title: '商品名称', width: 140, align: 'center', editor: { type: 'validatebox' } },
+                    { field: 'Unit', title: '单位', width: 80, align: 'center', editor: { type: 'validatebox' } },
+                    { field: 'Qty', title: '数量', width: 60, align: 'center', editor: { type: 'numberbox' } }
+            ]],
+            onClickCell: function (index, field) {
+                editCell(index, field);
+            },
+            onAfterEdit: function (index) {
+                saveJson();
+                grid.datagrid('refreshRow', index);
+            }
+        });
+
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 10,
+                height: $(window).height() - 40
+            }).datagrid('resize', {
+                width: $(window).width() - 10,
+                height: $(window).height() - 40
+            });
+        });
+
+        var sign = 0;
+        $("#btnSave").click(function () {
+            grid.datagrid("endEdit", editRow);
+            var rows = $('#List').datagrid("getRows");
+            for (var i = 0; i < rows.length; i++) {
+                if (rows[i].Qty == undefined || rows[i].Qty == "") {
+                    $.messager.alert('提示', "数量不能为空", "info")
+                    return false;
+                }
+                if (rows[i].ProductName == undefined || rows[i].ProductName == "") {
+                    $.messager.alert('提示', "商品名称不能为空", "info")
+                    return false;
+                }
+                if (rows[i].Unit == undefined || rows[i].Unit == "") {
+                    $.messager.alert('提示', "单位不能为空", "info")
+                    return false;
+                }
+            }
+            if ($("#EditForm").valid()) {
+                if (sign == 0) {
+                    saveJson();
+                    sign++;
+                    loading(0);
+                    $.ajax({
+                        url: "ViewReceiptAddSave",
+                        type: "Post",
+                        data: $("#EditForm").serialize(),
+                        success: function (data) {
+                            loading(1);
+                            if (data.State == "Success") {
+                                $.messager.alert('提示', '@Lib.MessageRes.SaveOK', "info", function () {
+                                    window.location.reload();
+                                    sign = 0
+                                });
+                            } else {
+                                $.messager.alert('提示', data.Message, "info", function () {
+                                    sign = 0
+                                });
+                            }
+                        },
+                        error: function () {
+                            loading(1);
+                            sign = 0;
+                        }
+                    });
+                }
+            }
+        });
+        @*addOrderDetail("@Model.OrderId")*@
+        enterSearch("#btnQuery");
+        var sign = 0;
+        $("#btnQuery").click(function () {
+            if ($("#OrderCode").val().trim() == "") {
+                $.messager.alert('提示', "请输入订单号", "info");
+                return false;
+            }
+            loading(0);
+            $.post("GetReceiptByGy", { "code": $("#OrderCode").val().trim() }, function (data) {  
+                sign++;
+                if (data.State == "Success") {
+                    $("#OrderCode").val(data.ModelList["OrderCode"]);
+                    $("#Receivings").val(data.ModelList["Receivings"]);
+                    $("#Money").val(data.ModelList["Money"]);
+                    $("#Vip_Name").val(data.ModelList["Vip_Name"]);
+                    $("#StorName").val(data.ModelList["StorName"]);
+                    $(data.Json.rows).each(function (i, item) {
+                        var ax = 0;
+                        var rows = $('#List').datagrid('getRows');
+                        for (var x = 0; x < rows.length; x++) {
+                            if (rows[x].item_code == item.item_code) {
+                                ax = 1;
+                            }
+                        }
+                        if (ax == 0) {
+                            $('#List').datagrid('appendRow', { ProductName: item.ProductName, Unit: item.Unit, Qty: item.Qty })
+                        }
+                    });
+                    loading(1);
+                    sign = 0;
+                } else {
+                    $.messager.alert('提示', data.Message, "info", function () {
+                        window.location.reload();
+                    });
+                }
+            });
+        })
+    });
+
+    //function addOrderDetail(id) {
+    //    grid.datagrid('loadData', { total: 0, rows: [] });
+    //    $.post("GetOrderDetail", { "ID": id }, function (data) {
+    //        $(data).each(function (i, item) {
+    //            $('#List').datagrid('appendRow', { ProductName: item.Name, Qty: item.Qty, Unit: item.Unit })
+    //        });
+    //    });
+    //}
+
+    //关闭当前页面
+    //function closeCurTab(name) {
+    //    var parentTab = parent.$('#mainTab').tabs('select', name);
+    //    var curTab = self.parent.$('#mainTab').tabs('getSelected');// 当前tab
+    //    var index = self.parent.$('#mainTab').tabs('getTabIndex', curTab);
+    //    self.parent.$('#mainTab').tabs('close', index);
+    //}
+    //function addTab() {
+    //    op("收款收据新增订单", "../Receipt/ViewOrderList");
+    //    closeCurTab("收款收据新增");//关闭当前页面
+    //}
+
+    function saveJson() {
+
+        JsonText = "[";
+        var rows = $('#List').datagrid('getChanges');
+
+        for (var i = 0; i < rows.length; i++) {
+            JsonText += '{';
+            JsonText += '"ProductName":' + '"' + rows[i].ProductName + '",';
+            JsonText += '"Unit":' + '"' + rows[i].Unit + '",';
+            JsonText += '"Qty":' + '"' + rows[i].Qty + '"},';
+        }
+        JsonText = JsonText.substring(0, JsonText.length - 1);
+        JsonText += "]";
+        if (rows.length == 0)
+            JsonText = "";
+        $("#jsonStr").val(JsonText);
+    }
+
+    function editCell(index, field) {
+        if (editRow != index) {
+            grid.datagrid('endEdit', editRow);
+            editRow = index;
+            grid.datagrid('selectRow', index);
+            grid.datagrid('beginEdit', index);
+            var editor = grid.datagrid('getEditor', { index: index, field: field });
+            //numberbox 特殊处理
+            setTimeout(function () {
+                editor.target.focus();
+            }, 0);
+
+            var editors = grid.datagrid('getEditors', index);
+            for (var i = 0; i < editors.length; i++) {
+                editors[i].target.bind('keydown', { field: editors[i].field }, function (e) {
+                    if (e.keyCode == 13) {
+                        grid.datagrid('endEdit', index);
+                        editRow = -1;
+                    } else if (e.keyCode == 38) {	// up
+
+                        if (editRow > 0) {
+                            editCell(editRow - 1, e.data.field);
+                        }
+                    } else if (e.keyCode == 40) {	// down
+
+                        if (editRow < grid.datagrid('getRows').length - 1) {
+                            editCell(parseInt(editRow) + 1, e.data.field);
+                        }
+                    }
+                    if (i < 2) {
+                        if (!(event.keyCode == 46) && !(event.keyCode == 9) && !(event.keyCode == 8) && !(event.keyCode == 37) && !(event.keyCode == 39))
+                            if (!((event.keyCode >= 48 && event.keyCode <= 57) || (event.keyCode >= 96 && event.keyCode <= 105)))
+                                event.returnValue = false;
+                    }
+                });
+            }
+        }
+    }
+    $(document).not(grid).on("click", function () {
+        grid.datagrid("endEdit", editRow);
+        grid.datagrid('unselectAll');
+    });
+</script>
+<div class="mvctool">
+    <input id="btnSave" class="modal-btn modal-btn-save" type="submit" value="保存">
+</div>
+@using (Html.BeginForm("EditForm", "Controller", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+    <table class="fromEditTable setTextWidth300">
+        <tr>
+            <td style="width: 10%; text-align: right">
+                @Html.Hidden("jsonStr")
+                @Html.HiddenFor(model => model.OrderId)
+                @Html.HiddenFor(model => model.ID)
+                @Html.LabelFor(model => model.OrderCode)：
+            </td>
+            <td style="width: 30%;">@Html.TextBoxFor(model => model.OrderCode)
+                <input type="button" value="查询" id="btnQuery" class="icon-search"></td>
+            <td style="width: 16.5%;">@Html.ValidationMessageFor(model => model.OrderCode)</td>
+            <td style="width: 16.5%; text-align: right">
+                @Html.LabelFor(model => model.Receivings)：
+            </td>
+            <td style="width: 16.5%;">@Html.TextBoxFor(model => model.Receivings)</td>
+            <td style="width: 16.5%; text-align: left">@Html.ValidationMessageFor(model => model.Receivings)</td>
+        </tr>
+        <tr>
+            <td style="text-align: right">
+                @Html.LabelFor(model => model.Vip_Name)：
+            </td>
+            <td>@Html.TextBoxFor(model => model.Vip_Name)</td>
+            <td style="text-align: left">@Html.ValidationMessageFor(model => model.Vip_Name)</td>
+            <td style="text-align: right">
+                @Html.LabelFor(model => model.StorName)：
+            </td>
+            <td>@Html.TextBoxFor(model => model.StorName)
+            </td>
+            <td style="text-align: left">@Html.ValidationMessageFor(model => model.StorName)</td>
+        </tr>
+        <tr>
+            <td style="text-align: right">
+                @Html.LabelFor(model => model.Money)：
+            </td>
+            <td>@Html.TextBoxFor(model => model.Money)</td>
+            <td style="text-align: left">@Html.ValidationMessageFor(model => model.Money)</td>
+        </tr>
+    </table>
+}
+<table id="List"></table>
+<div id="OrderDiv" class="easyui-dialog" closed="true" modal="true" title="选择订单" style="width: 450px; height: 400px;" resizable="true" closable="true">
+    <iframe scrolling="no" id='openIframeOrder' frameborder="0" src="" style="width: 100%; height: 98%;"></iframe>
+</div>

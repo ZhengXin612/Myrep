@@ -1,0 +1,257 @@
+﻿@{
+    ViewBag.Title = "ViewGeneralizeNotCheckedList";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+
+<script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+<div class="Company-top-box">
+    <div class="search-box">
+        <input type="text" id="txtQuery" style="width: 150px;" placeholder="负责人/订单号/旺旺号" />
+        仓库:
+        @Html.DropDownList("warhouse", ViewData["warhouse"] as List<SelectListItem>)
+        店铺:
+        @Html.DropDownList("storeName", ViewData["storeName"] as List<SelectListItem>)
+        发货状态:
+                             <select id="sendStatus" name="sendStatus">
+                                 <option value="==请选择==" selected="true">==请选择==</option>
+                                 <option value="2">已发货</option>
+                                 <option value="已过期">已过期</option>
+                                 <option value="">未匹配</option>
+                                 <option value="未发货">未发货</option>
+                             </select>
+        <span style="color: #808080; padding-right: 10px; font-size: 13px; margin-top: 3px; margin-left: 10px;">开始时间</span>
+        <input name="statethisdate" style="float: left;" value="" id="statethisdate" class="easyui-datebox" data-options="sharedCalendar:'#statethisdate'">
+        <span style="color: #808080; padding-right: 10px; font-size: 13px; margin-top: 3px; margin-left: 10px;">结束时间</span>
+        <input name="Endthisdate" style="float: left;" value="" id="Endthisdate" class="easyui-datebox" data-options="sharedCalendar:'#Endthisdate'">
+        <input type="button" value="查询" id="btnQuery" class="icon-search">
+    </div>
+    <div class="btn-bar">
+        <a href="#" onclick="Approve()" class="icon-check">批量审核</a>
+        <a href="#" onclick="Matching()" class="icon-check">匹配数据</a>
+        <a href="#" onclick="OutputExcel(this)" class="icon-check">导出Excel</a>
+        <p class="showBar">查看审核详情 : 请双击需要查看的数据</p>
+    </div>
+</div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+<script type="text/javascript">
+    //回车触发查询
+    enterSearch("#btnQuery");
+    $(function () {
+        var url = "GetGeneralizeApproveList";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() * 0.93,
+            sortName: 'ID',
+            sortOrder: 'desc',
+            idField: 'ID',
+            pageSize: 30,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: false,//单选模式
+            rownumbers: false,//行号
+            frozenColumns: [[
+    { field: 'Guid', title: 'Guid', width: 60, checkbox: true },
+     { field: 'CreateDate', title: '时间', width: 80, align: 'center', formatter: formatDatebox },
+          { field: 'WarhouseName', title: '仓库', width: 90, align: 'center' },
+                       {
+                           field: 'IsCancel', title: '是否取消', width: 60, align: 'center', formatter: function (value, row, index) {
+                               if (row.IsCancel == "True") {
+                                   return "取消"
+                               }
+                               else if (row.IsCancel == "已过期") {
+                                   return "已过期"
+                               }
+                               else if (row.IsCancel == "") {
+                                   return "未匹配"
+                               }
+                               else
+                                   return "未取消";
+                           }
+                       },
+                                                    {
+                                                        field: 'IsSend', title: '是否发货', width: 60, align: 'center', formatter: function (value, row, index) {
+                                                            if (row.IsSend == "2") {
+                                                                return "已发货"
+                                                            }
+                                                            else if (row.IsSend == "已过期") {
+                                                                return "已过期"
+                                                            }
+                                                            else if (row.IsSend == "") {
+                                                                return "未匹配"
+                                                            }
+                                                            else
+                                                                return "未发货";
+                                                        }
+                                                    },
+                                                    {
+                                                        field: 'PlatformFlag', title: '平台旗帜', width: 80, align: 'center',
+                                                        formatter: function (value, row, index) {
+                                                            var e;
+                                                            if (row.PlatformFlag == "4") {
+                                                                var e = '<img src="/Content/blue/images/flagBlue.png" />';
+                                                            } else {
+                                                                var e = "其他旗帜请核实！";
+                                                            }
+                                                            return e;
+                                                        }
+                                                    },
+      { field: 'StoreName', title: '店铺名称', width: 120, align: 'center' },
+       { field: 'OrderNumber', title: '订单号', width: 140, align: 'center' },
+        { field: 'ProductName', title: '宝贝名称', width: 120, align: 'center' },
+        { field: 'Cost', title: '金额', width: 70, align: 'center' },
+            ]],
+            columns: [[
+                { field: 'CommissionCost', title: '佣金', width: 70, align: 'center' },
+         { field: 'AliNumber', title: '旺旺号', width: 120, align: 'center' },
+        { field: 'TenPay', title: '财付通', width: 100, align: 'center' },
+       { field: 'BankNumber', title: '银行卡', width: 100, align: 'center' },
+       { field: 'BorrowCode', title: '借支批号', width: 150, align: 'center' },
+    { field: 'PostUser', title: '操作人', width: 80, align: 'center' },
+                 { field: 'OrderType', title: '订单类型', width: 80, align: 'center' },
+                { field: 'PayCommissionNumber', title: '付佣账号', width: 90, align: 'center' },
+                { field: 'ResponsibleName', title: '负责人', width: 80, align: 'center' },
+                { field: 'DKUserMessage', title: '刷手信息', width: 120, align: 'center' },
+                { field: 'Memo', title: '备注', width: 140, align: 'center' },
+
+                                                                                                {
+                                                                                                    field: 'IsCheck', title: '是否标记', width: 60, align: 'center',
+                                                                                                    formatter: function (value, row, index) {
+                                                                                                        var e;
+                                                                                                        if (row.IsCheck == "0") {
+                                                                                                            var e = '<img src="/Content/blue/images/cancel.png"   onclick="updateIsnew(' + row.ID + ',' + row.IsCheck + ')"/>';
+                                                                                                        } else {
+                                                                                                            var e = '<img src="/Content/blue/images/ok.png"   onclick="updateIsnew(' + row.ID + ',' + row.IsCheck + ')"/>';
+                                                                                                        }
+                                                                                                        return e;
+                                                                                                    }
+                                                                                                }
+            ]],
+            onDblClickRow: function (value, row, index) {
+                $('#openIframedetail')[0].src = "ViewGrnrralizeApproveDetail?pid=" + row.Guid;
+                $("#detailDiv").dialog({
+                    onClose: function () {
+                        $("#List").datagrid("reload");//刷新列表 
+                    }
+                });
+                $('#detailDiv').dialog('open');
+            }
+        });
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            });
+        });
+    });
+    var sign = 0;
+    function updateIsnew(Cid, IsCheck) {
+        if (sign == 0) {
+            sign++;
+            var url = "../Generalize/updateIscheck/";
+            loading(0);
+            $.ajax({
+                url: url + "?id=" + Cid + "&IsCheck=" + IsCheck,
+                type: "Post",
+                success: function (data) {
+                    loading(1);
+                    $('#List').datagrid('reload');
+                    sign = 0;
+                }
+            });
+        }
+    }
+
+    function Matching() {
+        var rows = $('#List').datagrid('getSelections');
+        if (rows.length == 0) {
+            $.messager.alert('提示', "请选中需要匹配的数据", "info");
+            return false;
+        }
+        var ids = "";
+        for (var i = 0; i < rows.length; i++) {
+            ids += rows[i].Guid + ","
+        }
+        ids = ids.substr(0, ids.length - 1);
+        if (sign == 0) {
+            sign++;
+            var url = "../Generalize/MatchingGy?ids=" + ids;
+            loading(0);
+            $.ajax({
+                url: url,
+                type: "Post",
+                success: function (data) {
+                    loading(1);
+                    if (data.State == "Success") {
+                        $.messager.alert('提示', "匹配成功", "info");
+                        $('#List').datagrid('reload');
+                        sign = 0;
+                    } else {
+                        $.messager.alert('提示', data.Message, "info");
+                        $('#List').datagrid('reload');
+                        sign = 0;
+                    }
+                }
+            });
+        }
+    }
+
+    function Approve() {
+        var rows = $('#List').datagrid('getSelections');
+        if (rows.length == 0) {
+            $.messager.alert('提示', "请选中需要操作的数据", "info");
+            return false;
+        }
+        var ids = "";
+        for (var i = 0; i < rows.length; i++) {
+            ids += rows[i].Guid + ","
+        }
+        ids = ids.substr(0, ids.length - 1);
+        $('#openIframeApprove')[0].src = "ViewGeneralizeApprove?ids=" + ids;
+        $("#approveDiv").dialog({
+            onClose: function () {
+                $("#List").datagrid("reload");//刷新列表 
+            }
+        });
+        $('#approveDiv').dialog('open');
+    }
+
+    function OutputExcel(s) {
+        var query = $("#txtQuery").val().trim();
+        var statedate = $('#statethisdate').datebox('getValue');
+        var EndDate = $('#Endthisdate').datebox('getValue');
+        if (statedate == "" || EndDate == "") {
+            $.messager.alert('提示', "请选择时间段", "info");
+            return false;
+        }
+        s.href = 'OutPutExcel?query=' + name + '&statedate=' + statedate + '&EndDate=' + EndDate;
+    }
+
+    $("#btnQuery").click(function () {
+
+        var queryStr = $("#txtQuery").val().trim();
+        var statedate = $('#statethisdate').datebox('getValue');
+        var EndDate = $('#Endthisdate').datebox('getValue');
+        var warhouse = $('#warhouse option:selected').text();
+        var storeName = $('#storeName option:selected').text();
+        var sendStatus = $("#sendStatus option:selected").val();
+        $('#List').datagrid({
+            url: 'GetGeneralizeApproveList?query=' + queryStr + '&startDate=' + statedate + '&endDate=' + EndDate + '&warhouse=' + warhouse + "&storeName=" + storeName + "&sendStatus=" + sendStatus
+        });
+
+    });
+
+</script>
+<div id="detailDiv" class="easyui-dialog" closed="true" modal="true" title="审核详情" style="width: 800px; height: 300px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIframedetail' frameborder="0" src="" style="width: 98%; height: 98%;"></iframe>
+</div>
+<div id="approveDiv" class="easyui-dialog" closed="true" modal="true" title="审核" style="width: 630px; height: 503px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIframeApprove' frameborder="0" src="" style="width: 98%; height: 98%;"></iframe>
+</div>

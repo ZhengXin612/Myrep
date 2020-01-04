@@ -1,0 +1,110 @@
+﻿@{
+    ViewBag.Title = "ViewDepartmentActivityList";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+
+<div class="Company-top-box">
+    <div class="search-box">
+         <input type="text" placeholder="申请人.." id="txtQuery"  class="icon-search-txt">
+         <input type="button" value="查询" id="btnQuery" class="icon-search">
+
+     </div>
+     <div class="btn-bar">
+       
+        
+    </div>
+</div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+
+<script type="text/javascript">
+    enterSearch("#btnQuery");
+  
+    $(function () {
+        var url = "/DepartmentActivity/GetDepartmentActivityList/";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width()-15,
+            method: 'post',
+            height: $(window).height() - 45,
+            fitColumns: true,
+           // sortName: 'Code',
+            sortOrder: 'desc',
+            idField: 'ID',
+            pageSize: 20,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                { field: 'PostUser', title: '申请人', width: 60, align: 'center' },
+                { field: 'PostTime', title: '申请时间', width: 100, align: 'center' },
+                { field: 'Dept', title: '申请部门', width: 80, align: 'center' },
+                { field: 'Reason', title: '原因', width: 100, align: 'center' },
+                { field: 'ChargePerson', title: '负责人', width: 60, align: 'center' },
+                { field: 'Tel', title: '负责人电话', width: 100, align: 'center' },
+                { field: 'Persons', title: '参加人员', width: 100, align: 'center' },
+                { field: 'PeopleNum', title: '参加人数', width: 60, align: 'center' },
+                { field: 'Address', title: '活动地点', width: 100, align: 'center' },
+                { field: 'Contents', title: '活动内容', width: 100, align: 'center' },
+                { field: 'StartTime', title: '活动开始时间', width: 100, align: 'center' },
+                { field: 'EndTime', title: '活动结束时间', width: 100, align: 'center' },
+                { field: 'Expense', title: '预计费用', width: 60, align: 'center' },
+                
+                { field: 'Status', title: '状态', width: 80, align: 'center', formatter: stateSecond },
+               
+            ]],
+            onDblClickRow: function (rowIndex, rowData) {
+                Detail()
+            },
+
+
+        })
+
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 40
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 40
+            });
+        });
+
+       
+    })
+
+ function Query()
+    {
+        var queryStr = $("#txtQuery").val();
+       
+        $('#List').datagrid({
+            url: '/DepartmentActivity/GetDepartmentActivityList?queryStr=' + encodeURI(queryStr)   //+ '&statedate=' + statedate + '&EndDate=' + EndDate + '&dianming=' + dianming
+
+        });
+        $("#txtQuery").focus().select();
+    }
+    $('#btnQuery').click(function () {
+
+        Query();
+
+    });
+
+    function Detail() {
+        var row = $('#List').datagrid('getSelected');
+        if (row != null) {
+            $("#DetailDiv").prev(".panel-header").find(".panel-title").html("详情")
+            $('#IframeDetail')[0].src = "ViewCheckDetail?DID=" + row.ID;
+            $('#DetailDiv').dialog('open');
+        }
+        else { $.messager.alert('提示', '@Lib.MessageRes.PleaseSelect', "info"); }
+    }
+
+
+    </script>
+<div id="DetailDiv" class="easyui-dialog" closed="true" modal="true" title="详情" style="width:60%; height:70%;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='IframeDetail' frameborder="0" src="" style="width:100%;height:98%;"></iframe>
+</div>
+
+

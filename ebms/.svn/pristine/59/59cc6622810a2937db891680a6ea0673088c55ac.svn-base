@@ -1,0 +1,79 @@
+﻿@model EBMS.Models.T_CashBack
+@{
+    ViewBag.Title = "ViewModify";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<script type="text/javascript">
+    $(function () {
+        var flag = 0
+        $("#btnSave").click(function () {
+            if (flag == 0) {
+                flag++;
+                loading(0)
+                if ($("#EditForm").valid()) {
+                    $.ajax({
+                        url: "ModifySave",
+                        type: "Post",
+                        data: $("#EditForm").serialize(),
+                        success: function (data) {
+                            if (data.State == "Success") {
+                                $.messager.alert('提示', "操作成功", "info", function () {
+                                    loading(1)
+                                    parent.$("#editDiv").dialog("close");
+                                    parent.$("#List").datagrid("reload");
+                                });
+                            } else {
+                                $.messager.alert('提示', data.Message, "info", function () {
+                                    flag = 0;
+                                    loading(1)
+                                });
+                            }
+                        },
+                        error: function (data) {
+                            $.messager.alert('提示', data, "info")
+                        }
+                    });
+                }
+            }
+        })
+
+    })
+   
+</script>
+
+<div class="mvctool">
+   
+     <a id="btnSave" href="javascript:;" class="modal-btn modal-btn-save">保存</a>
+</div>
+@using (Html.BeginForm("EditForm", "Controller", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+    <table class="fromEditTable setTextWidth300" id="cashback">
+        @Html.HiddenFor(model => model.ID)
+       
+        <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.OrderNum)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.OrderNum, new { @readonly = true})
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.OrderNum)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.BackFrom)：   
+            </td>
+            <td>
+
+                @Html.DropDownListFor(model => model.BackFrom,ViewData["Back"] as List<SelectListItem>)
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.BackFrom)
+            </td>
+        </tr>
+    
+    </table>
+}

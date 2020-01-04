@@ -1,0 +1,450 @@
+﻿@model EBMS.Models.T_Purchase
+@using Lib
+@{
+    ViewBag.Title = "ViewPurchasePricing";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+<script type="text/javascript">
+    var grid; //定义全局变量datagrid
+    var editRow = -1;
+    //加载数据
+    $(function () {
+        
+        $("#btnAgree").click(function () {
+            post(1);
+        });
+        $("#btnDisAgree").click(function () {
+            post(2);
+        });
+
+        var code = "@ViewData["Code"]";
+        $("#Warehouse").val(code);
+        var adminID = "@ViewData["adminId"]";
+        $("#ApproveFirst").val(adminID);
+        //创建一个新的Grid
+        grid = $('#List').datagrid({
+            width: $(window).width() - 10,
+            height: $(window).height() - 250,
+            fitColumns: true,
+            showFooter: true,
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                      {
+                          field: 'ProductName', title: '产品名称', width: 100
+                      },
+                {
+                    field: 'PlanNum', title: '需求数量', width: 80, editor: {
+                        type: 'text', options: { required: true }
+                    }
+                },
+                 {
+                     field: 'Specifications', title: '规格', width: 80, editor: {
+                         type: 'text', options: { required: true }
+                     }
+
+                 },
+                  {
+                      field: 'UnitPrice', title: '产品单价', width: 80, editor: {
+                          type: 'text', options: { required: true }
+                      }
+
+                  },
+                 {
+                     field: 'RequirementDate', title: '要求到货时间', align: 'center', width: 120, editor: {
+                         type: 'datebox', options: { required: true }
+                     }
+                 },
+                    {
+                        field: 'Supplier', title: '供应商', width: 80
+
+                    },
+                     {
+                         field: 'Company', title: '单位', width: 80
+
+                     },
+                      {
+                          field: 'offer', title: '报价', width: 80, editor: {
+                              type: 'text', options: { required: true }
+                          }
+
+                      },
+                      {
+                          field: 'EstimateDate', title: '预计到货时间', align: 'center', width: 120, editor: {
+                              type: 'datebox', options: { required: true }
+                          }
+                      },
+                      
+                   {
+                       field: 'Remarks', title: '备注', width: 80, editor: {
+                           type: 'text', options: { required: true }
+                       }
+
+                   },
+                   
+            ]],
+            onClickCell: function (index, field) {
+                if (field == "Supplier") {
+                    $('#openIframeSupplier')[0].src = "ViewSupplier?index=" + index;
+                    $('#SupplierDiv').dialog('open');
+                }
+                else if (field == "Company") {
+                    $('#openIframeCompany')[0].src = "ViewCompany?index=" + index;
+                    $('#CompanyDiv').dialog('open');
+                }
+                else {
+                    CopelPays();
+                    editCell(index, field);
+                }
+            
+            },
+            onAfterEdit: function (index) {
+                CopelPays();
+                var rows = $('#List').datagrid('getRows');
+               
+                    grid.datagrid('refreshRow', index);
+                    saveJson();
+               
+            }
+        });
+       
+        var PurchaseId = "@ViewData["ID"]";
+        function fLoadData() {
+            $.ajax({
+                type: "POST",
+                url: "EditGetDetail?ID=" + PurchaseId,
+                success: function (data) {
+                    var vData = $.parseJSON(data);
+                    grid.datagrid('loadData', vData); //将数据绑定到datagrid   
+                    saveJson();
+                  
+                }
+            });
+        }
+        fLoadData()
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 10,
+                height: $(window).height() - 191
+            })
+        });
+        //提交后台方法
+        var sign = 0;
+        $("#btnSave").click(function () {
+
+            loading(0);
+            if ($("#Warehouse").val() == "9999") {
+                $.messager.alert('提示', "请选择仓库", "info")
+                loading(1);
+                return
+            }
+            grid.datagrid("endEdit", editRow);
+            grid.datagrid('clearSelections');
+            var rows = $('#List').datagrid("getRows");
+            if (rows == "") {
+                $.messager.alert('提示', "请添加采购详情", "info")
+                loading(1);
+                return
+            }
+            //循环验证数据
+            for (var i = 0; i < rows.length; i++) {
+
+                if (rows[i].ProductName == undefined || rows[i].ProductName == "") {
+                    $.messager.alert('提示', "产品名称不能为空", "info")
+                    loading(1);
+                    return false;
+                }
+                if (rows[i].ProductName == undefined || rows[i].PlanNum == "") {
+                    $.messager.alert('提示', "数量不允许为空", "info")
+                    loading(1);
+                    return false;
+                }
+
+                if (rows[i].RequirementDate == undefined || rows[i].RequirementDate == "") {
+                    $.messager.alert('提示', "要求到货时间不能为空", "info")
+                    loading(1);
+                    return false;
+                }
+
+            }
+            if ($("#EditForm").valid()) {
+                if (sign == 0) {
+                    sign = 1;
+                    $.ajax({
+                        url: "ViewPurchaseEditSave",
+                        type: "Post",
+                        data: $("#EditForm").serialize(),
+                        success: function (data) {
+                            if (data.State == "Success") {
+                                loading(1);
+                                $.messager.alert('提示', '保存成功', "info", function () {
+                                    window.location.reload();
+                                    sign = 0
+                                });
+                            } else {
+                                loading(1);
+                                $.messager.alert('提示', data.Message, "info", function () {
+                                    $("#List").datagrid("reload");
+                                    sign = 0
+                                });
+                            }
+                        }
+                    });
+                }
+            }
+        });
+    });
+    function addshop(rows, index) {
+      
+        $('#SupplierDiv').dialog('close');
+        $('#List').datagrid('updateRow', {
+            index: index,
+            row: {
+                Supplier: rows[0].SuppliersName,
+            }
+        });
+    }
+    
+    function addCompany(rows, index) {
+ 
+        $('#CompanyDiv').dialog('close');
+        $('#List').datagrid('updateRow', {
+            index: index,
+            row: {
+                Company: rows[0].CompanyName,
+            }
+        });
+    }
+    //计算应付金额
+    function CopelPays()
+    {
+       
+        var rows = $('#List').datagrid('getRows');
+        var pay = 0;
+        for (var i = 0; i < rows.length; i++) {
+            if (rows[i].PlanNum != null && rows[i].UnitPrice != null)
+                pay += rows[i].PlanNum * rows[i].UnitPrice;
+               pay = Math.round(pay*100)*0.01;
+        }
+     
+        $('#CopelPay').val(pay.toFixed(2))
+    }
+    //序列化数据
+    function saveJson() {
+        CopelPays();
+        JsonText = "[";
+        var rows = $('#List').datagrid('getRows');
+        for (var i = 0; i < rows.length; i++) {
+            JsonText += '{';
+            JsonText += '"ProductName":' + '"' + rows[i].ProductName + '",';
+            JsonText += '"PlanNum":' + '"' + rows[i].PlanNum + '",';
+            JsonText += '"Specifications":' + '"' + rows[i].Specifications + '",';
+            JsonText += '"UnitPrice":' + '"' + rows[i].UnitPrice + '",';
+            JsonText += '"Supplier":' + '"' + rows[i].Supplier + '",';
+            JsonText += '"Company":' + '"' + rows[i].Company+ '",';
+            JsonText += '"offer":' + '"' + rows[i].offer+ '",';
+            JsonText += '"EstimateDate":' + '"' + rows[i].EstimateDate+ '",';
+            JsonText += '"Remarks":' + '"' + rows[i].Remarks + '",';
+            JsonText += '"RequirementDate":' + '"' + rows[i].RequirementDate + '"},';
+        }
+        JsonText = JsonText.substring(0, JsonText.length - 1);
+        JsonText += "]";
+        $("#jsonStr").val(JsonText);
+    }
+    //编辑触发的方法
+    function editCell(index, field) {
+        CopelPays();
+        //时间控件给默认值
+        var rows = $('#List').datagrid('getRows');
+        if (rows[index].EstimateDate == null) {
+            rows[index].EstimateDate = formatDatebox(new Date())
+        }
+        grid.datagrid('endEdit', editRow);
+        editRow = index;
+        grid.datagrid('selectRow', index);
+        grid.datagrid('beginEdit', index);
+        var editor = grid.datagrid('getEditor', { index: index, field: field });
+        setTimeout(function () {
+            editor.target.focus();
+        }, 0);
+
+        var editors = grid.datagrid('getEditors', index);
+        for (var i = 0; i < editors.length; i++) {
+            editors[i].target.bind('keydown', { field: editors[i].field }, function (e) {
+                if (e.keyCode == 13) {
+                    grid.datagrid('endEdit', index);
+                    editRow = -1;;
+                } else if (e.keyCode == 38) {	// up
+
+                    if (editRow > 0) {
+                        editCell(editRow - 1, e.data.field);
+                    }
+                } else if (e.keyCode == 40) {	// down
+
+                    if (editRow < grid.datagrid('getRows').length - 1) {
+                        editCell(parseInt(editRow) + 1, e.data.field);
+                    }
+                }
+                if (i < 2) {
+                    if (!(event.keyCode == 46) && !(event.keyCode == 9) && !(event.keyCode == 8) && !(event.keyCode == 37) && !(event.keyCode == 39))
+                        if (!((event.keyCode >= 48 && event.keyCode <= 57) || (event.keyCode >= 96 && event.keyCode <= 105)))
+                            event.returnValue = false;
+                }
+            });
+        }
+
+    }
+    //选择其他地方取消编辑
+    $(document).not(grid).on("click", function () {
+        CopelPays();
+        grid.datagrid("endEdit", editRow);
+        grid.datagrid('unselectAll');
+    });
+    //fkstatus这个名字是文涛要我取的。
+    var sign = 0;
+    function post(fkstatus) {
+        if (fkstatus == 1) {
+            loading(0);
+            if ($("#Warehouse").val() == "9999") {
+                $.messager.alert('提示', "请选择仓库", "info")
+                loading(1);
+                return
+            }
+            grid.datagrid("endEdit", editRow);
+            grid.datagrid('clearSelections');
+            var rows = $('#List').datagrid("getRows");
+            if (rows == "") {
+                $.messager.alert('提示', "请添加采购详情", "info")
+                loading(1);
+                return
+            }
+            //循环验证数据
+            for (var i = 0; i < rows.length; i++) {
+
+                if (rows[i].ProductName == undefined || rows[i].ProductName == "") {
+                    $.messager.alert('提示', "产品名称不能为空", "info")
+                    loading(1);
+                    return false;
+                }
+                if (rows[i].ProductName == undefined || rows[i].PlanNum == "") {
+                    $.messager.alert('提示', "数量不允许为空", "info")
+                    loading(1);
+                    return false;
+                }
+
+                if (rows[i].RequirementDate == undefined || rows[i].RequirementDate == "") {
+                    $.messager.alert('提示', "要求到货时间不能为空", "info")
+                    loading(1);
+                    return false;
+                }
+                if (rows[i].EstimateDate == undefined || rows[i].EstimateDate == "") {
+                    $.messager.alert('提示', "预计到货时间不能为空", "info")
+                    loading(1);
+                    return false;
+                }
+                if (rows[i].UnitPrice == undefined || rows[i].UnitPrice == "") {
+                    $.messager.alert('提示', "产品单价不能为空", "info")
+                    loading(1);
+                    return false;
+                }
+
+            }
+        }
+        if ($("#EditForm").valid()) {
+            if (sign == 0) {
+                sign = 1;
+                $.ajax({
+                    url: "PurchasePricingSave?fkstatus=" + fkstatus + "&memo=" + $("#Memo").val(),
+                    type: "Post",
+                    data: $("#EditForm").serialize(),
+                    success: function (data) {
+                            loading(1);
+                            $.messager.alert('提示', data, "info", function () {
+                                closeReshefTab("采购未审核")
+                                sign = 0
+                            });
+                      
+                    }
+                });
+            }
+        }
+    }
+</script>
+<div class="mvctool">
+   <div class="btn-bar">
+    <a href="javascript:;" id="btnAgree" class="icon-agree">同意</a>
+    <a href="javascript:;" id="btnDisAgree" class="icon-disagree">不同意</a>
+   </div>
+</div>
+<div class="note-box">
+    <p>审核备注：</p>
+    <textarea cols="20" id="Memo" name="Memo" rows="3" style="height:60px;width:380px;resize:none;overflow-y: scroll;"></textarea>
+</div>
+@using (Html.BeginForm("EditForm", "Controller", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+    <table class="fromEditTable setTextWidth300">
+         <tr>
+            <td>
+                   @Html.HiddenFor(model => model.ID)  
+                 @Html.HiddenFor(model => model.Status)  
+                @Html.LabelFor(model => model.PurchaseOddNum)：   
+            </td>
+            <td>
+              @Html.TextBoxFor(model => model.PurchaseOddNum, new { @readonly = true })
+            </td>
+        </tr>
+         <tr>
+            <td>
+                @Html.LabelFor(model => model.ApplyName)：   
+            </td>
+            <td>
+                  @Html.TextBoxFor(model => model.ApplyName, new { @readonly = true })
+                 
+            </td>
+        </tr>
+         <tr>
+            <td>
+                @Html.LabelFor(model => model.ApplyDepartment)：   
+            </td>
+            <td>
+                  @Html.DropDownListFor(model => model.ApplyDepartment, ViewData["ReportDepartment"] as List<SelectListItem>)
+            </td>
+        </tr>
+        <tr>
+            <td>
+                @Html.LabelFor(model => model.Warehouse)：   
+            </td>
+            <td>
+                  @Html.DropDownListFor(model => model.Warehouse, ViewData["Warehouse"] as List<SelectListItem>)
+            </td>
+        </tr>
+         <tr>
+            <td>
+              @Html.LabelFor(model => model.CopelPay)：   
+            </td>
+            <td>
+               @Html.TextBoxFor(model => model.CopelPay, new { @readonly = true })
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px;">
+                @Html.LabelFor(model => model.ApplyReason)：    
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.ApplyReason)
+        </tr>
+             <input type="hidden" id="jsonStr"   name="jsonStr" />
+    </table>
+}
+<div class="detail-list">
+    <table id="List"></table>
+</div>
+<div id="SupplierDiv" class="easyui-dialog" closed="true" modal="true" title="选择供应商" style="width: 500px; height: 420px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIframeSupplier' frameborder="0" src="" style="width: 98%; height: 98%;"></iframe>
+</div>
+<div id="CompanyDiv" class="easyui-dialog" closed="true" modal="true" title="选择单位" style="width: 500px; height: 420px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIframeCompany' frameborder="0" src="" style="width: 98%; height: 98%;"></iframe>
+</div>
+

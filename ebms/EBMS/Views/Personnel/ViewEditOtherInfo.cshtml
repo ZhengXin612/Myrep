@@ -1,0 +1,251 @@
+﻿@model EBMS.Controllers.PersonnelController.personelModel
+@{
+    ViewBag.Title = "ViewEditOtherInfo";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+
+<script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+<script type="text/javascript">
+    $(function () {
+        var id = "@ViewData["id"]"
+        var flag = "@ViewBag.flag";
+        var a = 0;
+        $('#btnSave').click(function () {
+            if (a == 0) {
+                a += 1;
+                loading(0);
+                $.ajax({
+                    url: "/Personnel/EditOtherInfo?id=" + id + "&flag=" + flag,
+                    type: "Post",
+                    data: $("#EditForm").serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        if (data == "1") {
+                            $.messager.alert("提示", "保存成功", "info", function () {
+                              
+                                parent.$("#openDivEditInfo").dialog("close");
+                               parent.location.reload()
+                               loading(1)
+                            })
+                        }
+                        else {
+                            $.messager.alert("提示", "保存失败", "info");
+                            loading(1)
+                            sign = 0;
+                        }
+                    }
+                });
+                       }
+           
+            return false;
+
+        });
+        for (var n = 0; n < $('.getDate').length; n++) {
+            
+          
+            if ($('.getDate')[n].textContent.length == 38 || $('.getDate')[n].textContent == null || $('.getDate')[n].textContent == "") {
+                $('.getDate')[n].innerHTML = ""
+            }
+            else {
+              
+                $('.getDate')[n].innerHTML = formatDatebox($('.getDate')[n].textContent);
+            }
+
+        }
+    });
+    function shuju() { //jquery获取复选框值 
+        var chk_value = [];
+        $('input[name="quit_data"]:checked').each(function () {
+            chk_value.push($(this).val());
+        });
+        $('#quit_QuitData').val(chk_value)
+    }
+   
+</script>
+<div class="mvctool">
+  
+   <a id="btnSave" href="javascript:;" class="modal-btn modal-btn-save">保存</a>
+</div>
+<div>
+    @using (Html.BeginForm("EditForm", "Controllers", null, FormMethod.Post, new { Id = "EditForm" }))
+    {
+    @Html.ValidationSummary(true)
+   
+        
+            
+          
+        if (ViewBag.flag == "1")
+        { 
+             <table class="fromEditTable setTextWidth300">
+        <tbody>
+           <tr>
+                <td style="width: 100px; text-align: right;">
+                    @Html.LabelFor(model => model.family.Name)：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.family.Name)
+                </td>
+                  
+                
+            </tr>  
+              <tr>
+           <td style="width: 100px; text-align: right;">
+                    @Html.LabelFor(model => model.family.Relation)：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.family.Relation)
+                </td>
+                  </tr>
+              <tr>
+           <td style="width: 100px; text-align: right;">
+                    @Html.LabelFor(model => model.family.WorkUnit)：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.family.WorkUnit)
+                </td>
+                  </tr>
+                  <tr>
+           <td style="width: 100px; text-align: right;">
+                    @Html.LabelFor(model => model.family.Job)：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.family.Job)
+                </td>
+                  </tr>
+                 </tbody>
+    </table>
+    
+           
+        }
+        else if (ViewBag.flag == "2")
+        {
+             <table class="fromEditTable setTextWidth300">
+        <tbody>
+           <tr>
+                <td style="width: 100px; text-align: right;">
+                    @Html.LabelFor(model => model.reward.RewardPunishDate)：   
+                </td>
+                <td >
+                    @Html.TextBoxFor(model => model.reward.RewardPunishDate, new { @class = "easyui-datebox" })
+                </td>
+                  
+                
+            </tr>  
+              <tr>
+           <td style="width: 100px; text-align: right;">
+                    @Html.LabelFor(model => model.reward.RewardPunishiDetails)：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.reward.RewardPunishiDetails)
+                </td>
+                  </tr>
+             </tbody>
+    </table>
+           
+        }
+        else if (ViewBag.flag == "3")
+        { <table class="fromEditTable setTextWidth300">
+        <tbody>
+          <tr>
+                <td style="width: 100px; text-align: right;">
+                    @Html.LabelFor(model => model.performance.PerformanceDate)：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.performance.PerformanceDate, new { @class = "easyui-datebox" })
+                </td>
+                  
+                
+            </tr>  
+              <tr>
+           <td style="width: 100px; text-align: right;">
+                    @Html.LabelFor(model => model.performance.PerformanceDetails)：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.performance.PerformanceDetails)
+                </td>
+                  </tr>
+             </tbody>
+    </table>
+      
+        }
+        @*else if (ViewBag.flag == "4")
+        { <table class="fromEditTable setTextWidth300">
+        <tbody>
+            <tr>
+                <td style="width: 100px; text-align: right;">
+                    @Html.LabelFor(model => model.quit.QuitDate)：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.quit.QuitDate, new { @class = "easyui-datebox" })
+                </td>
+                  
+                
+            </tr>  
+              <tr>
+           <td style="width: 100px; text-align: right;">
+                    @Html.LabelFor(model => model.quit.QuitData)：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.quit.QuitData)<br />
+                   
+                </td>
+                  </tr>
+            <tr>
+                <td colspan="3"> 
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                       @foreach (var item in ViewBag.quit_data)
+                       {
+                        <input id="@(item.Value)" name="quit_data" type="checkbox" value="@item.Value" onclick="shuju()" /> @item.Value                
+
+                       }</td>
+            </tr>
+         
+             </tbody>
+    </table>*@
+
+  
+        }
+        @*else if (ViewBag.flag == "5")
+        { <table class="fromEditTable setTextWidth300">
+        <tbody>
+             <tr>
+                <td style="width: 100px; text-align: right;">
+                    @Html.LabelFor(model => model.trans.Type)：   
+                </td>
+                <td>
+                    @Html.DropDownListFor(model => model.trans.Type, ViewData["tran_type"] as List<SelectListItem>)
+                </td>
+                  
+                
+            </tr>  
+           <tr>
+                <td style="width: 100px; text-align: right;">
+                    @Html.LabelFor(model => model.trans.TransferDate)：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.trans.TransferDate, new { @class = "easyui-datebox" })
+                </td>
+                  
+                
+            </tr>  
+              <tr>
+           <td style="width: 100px; text-align: right;">
+                    @Html.LabelFor(model => model.trans.TransferDetails)：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.trans.TransferDetails)
+                   
+                     
+                </td>
+                  </tr>
+        
+             </tbody>
+    </table>*@
+       
+        }
+            
+   
+           @Html.HiddenFor(model => model.person.ID)
+    }
+
+     </div>

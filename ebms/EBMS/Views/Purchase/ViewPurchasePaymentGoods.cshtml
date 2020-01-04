@@ -1,0 +1,203 @@
+﻿@model  EBMS.Models.T_LossReport
+@{
+    //商品列表
+    ViewBag.Title = "报损已审核";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+<style>
+    .datebox .combo-arrow {margin:5px 0 0 -20px;}
+    body {padding:5px;overflow:hidden}
+</style>
+<div class="Company-top-box">
+    <div class="search-box">
+         <input type="text" placeholder="采购编码.." id="txtQuery"  class="icon-search-txt">
+         <input type="button" value="查询" id="btnQuery" class="icon-search">
+       
+    </div>
+      <div class="btn-bar">
+          <a href="#" id="btnEdit" class="icon-edit">编辑</a>
+         <a href="#" id="btnPrint" class="icon-print">打印</a>
+         <a href="#" id="btnDelete" class="icon-remove">删除</a>
+    </div>
+    <div class="btn-bar">
+     @*   <a href="#" rel="external" ajax-data="false" class="icon-edit" onclick="getExcel(this)">导出Excel</a>*@
+     @*    <p class="showBar">查看支付 : 请双击需要查看的数据</p>*@
+    </div>
+</div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+<script type="text/javascript">
+    enterSearch("#btnQuery");
+    function op(name, url) {
+        self.parent.addTab(name, url, '');
+        getContextmenu()
+    }
+    var statusVal = $("#selStatus").val();
+    $(function () {
+        var url = "../Purchase/CheckedPurchasePaymentGoods";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() - 50,
+            fitColumns: true,
+            sortName: 'ID',
+            sortOrder: 'desc',
+            idField: 'ID',
+            pageSize: 20,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            columns: [[
+                 { field: 'PurchaseOddNum', title: '采购编号', width: 200, align: 'center' },
+                  { field: 'needpay', title: '本次需付金额', width: 100, align: 'center' },
+                 { field: 'payment', title: '本次支付金额', width: 100, align: 'center' },
+                 { field: 'paymentName', title: '支付人员', width: 100, align: 'center' },
+                 {
+                     field: 'ispayment', title: '是否支付', width: 100, align: 'center', formatter: function (value, row, index) {
+                         switch (row.ispayment) {
+                             case 0:
+                                 return "<font color=#d02e2e>未支付</font>";
+                                 break;
+                             case 1:
+                                 return "<font color=#2967c9>已支付</font>";
+                                 break;
+                             case 2:
+                                 return "<font color=#1fc73a>不同意</font>";
+                                 break;
+                         }
+                     }
+                 },
+                 { field: 'paymentaccounts', title: '支付帐号', width: 100, align: 'center' },
+                 { field: 'paymenmode', title: '支付方式', width: 100, align: 'center' },
+                 { field: 'paymendate', title: '支付时间', width: 100, align: 'center' },
+                 { field: 'FinanceToexamineName', title: '财务主管', width: 100, align: 'center' },
+                 {
+                     field: 'isFinanceToexamine', title: '财务主管是否审核', width: 100, align: 'center', formatter: function (value, row, index) {
+                         switch (row.isFinanceToexamine) {
+                             case 0:
+                                 return "<font color=#d02e2e>未审核</font>";
+                                 break;
+                             case 1:
+                                 return "<font color=#2967c9>已同意</font>";
+                                 break;
+                             case 2:
+                                 return "<font color=#1fc73a>不同意</font>";
+                                 break;
+                         }
+                     }
+                 },
+                 { field: 'FinanceToexaminedate', title: '财务主管审核时间', width: 140, align: 'center' },
+                 { field: 'ApplyRemarks', title: '申请备注', width: 150, align: 'center' },
+                 { field: 'FinanceToexaminRemarks', title: '财务主管备注', width: 100, align: 'center' },
+                 { field: 'paymenRemarks', title: '支付备注', width: 100, align: 'center' },
+                 { field: 'ApplyName', title: '申请人员', width: 100, align: 'center' },
+                 { field: 'ApplyDate', title: '申请时间', width: 180, align: 'center' },
+            ]],
+            onClickRow: function (rowIndex, rowData) {
+            },
+            onDblClickRow: function (rowIndex, rowData) {
+                var url = "../Purchase/ViewPurchaseFinanceListDetail?OddNum=" + rowData.PurchaseOddNum
+                window.open(url, "_blank", "height=" + (window.screen.availHeight - 30) + ",width=" + (window.screen.availWidth - 10) + ",scrollbars=yes,resizable=1,modal=false,alwaysRaised=yes");
+            },            onAfterEdit: function (index, rowData) {//回调函数可以直接用于操作页面
+            }
+        });
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            });
+        });
+    });
+    //得到选中行集合的id
+    function getSelections() {
+        var ss = [];
+        var rows = $('#List').datagrid('getSelections');
+        for (var i = 0; i < rows.length; i++) {
+            var row = rows[i];
+            ss.push(row.Id);
+        }
+        return ss;
+    }
+    $("#btnQuery").click(function () {
+        var queryStr = $("#txtQuery").val();
+ 
+        //如果查询条件为空默认查询全部
+        if (queryStr == null) {
+            queryStr = "%";
+        }
+        $('#List').datagrid({
+            url: '../Purchase/CheckedPurchasePaymentGoods?queryStr=' + encodeURI(queryStr)
+        });
+
+    });
+    function Show(id) {
+        var url = "../Purchase/ViewPurchaseListDetail?tid=" + id
+        window.open(url, "_blank", "height=" + (window.screen.availHeight - 30) + ",width=" + (window.screen.availWidth - 10) + ",scrollbars=yes,resizable=1,modal=false,alwaysRaised=yes");
+    }
+    ////Excel导出
+    //function getExcel(obj) {
+    //    var statedate = $('#statethisdate').datebox('getValue');
+    //    var EndDate = $('#Endthisdate').datebox('getValue');
+    //    obj.href = '../LossReport/getExcel?statedate=' + statedate + '&EndDate=' + EndDate;
+    //}    $("#btnEdit").click(function () {
+        var row = $('#List').datagrid('getSelected');
+        if (row != null) {
+            if (row.isFinanceToexamine != 0 && row.isFinanceToexamine != 2) {
+                $.messager.alert('提示', '只能编辑未审核和不同意的记录', "info");
+                return;
+            }
+            op("付款单编辑：" + row.ID, "../Purchase/ViewPurchasePaymentGoodsEdit?ID=" + row.ID)
+        }
+        else { $.messager.alert('提示', '请选择一条记录', "info"); }
+    });    $("#btnDelete").click(function () {
+        var row = $('#List').datagrid('getSelected');
+        if (row != null) {
+            if (row.isFinanceToexamine != 0) {
+                $.messager.alert('提示', '只能删除未审核的记录', "info");
+                return;
+            }
+
+            $.messager.confirm('提示', '确定删除该记录吗？', function (r) {
+                loading(0);
+                if (r) {
+                    var flag = 0
+                    if (flag == 0) {
+                        flag++
+                        $.ajax({
+                            url: "../Purchase/DeletePurchaseFinance?del=" + row.ID,
+                            type: "Post",
+                            contentType: "application/json",
+                            // data: JSON.stringify(p),
+                            dataType: "json",
+                            success: function (data) {
+                                loading(1);
+                                $('#List').datagrid('reload');
+                                flag = 0
+                                $('#List').datagrid("clearSelections");
+                            }, error: function () {
+                                loading(1);
+                                flag = 0
+                            }
+
+                        });
+                    }
+                }
+                else {
+                    loading(1);
+                }
+            });
+        }
+        else {
+            $.messager.alert('提示', '请选择一条记录', "info");
+        }
+    });</script>
+<div id="showDiv" class="easyui-dialog" closed="true" modal="true" title="审核详情" style="width:420px; height:420px;" resizable="true" closable="true">
+    <iframe scrolling="yes" id='openIframeShow' frameborder="0" src="" style="width:100%;height:98%;"></iframe>
+</div>
+

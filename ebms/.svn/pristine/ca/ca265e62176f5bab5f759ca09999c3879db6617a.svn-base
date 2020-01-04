@@ -1,0 +1,257 @@
+﻿@model EBMS.Models.T_CashBack
+@{
+    ViewBag.Title = "返现审核";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<style>
+    .btn-bar {
+        margin: 10px;
+    }
+
+    .note-box {
+        margin: 10px 0 0 10px;
+    }
+
+        .note-box p {
+            margin-bottom: 10px;
+        }
+</style>
+<div class="history-box">@Html.Raw(ViewData["history"])</div>
+<div class="btn-bar">
+    <a href="javascript:;" id="btnAgree" class="icon-agree">同意</a>
+    <a href="javascript:;" id="btnDisAgree" class="icon-disagree">不同意</a>
+</div>
+@using (Html.BeginForm("EditForm", "Controller", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+    <table class="fromEditTable setTextWidth300" id="cashback">
+        <tr>
+            <td style="text-align: right;">
+                @Html.LabelFor(model => model.OrderNum)：   
+            </td>
+            <td style="position: relative;max-width:200px">
+                @Html.DisplayFor(model => model.OrderNum)
+                <span  title="@Html.DisplayFor(model => model.OrderNum)" id="copy-btn1" class="copy-btn">复制</span>
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.OrderNum)
+            </td>
+        </tr>
+        @if (@ViewData["Cashier"].ToString() != "1")
+        {
+            <tr>
+                <td style="text-align: right;">
+                    @Html.LabelFor(model => model.PostUser)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.PostUser)
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.PostUser)
+                </td>
+            </tr>
+        }
+        <tr>
+            <td style="text-align: right;">
+                @Html.LabelFor(model => model.VipName)：   
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.VipName)
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.VipName)
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align: right;">
+                @Html.LabelFor(model => model.ShopName)：   
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.ShopName)
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.ShopName)
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align: right;">
+                @Html.LabelFor(model => model.WangWang)：   
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.WangWang)
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.WangWang)
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align: right;">
+                @Html.LabelFor(model => model.Reason)：   
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.Reason)
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.Reason)
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align: right;">
+                @Html.LabelFor(model => model.BackMoney)：   
+            </td>
+            <td style="position: relative">
+                @Html.DisplayFor(model => model.BackMoney)
+                <span  title="@Html.DisplayFor(model => model.BackMoney)" id="copy-btn2" class="copy-btn">复制</span>
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.BackMoney)
+            </td>
+        </tr>
+        @if (@ViewData["Cashier"].ToString() != "1")
+        {
+            <tr>
+                <td style="text-align: right;">
+                    @Html.LabelFor(model => model.ApproveName)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.ApproveName)
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.ApproveName)
+                </td>
+            </tr>
+        }
+        <tr>
+            <td style="text-align: right;">
+                @Html.LabelFor(model => model.OrderMoney)：   
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.OrderMoney)
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.OrderMoney)
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align: right;">
+                @Html.LabelFor(model => model.AlipayName)：   
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.AlipayName)
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.AlipayName)
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align: right;">
+                @Html.LabelFor(model => model.AlipayAccount)：   
+            </td>
+            <td style="position: relative">
+                @Html.DisplayFor(model => model.AlipayAccount)
+                <span  title="@Html.DisplayFor(model => model.AlipayAccount)" id="copy-btn3" class="copy-btn">复制</span>
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.AlipayAccount)
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align: right;">
+                @Html.LabelFor(model => model.Note)：   
+            </td>
+            <td style="max-width:200px">
+                @Html.DisplayFor(model => model.Note)
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.Note)
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align: left; text-indent: 2em;" colspan="6">
+                @Html.LabelFor(model => model.Repeat)：<font color="#d02e2e"> @Html.DisplayFor(model => model.Repeat) </font>
+            </td>
+        </tr>
+        @if (@ViewData["Cashier"].ToString() == "1")
+        {
+            <tr>
+                <td style="text-align: right;">
+                    @Html.LabelFor(model => model.BackFrom)：   
+                </td>
+                <td colspan="5">
+                    @Html.DropDownList("BackFrom", ViewData["BackFrom"] as List<SelectListItem>)
+                </td>
+            </tr>
+        }
+    </table>
+}
+
+<div class="note-box">
+    <p>审核备注：</p>
+    <textarea cols="20" id="Memo" name="Memo" rows="3" style="height: 60px; width: 380px; resize: none; overflow-y: scroll;"></textarea>
+</div>
+<script src="@Url.Content("~/Scripts/jquery.zclip.min.js")" type="text/javascript"></script>
+<script type="text/javascript">
+    $(function () {
+        var cashier = "@ViewData["Cashier"]";
+        var step = "@ViewData["step"]";
+        $("#btnAgree").click(function () {
+            if (backfrom === undefined) {
+                backfrom = "";
+            }
+            var backfrom = $("#BackFrom option:selected").val();
+            var para = { "id": "@ViewData["ID"]", "status": 1, "memo": $("#Memo").val(), "method": "@ViewData["Method"]", "cashier": cashier, "backfrom": backfrom, "step": step };
+            post(para);
+        });
+        $("#btnDisAgree").click(function () {
+            var backfrom = $("#BackFrom option:selected").val();
+            var checkMan = $("#checkSelect").val();
+            var para = { "id": "@ViewData["ID"]", "status": 2, "memo": $("#Memo").val(), "method": "@ViewData["Method"]", "cashier": cashier, "backfrom": backfrom, "step": step };
+            post(para);
+        });
+    });
+    var sign = 0;
+    function post(para) {
+        if (sign == 0) {
+            sign = 1;
+            loading(0)
+            $.ajax({
+                url: "/CashBack/CashBackCheck",
+                type: "post",
+                data: para,
+                dataType: "json",
+                success: function (data) {
+                    loading(1)
+                    $.messager.alert('提示', data, "info", function () {
+                        if (data == "审核成功")
+                        {
+                        parent.$('#checkDiv').dialog('close');
+                        parent.$('#List').datagrid('reload');
+                        parent.$('#List').datagrid("clearSelections");
+                        }
+                        sign = 0;
+                    });
+                    parent.$('#List').datagrid("clearSelections");
+                },
+                error: function () {
+                    loading(1);
+                    sign = 0;
+                }
+            });
+        }
+    }
+    $('.copy-btn').zclip({
+        path: "/Content/ZeroClipboard.swf",
+        copy: function () {
+            var t = $(this).attr("title");
+            return t
+        },
+        afterCopy: function () {
+            new_obj = $("<div id='msg-box' class='msg-box'>复制成功</div>");
+            $("#msg-box").remove()
+            $("#copy-btn1").after(new_obj);
+            $("#msg-box").delay(800).fadeOut()
+
+        }
+    });
+
+</script>

@@ -1,0 +1,113 @@
+﻿@model EBMS.Models.T_ReturnNoWithinRange
+@using Lib
+@{
+    ViewBag.Title = "ViewRetreatAdd";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+@*
+2016-11-25 刘明*@
+<script type="text/javascript">
+    var grid; //定义全局变量datagrid
+    var editRow = -1;
+    //加载数据
+    $(function () {
+        $("#btnNOReceipt").click(function () {
+            loading(0);
+            var ID = "@ViewData["ID"]";
+           var Remarks = $("#ToRemarks").val();
+      
+        if (ID != "" && ID != null) {
+            $.ajax({
+                url: "../ReturnToStorage/btnNOReceipt?ID=" + ID + "&ToRemarks=" + ToRemarks,
+                type: "Post",
+                contentType: "application/json",
+                // data: JSON.stringify(p),
+                dataType: "json",
+                success: function (data) {
+                    if (data.State == "Success") {
+                        loading(1);
+                        $.messager.alert('提示', '保存成功', "info", function () {
+                            parent.$('#checkDiv').dialog('close');
+                            parent.$('#List').datagrid('reload');
+                            parent.$('#List').datagrid("clearSelections");
+                            sign = 0
+                        });
+                    } else {
+                        loading(1);
+                        $.messager.alert('提示', data.Message, "info", function () {
+                            parent.$('#checkDiv').dialog('close');
+                            parent.$('#List').datagrid('reload');
+                            parent.$('#List').datagrid("clearSelections");
+                            sign = 0
+                        });
+                    }
+                }
+            });
+        }
+         });
+
+        $("#btnReceipt").click(function () {
+            loading(0);
+            var ID = "@ViewData["ID"]";
+
+        var ToRemarks = $("#ToRemarks").val();
+      
+        if (ID != "" && ID != null) {
+            $.ajax({
+                url: "../ReturnToStorage/btnReceipt?ID=" + ID + "&ToRemarks=" + ToRemarks,
+                type: "Post",
+                contentType: "application/json",
+                // data: JSON.stringify(p),
+                dataType: "json",
+                success: function (data) {
+                    if (data.State == "Success") {
+                        loading(1);
+                        $.messager.alert('提示', '保存成功', "info", function () {
+                            parent.$('#checkDiv').dialog('close');
+                            parent.$('#List').datagrid('reload');
+                            parent.$('#List').datagrid("clearSelections");
+                            sign = 0
+                        });
+                    } else {
+                        loading(1);
+                        $.messager.alert('提示', data.Message, "info", function () {
+                            parent.$('#checkDiv').dialog('close');
+                            parent.$('#List').datagrid('reload');
+                            parent.$('#List').datagrid("clearSelections");
+                            sign = 0
+                        });
+                    }
+                }
+            });
+        }
+    });
+
+    });
+   
+
+</script>
+<div class="mvctool">
+     <input type="button" value="同意" id="btnReceipt" class="icon-search">
+          <input type="button" value="不同意" id="btnNOReceipt" class="icon-search">
+</div>
+@using (Html.BeginForm("EditForm", "Controller", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+    <table class="fromEditTable setTextWidth300">
+          <tr>
+            <td style="width: 120px;">
+               备注：    
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.ToRemarks)
+           </td>
+        </tr>
+             <input type="hidden" id="jsonStr"  />
+    </table>
+}
+<div class="detail-list">
+    <table id="List"></table>
+</div>
+
+
+

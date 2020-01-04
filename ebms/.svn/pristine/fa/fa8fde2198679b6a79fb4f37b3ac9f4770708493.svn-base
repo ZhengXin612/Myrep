@@ -1,0 +1,214 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>title</title>
+    <link href="~/Areas/App/AppContent/css/api.css" rel="stylesheet" type="text/css" />
+<style>
+.Dom-box{display:none;}
+    	.main-box,.detail-item,.approve-box{border-bottom:1px solid #eeeeee;padding:0.08rem;}
+    	.main-box p{font-size:0.14rem;line-height:0.22rem;}
+    	.detail-box p{font-size:0.12rem;color:#666666;margin-bottom:0.02rem}
+    	.span-r{margin-right:0.15rem}
+    	.detail-item{border-left:2px solid #07A0EE;}
+    	#approveItem{font-size: 0.12rem;padding:0.20rem;}
+    	.title{font-size:0.12rem;color:#07A0EE;margin-bottom:0.1rem}
+    	dl{width:100%;display:table;padding-bottom:0.1rem;}
+    	dt,dd{float:left;}
+    	dt{width:20%;}
+    	dd{width:80%;color:#666666;position:relative}
+    	.r{float:right;margin-right:0.08rem}
+    	.line{width:1px;background:#dddddd;height:100%;position:absolute;top:0.12rem;left:-0.2rem}
+    	.line:after{content:"";width:0.05rem;height:0.05rem;background:#dddddd;display:block;border-radius:50%;margin:-0.08rem 0 0 -0.02rem}
+        .note{margin-top:0.05rem}      
+       .select{background:#fff;width:1rem;margin:0;padding:0}
+       .checkBox{padding:0.15rem 0.08rem;margin:0;font-size:0.14rem}
+       .txt-area{width:100%;height:0.8rem;border:1px solid #dddddd;outline:0;resize:none;margin-top:0.08rem;padding:0.05rem;box-sizing:border-box;-webkit-box-sizing:border-box}
+       .btn-bar{margin-top:0.2rem;display: table;width:100%}
+       .btn-bar a{width:45%;height:0.4rem;border-radius:5px;text-align:center;line-height:0.4rem}
+       .l-btn{float:left;background:#07A0EE;color:#FFFFFF}
+       .r-btn{float:right;background:#FC9D9D;color:#FFFFFF}
+       #checkBox select{max-width:1.6rem;overflow:hidden}
+       .p-s{margin-bottom:0.08rem}
+       .in-txt{margin-left:0.05rem;border:1px solid #ddd;height:0.24rem}
+       .d-title{color:#07A0EE}
+       .hide-input{display:none}
+</style>
+</head>
+    <body>
+<h2 class="header-bar">
+    <a href="/App/AppAssetsTransfer/Index" class="back-btn" ><i class="icon iconfont icon-back"></i></a>
+  
+</h2>
+  <form  id="EditForm" action="/Controller/EditForm" method="post">
+	<div>
+	<input  name="State" type="radio" ID="OK" class="hide-input" value="1">
+	<input  name="State" type="radio" ID="NO" class="hide-input" value="2">
+	<input name = "ID" type="text" class="hide-input" id="ID">
+	<input name = "ApplyID" type="text" class="hide-input" id="ApplyID">
+	  <!--主表内容块-->
+	    <div class="main-box Dom-box" id="mainItem"></div>
+	  <!--详情表内容块-->
+	    <div class="detail-box Dom-box" id="detailItem"></div>
+	 <!--审核记录内容块-->
+	    <div class="approve-box Dom-box"  id="approveItem"></div>
+	     <!--审核-->
+	     <div class="checkBox Dom-box" id="checkBox"></div>
+	</div>
+</form>
+<script src="~/Areas/App/AppContent/js/jquery-2.2.1.min.js"></script>
+<script>
+    //审核方法全局变量 ；
+    var Check = null;
+    $(function () {
+    var $ID = "@ViewData["ID"]";
+        var $CurUser = localStorage.getItem("CurUser");
+        //判断重复提交的变量      
+        var flag = 0;
+        var approveId = ""
+        var method = "";
+        var cashier = "";
+        Check = function (checkType) {
+
+            if (checkType == 1) {
+                $("#OK").attr("checked", "checked");
+            }
+            if (checkType == 2) {
+                $("#NO").attr("checked", "checked");
+            }
+            if (flag == 0) {
+                flag++;
+                var r = confirm("确定吗审核吗？");
+                if (r == true) {
+                    //确定
+                    //var para = {"CurUser":$CurUser};
+                    $.ajax({
+                        url: "/AppAssetsTransfer/Check?CurUser=" + $CurUser,
+                        type: "Post",
+                        data: $("#EditForm").serialize(),
+                        //data: para,
+                        dataType: "json",
+                        success: function (data) {
+                            if (data > 0) {
+                                alert("审核成功");
+                            } else {
+                                alert("审核失败");
+                            }
+
+                            window.location.href = "/App/AppAssetsTransfer/Index"
+                            flag = 0;
+                        },
+                        error: function () {
+                            flag = 0;
+                        }
+                    });
+                }
+                else {
+                    //取消
+                    flag = 0
+                }
+            }
+
+
+        }
+        //页面内容加载
+        $.ajax({
+            type: 'POST',
+            url: "/AppAssetsTransfer/GetDetail?ID=" + $ID + "&UserName=" + $CurUser,
+            dataType: 'json',
+            success: function (data) {
+
+                data = eval("(" + data + ")");
+                method = data.Main[0].Method;
+                cashier = data.Cashier;
+                approveId = data.approveId;
+                $("#ApplyID").val(data.ID);
+                $("#ID").val(approveId);
+                //主表DOM
+                var Status = "";
+                switch (data.Main[0].Status) {
+                    case -1:
+                        Status = "<font color=#d02e2e>未审核</font>";
+                        break;
+                    case 0:
+                        Status = "<font color=#2967c9>审核中</font>";
+                        break;
+                    case 1:
+                        Status = "<font color=#1fc73a>已同意</font>";
+                        break;
+                    case 2:
+                        Status = "<font color=#d02e2e>不同意</font>";
+                        break;
+                    case 3:
+                        Status = "<font color=#d02e2e>已作废</font>";
+                        break;
+
+                }
+                if (data.Main[0].usedMoney == null) {
+                    data.Main[0].usedMoney = "";
+                }
+                if (data.Main[0].surplusMoney == null) {
+                    data.Main[0].surplusMoney = "";
+                }
+                var mDom = "";
+                mDom += "<p class='d-title'>申请信息</p>";
+                mDom += "<p>资产名称：" + data.Main[0].Name + "</p><p>资产代码：" + data.Main[0].Code + "</p><p>申请人：" + data.Main[0].PostUserName + "</p><p>申请时间：" + data.Main[0].PostDate + "</p><p>变更类型：" + data.Main[0].TransferType + "</p><p>接收人：" + data.Main[0].LastApproveName + "</p><p>申请时间:" + data.Main[0].PostDate + "</p><p>变更类型:" + data.Main[0].TransferType + "</p><p>备注：" + data.Main[0].Memo + "</p>";
+                mDom += "<p class='d-title'>变更前</p>";
+                mDom += "<p>使用人：" + data.Main[0].Owner + "</p><p>地点：" + data.Main[0].Place + "</p><p>部门：" + data.Main[0].Department + "</p><p>负责人：" + data.Main[0].Responsible + "</p>";
+                mDom += "<p class='d-title'>变更后</p>";
+                mDom += "<p>使用人：" + data.Main[0].TransferOwner + "</p><p>地点：" + data.Main[0].TransferPlace + "</p><p>部门：" + data.Main[0].TransferDepartment + "</p><p>负责人：" + data.Main[0].TransferResponsible + "</p>";
+                $("#mainItem").html(mDom).show();
+
+                //主表DOM end
+
+                //审核记录DOM                       
+                var approveStatus = "";
+                var aDom = "<p class=\"title\">审批记录</p>";
+                $.each(data.Approve, function (i, val) {
+                    switch (val.State) {
+                        case -1:
+                            approveStatus = "<font color=#d02e2e>未审核</font>";
+                            break;
+                        case 0:
+                            approveStatus = "<font color=#2967c9>审核中</font>";
+                            break;
+                        case 1:
+                            approveStatus = "<font color=#1fc73a>已同意</font>";
+                            break;
+                        case 2:
+                            approveStatus = "<font color=#d02e2e>不同意</font>";
+                            break;
+                        default:
+                            approveStatus = "";
+                            break;
+                    }
+                    if (val.ApproveDate == null) {
+                        val.ApproveDate = "";
+                    }
+                    if (val.Memo == null) { val.Memo = "" }
+                    if ($.trim(val.Memo) != "") {
+                        val.Note = "备注：" + val.Memo;
+                    }
+                    aDom += "<dl><dt>" + val.ApproveName + "</dt><dd><div class=\"line\"></div><p><span>" + approveStatus + "</span><span class=\"r\">" + val.ApproveDate + "</span></p><p class=\"note\">" + val.Memo + "</p></dd></dl>";
+                })
+                $("#approveItem").html(aDom).show();
+                //返现审核记录 end
+                //审核操作的DOM          
+
+                if (data.myCheck == 1) {
+                    //是我审核的生成审核的div
+                    var cDom = "";
+                    cDom += '<p>备注：</p><textarea class="txt-area" id="note" name="Memo"></textarea><p class="btn-bar"><a href="javascript:;" class="l-btn" onclick="Check(1)">同意</a><a href="javascript:;" onclick="Check(2)" class="r-btn">不同意</a></p>';
+                    $("#checkBox").html(cDom).show();
+                }
+                //审核操作的DOM END
+            },
+            error: function (xhr, type) {
+            }
+        });
+    });
+</script>
+    </body>
+</html>

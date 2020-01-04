@@ -1,0 +1,147 @@
+﻿@{
+    ViewBag.Title = "ViewLazadaConfig";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+
+<script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/home.js")" type="text/javascript"></script>
+<div class="Company-top-box">
+    <div class="btn-bar">
+        <a href="#" id="btnAdd" class="icon-edit">添加</a>
+        <a href="#" id="btnEdit" class="icon-edit">编辑</a>
+        <a href="#" id="btnDelete" class="icon-remove">删除</a>
+    </div>
+</div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+
+<script type="text/javascript">
+
+    enterSearch("#btnQuery");
+    $(function () {
+        var url = "/AliExpressOrder/GetLazadaConfigList/";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() - 45,
+            fitColumns: true,
+            sortOrder: 'desc',
+            idField: 'ID',
+            pageSize: 20,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                { field: 'Name', title: '名称', width: 60, align: 'center' },
+                { field: 'Phone', title: '电话', width: 80, align: 'center' },
+                { field: 'AddressMessage', title: '地址信息', width: 100, align: 'center' },
+                { field: 'Address', title: '详细地址', width: 120, align: 'center' },
+                { field: 'Express', title: '快递', width: 80, align: 'center' },
+                { field: 'Warhouse', title: '仓库', width: 80, align: 'center' },
+                {
+                    field: 'IsDefault', title: '是否默认', width: 80, align: 'center',
+                    formatter: function (value, row, index) {
+                        var e;
+                        if (row.IsDefault == 0) {
+                            e = "否";
+                        } else {
+                            e = "是";
+                        }
+                        return e;
+                    }
+                },
+            ]]
+
+
+        })
+
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 40
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 40
+            });
+        });
+
+
+    })
+
+    $("#btnAdd").click(function () {
+        $('#IframeAdd')[0].src = "/AliExpressOrder/ViewLazadaConfigAdd";
+        $('#AddDiv').dialog('open');
+    });
+
+    $("#btnEdit").click(function () {
+        var row = $('#List').datagrid('getSelected');
+        if (row != null) {
+            $('#IframeEdit')[0].src = "/AliExpressOrder/ViewLazadaConfigEdit?ID=" + row.ID;
+            $('#editDiv').dialog('open');
+
+        }
+        else { $.messager.alert('提示', '@Lib.MessageRes.PleaseSelect', "info"); }
+    });
+
+    $("#btnDelete").click(function () {
+        var row = $('#List').datagrid('getSelected');
+        if (row != null) {
+
+            $.messager.confirm('提示', "@Lib.MessageRes.DelConfirm", function (r) {
+
+                if (r) {
+                    loading(0);
+                    var flag = 0
+                    if (flag == 0) {
+                        flag++
+                        $.ajax({
+                            url: "/AliExpressOrder/LazadaConfigDelete?ID=" + row.ID,
+                            type: "Post",
+                            contentType: "application/json",
+                            // data: JSON.stringify(p),
+                            dataType: "json",
+                            success: function (data) {
+                                if (data > 0) {
+                                    loading(1);
+                                    $('#List').datagrid('reload');
+
+                                    $.messager.alert('提示', '@Lib.MessageRes.DelOK', "info");
+
+                                }
+                                else {
+                                    loading(1);
+                                    flag = 0
+                                    $.messager.alert('提示', '删除失败', "info");
+                                }
+                            }, error: function (data) {
+                                loading(1);
+                                flag = 0;
+                                $.messager.alert('提示', data, "info");
+                            }
+
+                        });
+                    }
+                }
+            });
+
+
+        }
+        else {
+            $.messager.alert('提示', '@Lib.MessageRes.PleaseSelect', "info");
+        }
+    });
+
+
+
+</script>
+
+<div id="AddDiv" class="easyui-dialog" closed="true" modal="true" title="新增" style="width: 40%; height: 40%;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='IframeAdd' frameborder="0" src="" style="width: 100%; height: 98%;"></iframe>
+</div>
+<div id="editDiv" class="easyui-dialog" closed="true" modal="true" title="编辑" style="width: 40%; height: 40%;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='IframeEdit' frameborder="0" src="" style="width: 100%; height: 98%;"></iframe>
+</div>
+

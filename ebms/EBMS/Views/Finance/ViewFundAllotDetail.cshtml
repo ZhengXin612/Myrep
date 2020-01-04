@@ -1,0 +1,97 @@
+﻿@model EBMS.Models.T_FundAllot
+@{
+    ViewBag.Title = "ViewFundAllotDetail";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<div>
+    <table class="fromEditTable setTextWidth300">
+        <tbody>
+            <tr>
+                <td style="text-align: right;">
+                    @Html.LabelFor(model => model.PostUser)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.PostUser)
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right;">
+                    @Html.LabelFor(model => model.Department)：    
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.Department)
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right;">
+                    @Html.LabelFor(model => model.CompanyIn)：    
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.CompanyIn)
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right;">
+                    @Html.LabelFor(model => model.TheReceivingBank)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.TheReceivingBank)
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right;">
+                    @Html.LabelFor(model => model.AccountNumber)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.AccountNumber)
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right; width: 110px">
+                    @Html.LabelFor(model => model.CompanyOut)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.CompanyOut)
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right;">
+                    @Html.LabelFor(model => model.ThePaymentBank)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.ThePaymentBank)
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right;">
+                    @Html.LabelFor(model => model.PaymentNumber)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.PaymentNumber)
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right;">
+                    @Html.LabelFor(model => model.theMoney)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.theMoney)
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right;">
+                    @Html.LabelFor(model => model.UseOfProceeds)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.UseOfProceeds)
+                </td>
+            </tr>
+            <tr>
+                @Html.HiddenFor(model => model.ID)
+            </tr>
+        </tbody>
+    </table>
+</div>
+<hr style="height: 3px; color: blue" />
+@Html.Raw(ViewData["history"])
+

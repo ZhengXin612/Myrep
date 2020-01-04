@@ -1,0 +1,241 @@
+﻿@{
+    ViewBag.Title = "ViewOrderList";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<div class="Company-top-box">
+    <div class="search-box">
+        <input type="text" placeholder="物流单号" id="txtQuery" class="icon-search-txt">
+          仓库： @Html.DropDownList("RetreatWarehouseList",ViewData["RetreatWarehouseList"] as List<SelectListItem>) 
+
+        <span style="color: #808080; padding-right: 10px; font-size: 13px; margin-top: 3px; margin-left: 10px;">收货时间</span>
+        <input name="statethisdate" style="float: left;" value="" id="statethisdate" class="easyui-datebox" data-options="sharedCalendar:'#statethisdate'">
+        <span style="color: #808080; padding-right: 10px; font-size: 13px; margin-top: 3px; margin-left: 10px;">至</span>
+        <input name="Endthisdate" style="float: left;" value="" id="Endthisdate" class="easyui-datebox" data-options="sharedCalendar:'#Endthisdate'">
+        <input type="button" value="查询" id="btnQuery" class="icon-search">
+         @if(ViewData["name"].ToString()=="admin"||ViewData["name"].ToString()=="管理员" || ViewData["name"].ToString() == "于朋" || ViewData["name"].ToString() == "董甜希" || ViewData["name"].ToString() == "于朋" || ViewData["name"].ToString() == "董甜希")
+         {
+         <div class="btn-bar">
+         
+             
+            <a href="#" id="btnDelete" class="icon-remove">删除</a>
+             
+            
+         </div>
+            }
+        @if (ViewData["name"].ToString() == "admin" || ViewData["name"].ToString() == "管理员" || ViewData["name"].ToString() == "于朋" || ViewData["name"].ToString() == "南烟" || ViewData["name"].ToString() == "胡燕")
+		{
+            <div class="btn-bar">
+
+
+                <a href="#" id="btnB">修改仓库</a>
+
+
+            </div>
+        }
+       
+    </div>
+</div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+<script type="text/javascript">
+    function op(name, url) {
+        self.parent.addTab(name, url, '');
+        getContextmenu()
+    }
+   
+    $(function () {
+        //回车触发查询
+        enterSearch("#btnQuery");
+        var url = "../ReturnToStorage/GetSortingList";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() - 50,
+            fitColumns: true,
+            sortName: 'ID',
+            pageSize: 30,
+            sortOrder: 'desc',
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                { field: 'Retreat_expressName', title: '快递名称', width: 100, align: 'center' },
+                { field: 'Retreat_expressNumber', title: '快递单号', width: 80, align: 'center' },
+                { field: 'CollectName', title: '顾客姓名', width: 80, align: 'center' },
+                { field: 'CollectAddress', title: '顾客地址', width: 70, align: 'center' },
+                { field: 'receivermobile', title: '电话', width: 80, align: 'center' },
+                { field: 'Retreat_Warehouse', title: '收货仓库', width: 80, align: 'center' },
+                { field: 'ModularName', title: '匹配情况', width: 80, align: 'center' },
+                { field: 'GoodsReceiptDate', title: '收货时间', width: 80, align: 'center', formatter: formatDateBoxFull },
+                { field: 'Retreat_Remarks', title: '备注', width: 80, align: 'center' },
+                  {
+                      field: 'Sorting', title: '分拣', width: 120, align: 'center',
+                      formatter: function (value, row, index) {
+                          var e = ' <div class="btn-bar"><a href="#" class="icon-edit" onclick=Sorting(' + row.ID + ')>分拣</a>';
+                          if (row.ModularName=="无")
+                          {
+                              e += ' <a href="#" class="icon-edit" onclick=Modular(' + row.Retreat_expressNumber + ')>重新匹配</a>';
+                          }
+                          e += '</div>';
+                          return e;
+                      }
+                  },
+            ]]
+        });
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            });
+        });
+        $("#btnQuery").click(function () {
+            Query();
+        });
+    });
+
+   
+    $("#btnDelete").click(function () {
+        var row = $('#List').datagrid('getSelected');
+        if (row != null) {
+            if (row.ModularName != "无") {
+                $.messager.alert('提示', '只能删除无匹配情况的数据', "info");
+                return;
+            }
+            $.messager.confirm('提示', '确定删除该记录吗？', function (r) {
+                loading(0);
+                if (r) {
+                    var flag = 0
+                    if (flag == 0) {
+                        flag++
+                        $.ajax({
+                            url: "../ReturnToStorage/DeleteRetreatFinance?del=" + row.ID,
+                            type: "Post",
+                            contentType: "application/json",
+                            // data: JSON.stringify(p),
+                            dataType: "json",
+                            success: function (data) {
+                                loading(1);
+                                $('#List').datagrid('reload');
+                                flag = 0
+                                $('#List').datagrid("clearSelections");
+                            }, error: function () {
+                                loading(1);
+                                flag = 0
+                            }
+
+                        });
+                    }
+                }
+                else {
+                    loading(1);
+                }
+            });
+        }
+        else {
+            $.messager.alert('提示', '请选择一条记录', "info");
+        }
+    });
+    $("#btnB").click(function () {
+        var row = $('#List').datagrid('getSelected');
+        var Warehouse = $('#RetreatWarehouseList').val();
+        if (row != null) {
+            //if (row.ModularName != "无") {
+            //    $.messager.alert('提示', '只能删除无匹配情况的数据', "info");
+            //    return;
+            //}
+            if ($('#RetreatWarehouseList').val() == null || $('#RetreatWarehouseList').val()=="") {
+                $.messager.alert('提示', '请选择一个仓库', "info");
+                return;
+            }
+            $.messager.confirm('提示', '确定修改该记录的仓库吗？', function (r) {
+                loading(0);
+                if (r) {
+                    var flag = 0
+                    if (flag == 0) {
+                        flag++
+                        $.ajax({
+                            url: "../ReturnToStorage/ChangeHouse?ID=" + row.ID + "&house=" + Warehouse,
+                            type: "Post",
+                            contentType: "application/json",
+                            // data: JSON.stringify(p),
+                            dataType: "json",
+                            success: function (data) {
+                                loading(1);
+                                $('#List').datagrid('reload');
+                                flag = 0
+                                $('#List').datagrid("clearSelections");
+                            }, error: function () {
+                                loading(1);
+                                flag = 0
+                            }
+
+                        });
+                    }
+                }
+                else {
+                    loading(1);
+                }
+            });
+        }
+        else {
+            $.messager.alert('提示', '请选择一条记录', "info");
+        }
+    });
+    
+    function Query() {
+        var queryStr = $("#txtQuery").val().trim();
+        var RetreatWarehouseList = $('#RetreatWarehouseList').val();
+        var statedate = $('#statethisdate').datebox('getValue');
+        var EndDate = $('#Endthisdate').datebox('getValue');
+        //如果查询条件为空默认查询全部
+        $('#List').datagrid({
+            url: '../ReturnToStorage/GetSortingList?queryStr=' + queryStr + '&RetreatWarehouseList=' + RetreatWarehouseList + "&statedate=" + statedate + "&EndDate=" + EndDate
+        });
+    }
+    function Sorting(ID) {
+        if (ID == null) {
+            $.messager.alert('提示', '请选择一条记录', "info");
+        }
+        else {
+           // op("退货退款分拣：" + ID, "/ReturnToStorage/ViewSortingAdd?ID=" + ID)
+            $('#openIframeSortingAdd')[0].src = "ViewSortingAdd?ID=" + ID;
+            $('#SortingAdd').dialog('open');
+        }
+
+    }
+    function Modular(expressNumber) {
+        $.ajax({
+            url: "../ReturnToStorage/ModularRT?expressNumber=" + expressNumber,
+            type: "Post",
+            contentType: "application/json",
+            // data: JSON.stringify(p),
+            dataType: "json",
+            success: function (data) {
+                if (data > 0) {
+                    alert("更新成功");
+                }
+                else {
+                    alert("未找到可更新数据");
+                }
+                loading(1);
+                $('#List').datagrid('reload');
+                flag = 0
+                $('#List').datagrid("clearSelections");
+            }, error: function () {
+                loading(1);
+                flag = 0
+            }
+        });
+    }
+
+</script>
+<div id="SortingAdd" class="easyui-dialog" closed="true" modal="true" title="分拣结果" style="width: 1300px; height: 680px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIframeSortingAdd' frameborder="0" src="" style="width: 98%; height: 98%;"></iframe>
+</div>

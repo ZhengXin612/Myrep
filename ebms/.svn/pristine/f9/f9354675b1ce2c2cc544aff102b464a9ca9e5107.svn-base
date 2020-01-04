@@ -1,0 +1,73 @@
+﻿@{
+    ViewBag.Title = "ViewAreaSubsidyCost";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+<div class="Company-top-box">
+    <div class="search-box">
+        <input type="text" id="number" style="width: 150px;" placeholder="运单号" />
+                <span style="color: #808080; padding-right: 10px; font-size: 13px; margin-top: 3px; margin-left: 10px;">开始时间</span>
+        <input name="startDate" style="float: left;" value="@ViewData["date"]" id="startDate" class="easyui-datebox" data-options="sharedCalendar:'#statethisdate'">
+        <span style="color: #808080; padding-right: 10px; font-size: 13px; margin-top: 3px; margin-left: 10px;">结束时间</span>
+        <input name="endDate" style="float: left;" value="" id="endDate" class="easyui-datebox" data-options="sharedCalendar:'#Endthisdate'">
+        <input type="button" value="查询" id="btnQuery" class="icon-search">
+    </div>
+</div>
+
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+<script type="text/javascript">
+    enterSearch("#btnQuery");
+    $(function () {
+        var s;
+        var url = "GetAreaSubsidyCostList/?settlementStartDate=" + "@ViewData["date"]";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 10,
+            method: 'post',
+            height: $(window).height() *0.95,
+            fitColumns: true,
+            sortName: 'SettlementDate',
+            sortOrder: 'desc',
+            pageSize: 30,
+            pagination: true,
+            striped: true,
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号 
+            columns: [[
+                { field: 'SettlementDate', title: '结算日期', width: 60, align: 'center' },
+                { field: 'Number', title: '运单号', width: 60, align: 'center' },
+                { field: 'StartAdressName', title: '始发地名称', width: 60, align: 'center' },
+                { field: 'DestinationName', title: '目的名称', width: 80, align: 'center' },
+                { field: 'CostName', title: '费用名称', width: 120, align: 'center' },
+                { field: 'SettlementCost', title: '结算费用', width: 80, align: 'center' },
+                { field: 'ConsigneeName', title: '揽件业务员名称', width: 60, align: 'center' },
+                { field: 'SendCodeName', title: '派送业务员名称', width: 60, align: 'center' },
+                { field: 'ArriveDate', title: '到件时间', width: 60, align: 'center' },
+                { field: 'SignInDate', title: '签收时间', width: 60, align: 'center' }
+            ]]
+        });
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 10,
+                height: $(window).height() - 40
+            }).datagrid('resize', {
+                width: $(window).width() - 10,
+                height: $(window).height() - 40
+            });
+        });
+    });
+    $("#btnQuery").click(function () {
+
+        var number = $("#number").val().trim();
+        var startdate = $('#startDate').datebox('getValue');
+        var endDate = $('#endDate').datebox('getValue');
+        $('#List').datagrid({
+            url: 'GetAreaSubsidyCostList?number=' + number + '&settlementStartDate=' + startdate + '&settlementEndDate=' + endDate
+        });
+        $("#txtQuery").focus().select();
+    });
+</script>
+

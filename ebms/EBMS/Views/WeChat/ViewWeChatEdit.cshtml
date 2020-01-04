@@ -1,0 +1,307 @@
+﻿@model  EBMS.Models.T_WeChat
+@using Lib;
+@{
+    ViewBag.Title = "新增";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+    
+}
+
+<script type="text/javascript">
+    var grid; //定义全局变量datagrid
+    var editRow = -1;
+    $(function () {
+        //创建一个新的Grid
+        grid = $('#List').datagrid({
+            width: $(window).width() - 10,
+            height: $(window).height() - 200,
+            fitColumns: true,
+            showFooter: true,
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                  {
+                      field: 'GoodsName', title: '产品编码', width: 80
+                  },
+                      {
+                          field: 'GoodsCode', title: '产品名称', width: 80
+                      },
+
+                {
+                    field: 'qty', title: '数量', width: 80
+                },
+                 {
+                     field: 'Price', title: '佣金', width: 80, editor: {
+                         type: 'text'
+                     }
+                 },
+                   {
+                       field: 'Remarks', title: '备注', width: 80, editor: {
+                           type: 'text', options: { required: true }
+                       }
+                   },
+
+                    {
+                        field: 'action', title: '操作', width: 120, align: 'center', formatter: function (value, row, index) {
+                            return '<div class="btn-bar"><a onclick="removeRow(' + index + ')" class="icon-remove">删除</a></div>';
+                        }
+                    },
+            ]],
+            onClickCell: function (index, field) {
+               if (field != 'action') {
+                    editCell(index, field);
+                }
+              
+            },
+            onAfterEdit: function (index) {
+                grid.datagrid('refreshRow', index);
+                updateFooter()
+                saveJson();
+            }
+        });
+        grid.datagrid('loadData', { total: 0, rows: [], "footer": [{ "Unit": "合计", "UnitPrice": 0.00, "Qty": 0 }] });
+        var ID = "@ViewData["ID"]";
+        function fLoadData() {
+            $.ajax({
+                type: "POST",
+                url: "EditGetDetail?ID=" + ID,
+                success: function (data) {
+                    var vData = $.parseJSON(data);
+                    grid.datagrid('loadData', vData); //将数据绑定到datagrid   
+                    saveJson();
+                    updateFooter();
+                }
+            });
+        }
+        fLoadData();
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 10,
+                height: $(window).height() - 191
+            })
+        });
+        var sign = 0;
+        $("#btnSave").click(function () {
+            if ($("#EditForm").valid()) {
+              
+                if ($('#WechatNumber').val() == null || $('#WechatNumber').val() == "") {
+                    $.messager.alert("提示", "微信号必须填写", "info")
+                    return false;
+                }
+                if ($('#Expenditure').val() == null || $('#Expenditure').val() == "") {
+                    $.messager.alert("提示", "支出帐号必须选择", "info")
+                    loading(1);
+                    return false;
+                }
+                var rows = $('#List').datagrid("getRows");
+                for (var i = 0; i < rows.length; i++) {
+                 
+                    if ((rows[i].Price == null || rows[i].Price == "") && rows[i].Price!=0) {
+
+                        $.messager.alert('提示', "佣金必须填写", "info")
+                        loading(1);
+                        return false;
+                    }
+
+                }
+                saveJson();
+                if (sign == 0) {
+                    sign = 1;
+                    $.ajax({
+                        url: "../WeChat/ViewWeChatEditSave",
+                        type: "Post",
+                        data: $("#EditForm").serialize(),
+                        dataType: "json",
+                        success: function (data) {
+                            if (data.State == "Success") {
+                                $.messager.alert("提示", "保存成功", "info", function () {
+                                    parent.$('#editDiv').dialog('close');
+                                    parent.$("#List").datagrid("reload");
+                                    parent.$('#List').datagrid("clearSelections");
+                                    sign = 0;
+                                })
+                            } else if (data.State == "-1") {
+                                $.messager.alert("提示", data.Message, "info");
+                                sign = 0;
+                            }
+                            else {
+                                $.messager.alert("提示", "保存失败", "info");
+                                sign = 0;
+                            }
+
+                        }
+                    });
+                }
+            }
+
+        });
+    });
+  
+    function addRow() {
+        $('#List').datagrid('appendRow', {
+            Code: "",
+            Name: "",
+            qty: "0",
+            UnitPrice: "0",
+
+        })
+    }
+    //删除某一行数据
+    function removeRow(index) {
+        editCell(index, "Qty")
+        var rows = $('#List').datagrid("getRows");
+        $('#List').datagrid('deleteRow', index);
+        $('#List').datagrid("loadData", rows);
+        saveJson();
+        updateFooter()
+    }
+    //底部统计
+    function updateFooter() {
+        var billCount = 0;
+        var Total = 0;
+        var rows = grid.datagrid('getRows');
+        for (var i = 0; i < rows.length; i++) {
+            var row = rows[i];
+            if (row.Qty) {
+                billCount += parseInt(row.Qty);
+
+            }
+            if (row.UnitPrice) {
+                Total += parseFloat(row.UnitPrice)
+            }
+        }
+        grid.datagrid('reloadFooter', [{ "Unit": "合计", "UnitPrice": Total.toFixed(2), "Qty": billCount }]);
+    }
+    //序列化数据
+    function saveJson() {
+        // CopelPays();
+        JsonText = "[";
+        var rows = $('#List').datagrid('getRows');
+        for (var i = 0; i < rows.length; i++) {
+            JsonText += '{';
+            JsonText += '"GoodsCode":' + '"' + rows[i].GoodsCode + '",';
+            JsonText += '"GoodsName":' + '"' + rows[i].GoodsName + '",';
+            JsonText += '"Price":' + '"' + rows[i].Price + '",';
+            JsonText += '"Remarks":' + '"' + rows[i].Remarks + '",';
+            JsonText += '"qty":' + '"' + rows[i].qty + '"},';
+        }
+        JsonText = JsonText.substring(0, JsonText.length - 1);
+        JsonText += "]";
+        $("#jsonStr").val(JsonText);
+    }
+    //编辑触发的方法
+    function editCell(index, field) {
+        //  CopelPays();
+        //给时间控件默认值
+        //var rows = $('#List').datagrid('getRows');
+        //if (rows[index].RequirementDate == null || rows[index].RequirementDate == "") {
+        //    rows[index].RequirementDate = formatDatebox(new Date())
+        //}
+        grid.datagrid('endEdit', editRow);
+        editRow = index;
+        grid.datagrid('selectRow', index);
+        grid.datagrid('beginEdit', index);
+        var editor = grid.datagrid('getEditor', { index: index, field: field });
+        setTimeout(function () {
+            editor.target.focus();
+        }, 0);
+
+        var editors = grid.datagrid('getEditors', index);
+        for (var i = 0; i < editors.length; i++) {
+            editors[i].target.bind('keydown', { field: editors[i].field }, function (e) {
+                if (e.keyCode == 13) {
+                    grid.datagrid('endEdit', index);
+                    editRow = -1;;
+                } else if (e.keyCode == 38) {	// up
+
+                    if (editRow > 0) {
+                        editCell(editRow - 1, e.data.field);
+                    }
+                } else if (e.keyCode == 40) {	// down
+
+                    if (editRow < grid.datagrid('getRows').length - 1) {
+                        editCell(parseInt(editRow) + 1, e.data.field);
+                    }
+                }
+                if (i < 2) {
+                    if (!(event.keyCode == 46) && !(event.keyCode == 9) && !(event.keyCode == 8) && !(event.keyCode == 37) && !(event.keyCode == 39))
+                        if (!((event.keyCode >= 48 && event.keyCode <= 57) || (event.keyCode >= 96 && event.keyCode <= 105)))
+                            event.returnValue = false;
+                }
+            });
+        }
+
+    }
+    //选择其他地方取消编辑
+    $(document).not(grid).on("click", function () {
+        // CopelPays();
+        grid.datagrid("endEdit", editRow);
+        grid.datagrid('unselectAll');
+    });
+
+</script>
+<div class="mvctool">
+  <input id="btnSave" class="modal-btn modal-btn-save" type="submit" value="保存">
+</div>
+    @using (Html.BeginForm("EditForm", "Controllers", null, FormMethod.Post, new { Id = "EditForm" }))
+    {
+    @Html.ValidationSummary(true)
+      <table class="fromEditTable setTextWidth300">
+        <tbody>
+            <tr>
+            <td class="lab">
+                  @Html.LabelFor(model => model.OrderNumber):
+               </td>
+               <td>
+                 @Html.DisplayFor(model => model.OrderNumber)
+               </td>
+               <td class="lab">
+                  @Html.LabelFor(model => model.ShopName):
+               </td>
+               <td>
+                 @Html.DisplayFor(model => model.ShopName)
+               </td>
+              
+          </tr> 
+            <tr>
+                  <td class="lab">
+                  @Html.LabelFor(model => model.Wangwang):
+               </td>
+               <td>
+                 @Html.DisplayFor(model => model.Wangwang)
+               </td>
+                   <td class="lab">
+                @*  @Html.LabelFor(model => model.Commission):*@
+                      支出帐号：
+               </td>
+               <td>
+                         @Html.DropDownListFor(model => model.Expenditure, ViewData["ExpenditureList"] as List<SelectListItem>)
+           @*      @Html.TextBoxFor(model => model.Commission)*@
+               </td>
+            </tr>
+               <tr>
+                  <td class="lab">
+                  @Html.LabelFor(model => model.WechatNumber):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model => model.WechatNumber)
+               </td>
+                
+                  <td class="lab">
+                  @Html.LabelFor(model => model.Remarks):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model => model.Remarks)
+               </td>
+          </tr> 
+         
+        </tbody>
+            <input type="hidden" id="jsonStr" name="jsonStr" />
+    </table>
+           @Html.HiddenFor(model => model.ID)
+       
+    }
+
+    <div class="detail-list">
+    <table id="List"></table>
+</div>
+

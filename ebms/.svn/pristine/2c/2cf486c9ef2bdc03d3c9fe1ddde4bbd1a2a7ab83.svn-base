@@ -1,0 +1,140 @@
+﻿@model  EBMS.Models.T_LossReport
+@{
+   
+    ViewBag.Title = "我的采购";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+<script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+<div class="Company-top-box">
+    <div class="search-box">
+         <input type="text" placeholder="采购编码.." id="txtQuery"  class="icon-search-txt">
+        @*     <select id="selStatus" name="selStatus" class="sel-box">
+        <option value="9999" selected="">审核状态</option>
+        <option value="2">不同意</option>
+        <option value="1">已同意</option>
+        <option value="0">审核中</option>
+        <option value="-1">未审核</option>
+         <option value="3">已作废</option>
+    </select>*@
+         <input type="button" value="查询" id="btnQuery" class="icon-search">
+    </div>
+    <div class="btn-bar">
+         <p class="showBar">选择采购单号 : 请双击需要查看的数据</p>
+    </div>
+</div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+<script type="text/javascript">
+    enterSearch("#btnQuery");
+    function op(name, url) {
+        self.parent.addTab(name, url, '');
+        getContextmenu()
+    }
+    var statusVal = "9999";
+    $(function () {
+        var url = "../Purchase/ViewPurchaseQueryList?Status=" + statusVal;
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() - 50,
+            fitColumns: true,
+            sortName: 'ID',
+            sortOrder: 'desc',
+            idField: 'ID',
+            pageSize: 20,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            columns: [[
+                 { field: 'PurchaseOddNum', title: '采购编码', width: 200, align: 'center' },
+                 { field: 'ApplyDepartment', title: '采购部门', width: 100, align: 'center' },
+                    { field: 'CopelPay', title: '应付金额', width: 100, align: 'center' },
+                    { field: 'needpay', title: '待财务付款金额', width: 100, align: 'center' },
+                       { field: 'ActualPay', title: '已付金额', width: 100, align: 'center' },
+                       { field: 'cishu', title: '已申请次数', width: 100, align: 'center' },
+                 { field: 'Warehouse', title: '仓库', width: 100, align: 'center' },
+                 {
+                     field: 'Status', title: '状态', width: 100, align: 'center', formatter: function (value, row, index) {
+                         switch (row.Status) {
+                             case -1:
+                                 return "<font color=#d02e2e>未审核</font>";
+                                 break;
+                             case 0:
+                                 return "<font color=#2967c9>审核中</font>";
+                                 break;
+                             case 1:
+                                 return "<font color=#1fc73a>已同意</font>";
+                                 break;
+                             case 2:
+                                 return "<font color=#d02e2e>不同意</font>";
+                                 break;
+                             case 3:
+                                 return "<font color=#d02e2e>已作废</font>";
+                                 break;
+
+                         }
+                     }
+                 },
+                 { field: 'ApplyDate', title: '申请时间', width: 100, align: 'center', formatter: formatDatebox },
+
+            {
+                field: 'action', title: '操作', width: 100, align: 'center',
+                formatter: function (value, row, index) {
+                    var e = ' <div class="btn-bar"><a href="#" class="icon-edit" onclick=Show(' + row.ID + ')>审核详情</a></div>';
+                    return e;
+                }
+            }
+            ]],
+            onDblClickRow: function (rowIndex, rowData) {
+                myfunction();
+            },            onAfterEdit: function (index, rowData) {//回调函数可以直接用于操作页面
+            }
+        });
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            });
+        });
+    });
+    $("#btnGuanbi").click(function () {
+        parent.$('#openDivchakna').dialog('close');
+    });
+  
+
+ 
+    $("#btnQuery").click(function () {
+
+        var queryStr = $("#txtQuery").val();
+
+        //如果查询条件为空默认查询全部
+        if (queryStr == null) {
+            queryStr = "%";
+        }
+        var val = "9999";
+        $('#List').datagrid({
+            url: '../Purchase/ViewPurchaseQueryList?queryStr=' + encodeURI(queryStr) + "&status=" + val
+        });
+
+    });
+
+    function myfunction() {
+        var rows = $('#List').datagrid('getSelections');
+        parent.addCompany(rows);
+        }
+  
+    function Show(id) {
+        var url = "../Purchase/ViewPurchaseListDetail?tid=" + id
+        window.open(url, "_blank", "height=" + (window.screen.availHeight - 30) + ",width=" + (window.screen.availWidth - 10) + ",scrollbars=yes,resizable=1,modal=false,alwaysRaised=yes");
+
+    }
+
+</script>
+<div id="showDiv" class="easyui-dialog" closed="true" modal="true" title="审核详情" style="width:420px; height:420px;" resizable="true" closable="true">
+    <iframe scrolling="yes" id='openIframeShow' frameborder="0" src="" style="width:100%;height:98%;"></iframe>
+</div>

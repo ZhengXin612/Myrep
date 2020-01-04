@@ -1,0 +1,598 @@
+﻿@{
+    ViewBag.Title = "ViewLineExpensePrint";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+<script type="text/javascript">
+
+    var total = "@ViewData["total"]";
+    $(function () {
+        var id = "@ViewData["Bid"]";
+        var page = "@ViewData["page"]";
+
+        bandingshuju(id, page);
+        bandingchanp(id, page);
+
+
+
+    }
+    )
+    function guanbi() {
+        parent.$('#openDivbaoxiaodan').dialog('close');
+
+    }
+
+    function printpage(id) {
+        $.ajax({
+            url: "UpdateprintCountByID",
+            type: "Post",
+            data: { id: id },
+            dataType: "json",
+            success: function (data) {
+                if (data.State == "Success") {
+                    parent.$("#List").datagrid("reload");
+                    window.print();
+                }
+                else {
+                    $.messager.alert("提示", data.Message, "info");
+                }
+
+            }
+        });
+
+    }
+
+    function bandingshuju(id, page) {
+
+        $.post("GetExpensePrint", { "id": id }, function (data) {
+            var dates = formatDateBoxFullnianyueri(data.CrateDate);
+            $("#riqi").html(dates);
+            var bumen =  data.Department;
+
+            $("#bumen").html(bumen);
+            var beizhu = "";
+            if (data.Car_Number != null && data.Car_Number != "") {//item.Report_zhanghaoName + item.Report_kaihuhang +
+                beizhu = "账号:" + data.Car_Number;
+            }
+            if (data.Reun_Name != null && data.Reun_Name != "") {
+                beizhu = "账户:" + data.Reun_Name + beizhu;
+            }
+            if (data.Reun_Bank != null && data.Reun_Bank != "") {
+                beizhu = "开户行:" + data.Reun_Bank + beizhu;
+            }
+            //分页最后显示备注
+            if (total > 1) {
+                if (total == page) {
+                    $("#beizhu").html(beizhu)
+                }
+            }
+            else {
+                $("#beizhu").html(beizhu)
+            }
+
+            $("#fujianzongshu").html(15);
+
+        });
+
+    }
+    function bandingchanp(id, page) {
+
+        $.post("GetExpenseProductPrint", { "expenseId": id, "page": page }, function (data) {
+            var zongjiage = 0;
+
+
+            for (var i = 0; i < data.length; i++) {
+                if (i <= 4) {
+                    var zhaiyao = data[i].Abstract + "(" + data[i].Num + "*" + data[i].Price + ")";
+                    $("#zhaiyao" + i + "").html(zhaiyao);
+                    var ssr = data[i].Price * data[i].Num;
+
+                    var t = ssr.toFixed(2);
+
+                    var ssa = t * 100;
+                    var jine = ssa.toFixed(0);
+
+                    zongjiage += parseFloat(jine);
+
+                    var myarr = new Array();
+                    for (var z = 0; z < jine.toString().length; z++) {
+
+
+                        myarr[z] = jine.toString().substr(z, 1);
+
+                    }
+
+                    var ss = new Array("", "", "", "", "", "", "", "", "", "", "");
+                    var sx = myarr.length - 1;
+                    for (var x = 0; x < myarr.length; x++) {
+
+                        ss[sx] = myarr[x];
+                        sx--;
+                    }
+
+                    var xax = "<td>" + ss[9] + "</td><td>" + ss[8] + "</td><td>" + ss[7] + "</td><td>" + ss[6] + "</td><td>" + ss[5] + "</td><td>" + ss[4] + "</td><td>" + ss[3] + "</td><td>" + ss[2] + "</td><td>" + ss[1] + "</td><td >" + ss[0] + "</td>";
+
+                    $("#zz" + i + "").html(xax);
+
+
+                }
+
+            }
+            //分页打印
+            if (page > 1 && total == page) {
+                zongjiage = (parseFloat( @ViewData["jine"]) * 100).toFixed(0);
+            }
+
+            if (total > 1)
+                $("#footPage").html("" + page + "/" + total + "页");
+            var zongarr = new Array();
+            for (var y = 0; y < zongjiage.toString().length; y++) {
+                zongarr[y] = zongjiage.toString().substr(y, 1);
+            }
+            var zj = new Array("", "", "", "", "", "", "", "", "", "", "");
+            var dj = zongarr.length - 1;
+            for (var c = 0; c < zongarr.length; c++) {
+
+                zj[dj] = zongarr[c];
+                dj--;
+            }
+            zj[zongarr.length] = "￥";
+            var zjg = "<td>" + zj[9] + "</td><td>" + zj[8] + "</td><td>" + zj[7] + "</td><td>" + zj[6] + "</td><td>" + zj[5] + "</td><td>" + zj[4] + "</td><td>" + zj[3] + "</td><td>" + zj[2] + "</td><td>" + zj[1] + "</td><td >" + zj[0] + "</td>";
+            if (page == total) {
+                $("#zz5").html(zjg);
+                zongjiage = zongjiage / 100;
+
+                $("#jinedax").html(ChinaCost(zongjiage));
+            }
+            else {
+
+                $("#zz5").html("<td colspan=10> </td>");
+                zongjiage = zongjiage / 100;
+                //$("#jinedax").html(ChinaCost(zongjiage));
+                $("#heji").html(" &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ");
+            }
+        });
+
+    }
+
+    function ChinaCost(numberValue) {
+
+        var numberValue = new String(Math.round(numberValue * 100)); // 数字金额
+        var chineseValue = ""; // 转换后的汉字金额
+        var String1 = "零壹贰叁肆伍陆柒捌玖"; // 汉字数字
+        var String2 = "万仟佰拾亿仟佰拾万仟佰拾元角分"; // 对应单位
+        var len = numberValue.length; // numberValue 的字符串长度
+        var Ch1; // 数字的汉语读法
+        var Ch2; // 数字位的汉字读法
+        var nZero = 0; // 用来计算连续的零值的个数
+        var String3; // 指定位置的数值
+        if (len > 15) {
+            alert("超出计算范围");
+            return "";
+        }
+        if (numberValue == 0) {
+            chineseValue = "零元整";
+            return chineseValue;
+        }
+        String2 = String2.substr(String2.length - len, len); // 取出对应位数的STRING2的值
+        for (var i = 0; i < len; i++) {
+            String3 = parseInt(numberValue.substr(i, 1), 10); // 取出需转换的某一位的值
+            if (i != (len - 3) && i != (len - 7) && i != (len - 11) && i != (len - 15)) {
+                if (String3 == 0) {
+                    Ch1 = "";
+                    Ch2 = "";
+                    nZero = nZero + 1;
+                }
+                else if (String3 != 0 && nZero != 0) {
+                    Ch1 = "零" + String1.substr(String3, 1);
+                    Ch2 = String2.substr(i, 1);
+                    nZero = 0;
+                }
+                else {
+                    Ch1 = String1.substr(String3, 1);
+                    Ch2 = String2.substr(i, 1);
+                    nZero = 0;
+                }
+            }
+            else { // 该位是万亿，亿，万，元位等关键位
+                if (String3 != 0 && nZero != 0) {
+                    Ch1 = "零" + String1.substr(String3, 1);
+                    Ch2 = String2.substr(i, 1);
+                    nZero = 0;
+                }
+                else if (String3 != 0 && nZero == 0) {
+                    Ch1 = String1.substr(String3, 1);
+                    Ch2 = String2.substr(i, 1);
+                    nZero = 0;
+                }
+                else if (String3 == 0 && nZero >= 3) {
+                    Ch1 = "";
+                    Ch2 = "";
+                    nZero = nZero + 1;
+                }
+                else {
+                    Ch1 = "";
+                    Ch2 = String2.substr(i, 1);
+                    nZero = nZero + 1;
+                }
+                if (i == (len - 11) || i == (len - 3)) { // 如果该位是亿位或元位，则必须写上
+                    Ch2 = String2.substr(i, 1);
+                }
+            }
+            chineseValue = chineseValue + Ch1 + Ch2;
+        }
+        if (String3 == 0) { // 最后一位（分）为0时，加上“整”
+            chineseValue = chineseValue + "整";
+        }
+        return chineseValue;
+    }
+    function baocun() {
+
+        var page = "@ViewData["page"]";
+
+        if (page == 1) {
+
+            var id = "@ViewData["Bid"]";
+      }
+  }
+
+
+
+</script>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>费用报销单</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <style type="text/css">
+        * {
+            margin: 0;
+            padding: 0;
+            border: 0;
+            outline: 0;
+            font-family: "宋体";
+        }
+
+        body {
+            font-size: 12px;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: normal;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        li {
+            list-style: none;
+        }
+
+        .Any_single {
+            width: 100%;
+            position: relative;
+        }
+
+            .Any_single h2 {
+                text-align: center;
+                width: 50%;
+                margin: 0 auto;
+                font-size: 20px; /*height:45px;line-height:45px*/
+            }
+
+                .Any_single h2 span {
+                    padding: 0 10px;
+                }
+
+        .h2-double-line {
+            border: 1px solid #000;
+            width: 50%;
+            height: 5px;
+            margin: 0 auto;
+            border-left: 0;
+            border-right: 0;
+        }
+
+        .Any_single_body {
+            width: 95%;
+            margin: 0 auto;
+        }
+
+        .fx-item {
+            margin: 10px 0;
+            width: 100%;
+            display: table;
+        }
+
+        .fx-item-a {
+            width: 300px;
+            text-align: left;
+        }
+
+        .fx-item-b {
+            width: 100px;
+            text-align: center;
+        }
+
+        .fx-item-c {
+            width: 200px;
+            text-align: right;
+        }
+
+        #bumen {
+            font-size: 10px;
+        }
+
+        .fx-t {
+            float: left;
+        }
+
+        .yeshu {
+            padding: 0 5px;
+            border-bottom: 1px solid #000;
+        }
+
+        .expense-table {
+            border: 1px solid #000;
+            border-spacing: 0;
+            width: 100%;
+            text-align: center;
+            border-collapse: collapse;
+        }
+
+            .expense-table tr td {
+                text-align: center;
+            }
+
+            .expense-table tr {
+                height: 25px;
+            }
+
+                .expense-table tr td {
+                    border-right: 1px solid #000;
+                }
+
+        .money {
+            border-bottom: 1px solid #000;
+            height: 25px;
+            line-height: 25px;
+        }
+
+        .money-dw {
+            height: 20px;
+            line-height: 20px;
+        }
+        /*.money-dw span{width: 11%;float: left;border-right: 1px solid #000;height: 100%;padding: 0}*/
+        .b-b {
+            border-bottom: 1px solid #000;
+        }
+
+        .money-big {
+            text-align: left;
+            font-weight: bold;
+            text-indent: 4px;
+            font-size: 14px;
+        }
+
+            .money-big span {
+                font-weight: normal;
+                width: 45px;
+                display: inline-block;
+                text-align: center;
+                font-size: 12px;
+            }
+
+        .t-p {
+            text-align: left;
+            text-indent: 4px;
+        }
+
+            .t-p span {
+                display: inline-block;
+            }
+
+        .dw {
+            float: right;
+            font-weight: normal;
+            font-style: normal;
+            margin-right: 4px;
+        }
+
+        .table-bot {
+            width: 80%;
+            margin: 10px auto;
+        }
+
+            .table-bot span {
+                width: 19%;
+                text-align: left;
+                display: inline-block;
+                text-indent: 2em;
+            }
+
+        .bian-hao {
+            position: absolute;
+            right: 30px;
+            z-index: 2;
+            top: -20px;
+        }
+
+        @@media print {
+            .noprint {
+                display: none;
+                color: green;
+            }
+        }
+
+        .Batch-number {
+            float: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="noprint">
+        <a href="javascript:printpage(@ViewData["id"]);" class="icon-ok">打印</a>
+        <br />
+        分页：@Html.Raw(ViewData["pager"])
+    </div>
+
+    <div class="Any_single">
+        <h2>费<span></span>用<span></span>报<span></span>销<span></span>单</h2>
+        <div class="bian-hao">
+            <img src="~/Content/barCode.ashx?code=@ViewData["code"]"   width="169" height="60">
+        </div>
+        <div class="h2-double-line"></div>
+        <div class="Any_single_body">
+            <p class="fx-item"><span class="fx-t fx-item-a">报销部门：<b id="bumen"></b></span><span class="fx-t  fx-item-b"><b id="riqi"></b></span><span class="fx-t  fx-item-c">单据及附件共<span class="yeshu">______</span>页</span></p>
+            <table class="expense-table">
+                <tr style="border: 1px solid #000; height: 45px">
+                    <td width="18%">报&nbsp;销&nbsp;项&nbsp;目</td>
+                    <td width="42%">摘&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;要</td>
+                    <td width="18%" rowspan="7">
+                        <table class="expense-table" style="border: 0">
+                            <tr style="height: 25px">
+                                <td width="100%" style="border-right: 0; text-align: center; border-bottom: 1px solid #000" colspan="10">金额</td>
+                            </tr>
+                            <tr style="height: 19px;" class="b-b">
+                                <td>千</td>
+                                <td>百</td>
+                                <td>十</td>
+                                <td>万</td>
+                                <td>千</td>
+                                <td>百</td>
+                                <td>十</td>
+                                <td>元</td>
+                                <td>角</td>
+                                <td style="border: 0">分</td>
+                            </tr>
+                            <tr class="b-b" id="zz0">
+                            </tr>
+                            <tr class="b-b" id="zz1">
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+
+                                <td style="border: 0"></td>
+                            </tr>
+                            <tr class="b-b" id="zz2">
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td style="border: 0"></td>
+                            </tr>
+                            <tr class="b-b" id="zz3">
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td style="border: 0"></td>
+                            </tr>
+                            <tr class="b-b" id="zz4">
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td style="border: 0"></td>
+                            </tr>
+                            <tr id="zz5">
+                            </tr>
+                        </table>
+                    </td>
+                    <td width="22%" rowspan="7" style="border-right: 0">
+                        <table class="expense-table" style="border: 0">
+                            <tr style="height: 96px" class="b-b">
+                                <td width="18%">备<br />
+                                    注</td>
+                                <td style="border: 0" width="82%" id="beizhu"></td>
+                            </tr>
+                            <tr style="height: 96px">
+                                <td>领<br />
+                                    导<br />
+                                    审<br />
+                                    批</td>
+                                <td style="border: 0" width="82%"></td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <!--rowspan = "2"  style="height: 90px"-->
+
+                <tr class="b-b">
+                   <td id="jzpihao">@ViewData["borrowCode"]</td>
+                    <td id="zhaiyao0"></td>
+                </tr>
+                <tr class="b-b">
+                    <td></td>
+                    <td id="zhaiyao1"></td>
+                </tr>
+                <tr class="b-b">
+                    <td></td>
+                    <td id="zhaiyao2"></td>
+                </tr>
+                <tr class="b-b">
+                    <td></td>
+                    <td id="zhaiyao3"></td>
+                </tr>
+                <tr class="b-b">
+                    <td></td>
+                    <td id="zhaiyao4"></td>
+                </tr>
+                <tr class="b-b">
+                    <td colspan="2" id="heji">合&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;计</td>
+
+                </tr>
+                <tr>
+                    <td colspan="2" width="60%">
+                        <p class="money-big">金额大写：<b id="jinedax"></b></p>
+                    </td>
+                    <td width="20%">
+                        <p class="t-p">原借款：<span></span><i class="dw">元</i></p>
+                    </td>
+                    <td width="20%">
+                        <p class="t-p">应退（补）款：<span></span><i class="dw">元</i></p>
+                    </td>
+                </tr>
+            </table>
+            <div class="table-bot">
+                <span>会计主管:</span>
+                <span>复核:</span>
+                <span>出纳:</span>
+                <span>报销人:</span>
+                <span id="Printnum"></span>
+                <span style="float: right; width: 60px" id="footPage"></span>
+            </div>
+        </div>
+        <!--Any_single_body end-->
+
+    </div>
+    <!--Any_single end-->
+
+</body>
+</html>

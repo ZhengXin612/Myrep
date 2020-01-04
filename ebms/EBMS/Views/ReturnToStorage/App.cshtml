@@ -1,0 +1,152 @@
+﻿@model EBMS.Models.T_ReturnToStorage
+@{
+   Layout = null;
+  
+}
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>EBMS退回件新增</title>
+<meta name="renderer" content="webkit">
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible"  content="IE=Edge,chrome=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="viewport" content="width=device-width, initial-scale=1 ,user-scalable=no" >
+    <style>
+*{padding:0;margin:0}
+body{padding:0;margin:0;color:#666;position:relative;font-family:"微软雅黑"}
+#video{display: block;margin:1em auto;width:180px;height:180px;}
+.video{display:none;background:rgba(255,255,255,1);position:absolute;top:0;left:0;width:100%;height:100%}
+#StockName,#Materiel_Name,#Box_Num{padding:1px;border:1px solid #999;margin-bottom:2px;height:30px;padding:2px;}
+.getPhoto{margin-left:25px;color:#3499DA;text-decoration:none}
+.fromEditTable {width:95%;margin:10px auto}
+.fromEditTable tr{line-height:40px} 
+.fromEditTable tr td input {height:25px}
+.form-table{overflow:hidden}
+.close{text-decoration:none;border:1px solid #333;border-radius:50%;width:30px;height:30px;display:block;line-height:30px;text-align:center;font-size:30px;margin:0 auto;color:#333}
+.saveBtn{margin:20px auto 0 auto;width:80%;height:40px;line-height:40px;background:#2298ef;text-decoration:none;color:#fff;display:block;border-radius:2px;text-align:center}
+.saveBtn:hover{background:#3499DA}
+ #mask{ width:100%;background:rgba(0,0,0,0.6);position:absolute;z-index:9999;display:none}
+</style>
+</head>
+<body>
+     
+         <script src="@Url.Content("~/Content/blue/js/jquery-1-7-1-min.js")" type="text/javascript"></script>
+<!--表单区域-->
+<script type="text/javascript">
+    var grid; //定义全局变量datagrid
+    var editRow = -1;
+    //加载数据
+    $(function () {
+        //提交后台方法
+        var sign = 0;
+        $("#btnSave").click(function () {
+          
+            if ($("#Retreat_Warehouse").val() == "") {
+                alert("请选择仓库")
+              
+                return
+            }
+            if ($("#Retreat_expressName").val() == "") {
+               alert( "请选择快递")
+                loading(1);
+                return
+            }
+            if ($("#Retreat_expressNumber").val() == "") {
+                alert("快递单号必须填写")
+              
+                return
+            }
+            //if ($("#EditForm").valid()) {
+                if (sign == 0) {
+                    sign = 1;
+                    $.ajax({
+                        url: "ViewReturnToStorageAddSave?detailList="+$("#D").val(),
+                        type: "Post",
+                        data: $("#EditForm").serialize(),
+                        success: function (data) {
+                            if (data.State == "Success") {
+                                alert('保存成功')
+                                window.location.reload();
+                                sign = 0
+                              
+                            } else {
+                                alert( data.Message)
+                                
+                                    sign = 0
+                              
+                            }
+                        }
+                    });
+                }
+           // }
+        });
+    });
+  
+</script>
+       <div id="mask"></div>
+@using (Html.BeginForm("EditForm", "Controller", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+    <div class="form-table">
+
+    <table class="fromEditTable setTextWidth300">
+        <tr>
+            <td style="width: 30%; text-align: right">
+                 快递公司：    
+            </td>
+           <td style="width:70%;">  @Html.DropDownListFor(model => model.Retreat_expressName, ViewData["RetreatexpressNameList"] as List<SelectListItem>)</td>
+        </tr>
+        <tr>
+            <td style="width:30%; text-align: right">
+                  快递单号：  
+            </td>
+            <td style="width:70%;">   @Html.TextBoxFor(model => model.Retreat_expressNumber)</td>
+        </tr>
+           <tr>
+            <td style="width:30%; text-align: right">
+                发货人姓名：    
+            </td>
+               
+            <td style="width:70%;">  @Html.TextBoxFor(model => model.CollectName)</td>
+        </tr>
+         <tr>
+            <td style="width:30%; text-align: right">
+                地址：  
+            </td>
+             <td  style="width:70%;">  @Html.TextBoxFor(model => model.CollectAddress)</td>
+        </tr>
+         <tr>
+            <td style="width:30%; text-align: right">
+                 电话号码：    
+            </td>
+            <td  style="width:70%;">  @Html.TextBoxFor(model => model.receivermobile)</td>
+        </tr>
+    
+        <tr>
+            <td style="width:30%; text-align: right">
+                收货仓库： 
+            </td>
+            <td  style="width:70%;"> @Html.DropDownListFor(model => model.Retreat_Warehouse, ViewData["RetreatWarehouseList"] as List<SelectListItem>) </td>
+        </tr>
+         <tr>
+            <td style="width:30%; text-align: right">
+               备注：
+            </td>
+            <td  style="width:70%;">@Html.TextBoxFor(model => model.Retreat_Remarks) </td>
+        </tr>
+    </table>
+    
+
+</div>
+<!--表单区域 END-->
+    <input type="hidden" ID="D" value=""/>
+}
+    <div>
+        <a href="javascript:;" id="btnSave" class="saveBtn">提交</a>
+    </div>
+
+</body>
+
+
+</html>

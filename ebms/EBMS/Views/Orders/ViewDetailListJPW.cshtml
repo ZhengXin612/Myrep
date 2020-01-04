@@ -1,0 +1,44 @@
+﻿@{
+    ViewBag.Title = "ViewDetailListJPW";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+<table id="List"></table>
+<script type="text/javascript">
+
+    $(function () {
+        var url = "GetJPWOrdersDetailList?code=" + "@ViewData["code"]";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width(),
+            method: 'post',
+            height: $(window).height() * 0.97,
+            fitColumns: true,
+            sortName: 'ID',
+            sortOrder: 'desc',
+            pageSize: 10,
+            pagination: true,
+            striped: true,
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号 
+            columns: [[
+                { field: 'item_code', title: '商品编码', width: 50, align: 'center' },
+                 { field: 'item_name', title: '商品名称', width: 150, align: 'center' },
+                 { field: 'qty', title: '数量', width: 60, align: 'center' },
+                { field: 'price', title: '单价', width: 60, align: 'center' }
+            ]]
+        });
+    });
+
+    //grid 大小随窗口变化
+    $(window).resize(function () {
+        $('#List').datagrid('resize', {
+            width: $(window).width(),
+            height: $(window).height() - 30
+        }).datagrid('resize', {
+            width: $(window).width(),
+            height: $(window).height() - 30
+        });
+    });
+
+</script>

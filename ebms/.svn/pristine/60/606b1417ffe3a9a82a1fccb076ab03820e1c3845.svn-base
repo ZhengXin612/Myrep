@@ -1,0 +1,94 @@
+﻿@model EBMS.Models.T_BusinessTravelApprove
+@{
+    ViewBag.Title = "ViewCheck";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+
+<script type="text/javascript">
+    $(function () {
+        var flag = 0;
+        $('#btnSave').click(function () {
+           
+            if ($("#EditForm").valid() && flag == 0) {
+                loading(0)
+                flag += 1;
+                $.ajax({
+                    url: "/BusinessTravel/BusinessTravelCheckSave",
+                    type: "Post",
+                    data: $("#EditForm").serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        loading(1);
+                        if (data.State == "Success") {
+                            parent.$('#List').datagrid("reload")
+                            $.messager.alert("提示", "@Lib.MessageRes.SaveOK", "info", function () {
+                                parent.$('#CheckDiv').dialog('close');
+                            })
+                        }
+                        else {
+                            $.messager.alert("提示", data.Message, "info");
+                            sign = 0;
+                        }
+                        parent.$('#List').datagrid("clearSelections");
+                    }
+                });
+            }
+            return false;
+
+        });
+
+    })
+   
+
+
+</script>
+<style>
+    .lab {
+  width: 110px; 
+  text-align: right;}
+</style>
+<div class="mvctool">
+    <a id="btnSave" href="javascript:;" class="modal-btn modal-btn-save">保存</a>
+    
+</div>
+
+<div>
+    @using (Html.BeginForm("EditForm", "Controllers", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+    <table class="fromEditTable setTextWidth300">
+       
+        <tbody>
+             <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.Status):
+               </td>
+               <td>
+                   @Html.RadioButtonFor(model => model.Status,"1")同意
+              
+                   @Html.RadioButtonFor(model => model.Status,"2")不同意
+               </td>
+              </tr> 
+           
+         <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.Memo):
+               </td>
+               <td>
+                   @Html.TextAreaFor(model => model.Memo)
+               </td>
+                  <td>
+                   @Html.ValidationMessageFor(model => model.Memo)
+               </td>
+              </tr> 
+             
+        </tbody>
+    </table>
+           @Html.HiddenFor(model => model.ID)
+         
+}
+
+</div>
+
+
+

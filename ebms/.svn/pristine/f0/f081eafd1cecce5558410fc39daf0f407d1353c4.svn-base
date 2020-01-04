@@ -1,0 +1,84 @@
+﻿@model EBMS.Models.T_Borrow
+@{
+    ViewBag.Title = "ViewBorrowDetail";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<table class="fromEditTable setTextWidth300">
+    <tbody>
+        <tr>
+            <td style="width: 80px; text-align: right;">
+                @Html.LabelFor(model => model.BorrowName)：    
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.BorrowName)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 80px; text-align: right;">
+                @Html.LabelFor(model => model.BorrowerDep)：   
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.BorrowerDep)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 80px; text-align: right;">
+                @Html.LabelFor(model => model.BorrowAccountID)：   
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.BorrowAccountID)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 80px; text-align: right;">
+                @Html.LabelFor(model => model.BorrowBank)：   
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.BorrowBank)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 80px; text-align: right;">
+                @Html.LabelFor(model => model.BorrowAccountName)：   
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.BorrowAccountName)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 100px; text-align: right;">
+                @Html.LabelFor(model => model.BorrowNeedDate)：
+            </td>
+            <td>
+                @Model.BorrowNeedDate.Value.ToString("yyyy-MM-dd")
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 80px; text-align: right;">
+                @Html.LabelFor(model => model.BorrowMoney)：   
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.BorrowMoney, new { style = "width:50px;" })
+            </td>
+        </tr>
+
+        <tr>
+            <td style="width: 80px; text-align: right;">
+                @Html.LabelFor(model => model.BorrowReason)：   
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.BorrowReason)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 80px; text-align: right;">
+                @Html.LabelFor(model => model.BorrowerFrom)：   
+            </td>
+            <td>@Html.DisplayFor(model => model.BorrowerFrom)
+            </td>
+        </tr>
+    </tbody>
+</table>
+<hr style="height: 1px; border: none; border-top: 1px dashed #0066CC;" />
+@Html.Raw(ViewData["history"])

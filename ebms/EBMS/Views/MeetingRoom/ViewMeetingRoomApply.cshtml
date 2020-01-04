@@ -1,0 +1,224 @@
+﻿@model EBMS.Models.T_MeetingRoom
+@{
+    ViewBag.Title = "ViewMeetingRoomApply";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+
+<script type="text/javascript">
+    $(function () {
+        var date = "@DateTime.Now";
+
+        for (var i = 0; i < $(".easyui-datetimebox").length ; i++) {
+
+            $(".easyui-datetimebox").eq(i).datetimebox("setValue", date);
+        }
+
+        var flag = 0;
+        $('#btnSave').click(function () {
+            if ($("#CurrentApprove").val() == null || $("#CurrentApprove").val() == "")
+            {
+                $.messager.alert("提示", "请选择审核人", "info");
+                return false;
+            }
+            if ($("#EditForm").valid() && flag == 0) {
+                loading(0)
+                flag += 1;
+                $.ajax({
+                    url: "/MeetingRoom/MeetingroomApplySave",
+                    type: "Post",
+                    data: $("#EditForm").serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        loading(1);
+                        if (data.State == "Success") {
+                          
+                            $.messager.alert("提示", "@Lib.MessageRes.SaveOK", "info", function () {
+                                window.location.reload();
+                            })
+                        }
+                        else {
+                            $.messager.alert("提示", data.Message, "info");
+                            flag = 0;
+                           
+                        }
+                    },
+                    error: function (data)
+                    {
+                        flag = 0;
+                        $.messager.alert("提示", data, "info");
+                    }
+                });
+            }
+            return false;
+
+        });
+        $("#MeetingRoom").change(function () {
+          
+            CheckUseState();
+        })
+       
+     
+        $('#StartTime').datetimebox({
+            onChange: function (newValue, oldValue) {
+                CheckUseState();
+          
+            }
+        });
+        $('#EndTime').datetimebox({
+            onChange: function (newValue, oldValue) {
+                CheckUseState();
+
+            }
+        });
+       
+    })
+  
+    function CheckUseState()
+    {
+        
+        var MeetingRoom = $("#MeetingRoom").val();
+        var StartTime = $("#StartTime").datebox('getValue');
+        var EndTime = $("#EndTime").datebox('getValue');// $("#EndTime").val();
+       
+        //alert(EndTime)
+        if (MeetingRoom != "" && StartTime != "" && EndTime != "")
+        {
+            $.post("/MeetingRoom/CheckUseState", { MeetingRoom: MeetingRoom, StartTime: StartTime, EndTime: EndTime }, function (data) {
+                if (data.i > 0) {
+                  
+                    var Msg = "";
+                    for (var z = 0; z < data.i; z++)
+                    {
+                        var stateStr = "";
+                        if (data.list[z].Status == 1) {
+                            stateStr = "已同意";
+                        }
+                        else { stateStr = "进行中"; }
+                        Msg += (z + 1) + "、" + data.list[z].PostName + "申请了在" + formatDateBoxFull(data.list[z].StartTime) + "至" +formatDateBoxFull( data.list[z].EndTime) + "使用该会议室,审批" + stateStr + ";"
+                    }
+                    Msg+="<br/>(若继续申请导致冲突,请私下协商)"
+                    $.messager.alert("提示", Msg, "info");
+                }
+            }, 'json')
+        }
+       
+    }
+
+</script>
+<style>
+    .lab {
+  width: 110px; 
+  text-align: right;}
+</style>
+<div class="mvctool">
+    <a id="btnSave" href="javascript:;" class="modal-btn modal-btn-save">保存</a>
+    
+</div>
+
+<div>
+    @using (Html.BeginForm("EditForm", "Controllers", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+    <table class="fromEditTable setTextWidth300">
+       
+        <tbody>
+            <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.MeetingRoom):
+               </td>
+               <td>
+                   @Html.DropDownListFor(model => model.MeetingRoom,ViewData["RoomName"] as List<SelectListItem>)
+               </td>
+               <td>
+                   @Html.ValidationMessageFor(model => model.MeetingRoom)
+               </td>
+          </tr> 
+             <tr>
+              <td class="lab">
+                  @Html.Label("开始时间"):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model => model.StartTime, new { @class="easyui-datetimebox"})
+                    
+               </td>
+                  <td>
+                   @Html.ValidationMessageFor(model => model.StartTime)
+               </td>
+              </tr>
+            <tr>
+                <td class="lab">
+                    @Html.Label("结束时间"):
+                </td>
+                 <td>
+                    @Html.TextBoxFor(model => model.EndTime, new {@class="easyui-datetimebox"})
+                </td>
+                 <td>
+                   @Html.ValidationMessageFor(model => model.EndTime)
+               </td>
+                </tr> 
+            <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.Host):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model => model.Host)
+               </td>
+               <td>
+                   @Html.ValidationMessageFor(model => model.Host)
+               </td>
+          </tr> 
+          
+             <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.MeetingTheme):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model => model.MeetingTheme)
+               </td>
+                  <td>
+                   @Html.ValidationMessageFor(model => model.MeetingTheme)
+               </td>
+          </tr> 
+              <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.Memo):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model => model.Memo)
+               </td>
+                   <td>
+                   @Html.ValidationMessageFor(model => model.Memo)
+               </td>
+          </tr> 
+              <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.PeopleNum):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model => model.PeopleNum)
+               </td>
+                  <td>
+                   @Html.ValidationMessageFor(model => model.PeopleNum)
+               </td>
+          </tr> 
+           
+              <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.CurrentApprove):
+               </td>
+               <td>
+                   @Html.DropDownListFor(model => model.CurrentApprove, ViewData["ApproveList"] as List<SelectListItem>)
+               </td>
+                  <td>
+                   @Html.ValidationMessageFor(model => model.CurrentApprove)
+               </td>
+          </tr> 
+             
+            
+        </tbody>
+    </table>
+           @Html.HiddenFor(model => model.ID)
+       
+}
+
+</div>

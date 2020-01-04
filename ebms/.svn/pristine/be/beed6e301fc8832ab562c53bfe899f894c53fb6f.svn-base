@@ -1,0 +1,155 @@
+﻿@{
+	ViewBag.Title = "ViewPrintReturn";
+	Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+
+<div class="Company-top-box">
+	<div class="search-box">
+		<select id="ISqualified"  class="sel-box">
+			<option value=""> 全部</option>
+			@*<option value="合格"> 合格</option>
+			<option value="不合格"> 不合格</option>*@
+		</select>
+
+		@*仓库：@Html.DropDownList("Outwarehouse", ViewData["RetreatWarehouseList"] as List<SelectListItem>)*@
+		<select id="Outwarehouse" class="sel-box">
+			<option value=""> ==仓库==</option>
+			<option value="110034"> 榔梨不良品仓库</option>
+			<option value="110003"> 待处理一库</option>
+		</select>
+	    @*仓库： @Html.DropDownList("Inwarehouse", ViewData["RetreatWarehouseList"] as List<SelectListItem>)*@
+		
+		<select id="InGoodsAllocation" >
+			<option value=""> ==入库货位==</option>
+			<option value="J"> J高桥快递</option>
+			<option value="H-01"> H-01 H-01</option>
+			<option value="H-02"> H-02 H-02</option>
+		</select>
+		
+		<input type="button" value="查询" id="btnQuery" class="icon-search">
+		
+		<a href="#" class="easyui-linkbutton" plain="true" iconcls="icon-print" id="btnPrint">打印</a>
+	</div>
+</div>
+
+<table id="List"></table>
+<script type="text/javascript">
+    enterSearch("#btnQuery");
+    $(function () {
+    	//var url = "GetPrintReturn?ISqualified="+  $("#ISqualified").val() ;
+        $('#List').datagrid({
+          //  url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() - 50,
+            fitColumns: true,
+            sortName: 'ID',
+            sortOrder: 'desc',
+            idField: 'ID',
+            pageSize: 20,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: false,//单选模式
+            columns: [[
+                 { field: 'item_code', title: '编码', width: 80, align: 'center' },
+                { field: 'item_name', title: '名称', width: 80, align: 'center' },
+                { field: 'qty', title: '数量', width: 80, align: 'center' },
+               
+              
+
+            ]],
+            @*onDblClickRow: function (rowIndex, rowData) {
+                parent.addshop(rowData, "@ViewData["index"]");
+               // myfunction();
+            }*@
+        });
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            });
+        });
+       
+        $("#ISqualified").change(function () {
+           
+        	query()
+        });
+        $("#btnQuery").click(function () {
+        	query()
+        })
+
+        $("#Outwarehouse").change(function () {
+
+        	query()
+        });
+    });
+
+	function query()
+	{
+		var OutWarehouse = $("#Outwarehouse").val();
+
+		var InGoodsAllocation = $("#InGoodsAllocation").val();
+		$('#List').datagrid({
+			url: "GetPrintReturn?OutWarehouse=" + OutWarehouse + "&InGoodsAllocation=" + InGoodsAllocation
+		});
+
+	}
+
+</script>
+
+<script>
+	$("#btnPrint").click(function () {
+		var rows = $('#List').datagrid("getRows");
+		console.log(rows);
+		var OutWarehouse = $("#Outwarehouse").val();
+		
+		var InGoodsAllocation = $("#InGoodsAllocation").val();
+		
+		if (!(OutWarehouse && InGoodsAllocation ))
+		{
+			alert("请选择出库仓库 /入库货位");
+			return false;
+		}
+		if (rows &&rows.length > 0) {
+			$.ajax({
+				url: "/Print/PrintReturn?OutWarehouse=" + OutWarehouse  + "&InGoodsAllocation=" + InGoodsAllocation ,
+				type: "Post",
+
+				success: function (data) {
+
+
+					var printStr = "<html><head><meta http-equiv='Content-Type' content='text/html; charset=utf-8'></head><body >";
+					//data.printInfo
+					printStr += "<h3>" + data.printInfo.PrintNO + "(" + data.printInfo.OutWarehouse + "," + data.printInfo.InGoodsAllocation + ")</h3>";
+					//printStr += "<p>分拣人:"+ data.printInfo.PostUser +"</p><p>"+ formatDateBoxFull( new Date()) +"</p>";
+					printStr += "<table border=\"1px\" cellpadding=\"5px\" cellspacing=\"5px\" style=\"border-bottom:1px solid #FFF; border-collapse: collapse\"><thead><tr><td>代码</td><td>名称</td><td>规格</td><td>单位</td><td>数量</td></tr></thead>"
+					var content = "";
+					for (var i = 0; i < data.rows.length; i++) {
+						var item = data.rows[i];
+						content += "<tr style=\"border-bottom:1px solid\"><td>" + item.ProductCode + "</td><td>" + item.ProductName + "</td><td>" + item.SpecName + "</td><td>" + item.UnitName + "</td><td>" + item.Qty + "</td></tr>"
+					}
+
+					printStr = printStr + content + "<tr><td colspan=\"5\">分拣人:" + data.printInfo.PostUser + "</td></tr><tr><td colspan=\"5\">" + formatDateBoxFull(new Date()) + "</td></tr></table></body></html>";
+					var pwin = window.open("Print.html", "print"); //
+					pwin.document.write(printStr);
+					pwin.document.close(); //这句很重要，没有就无法实现 
+					pwin.print();
+
+				}
+			});
+		}
+		else {
+			alert("没有需要打印的数据");
+		}
+		
+		
+	})
+</script>
+
+
+

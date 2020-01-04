@@ -1,0 +1,57 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<style>
+    .btn-bar {margin:10px}
+    .note-box {margin:10px 0 0 10px}
+    .note-box p{margin-bottom:10px}
+</style>
+<div class="btn-bar">
+    <a href="javascript:;" id="btnAgree" class="icon-agree">同意</a>
+    <a href="javascript:;" id="btnDisAgree" class="icon-disagree">不同意</a>
+   </div>
+<div class="history-box">@Html.Raw( ViewData["history"])</div>
+<div class="note-box">
+    <p>审核备注：</p>
+    <textarea cols="20" id="Memo" name="Memo" rows="3" style="height:60px;width:380px;resize:none;overflow-y: scroll;"></textarea>
+</div>
+<script type="text/javascript">
+    $(function () {
+        $("#btnAgree").click(function () {
+            var para = {"id":"@ViewData["approveid"]", "status": 1,"memo": $("#Memo").val()};
+            post(para);  
+        });
+        $("#btnDisAgree").click(function () {
+            var para = {"id":"@ViewData["approveid"]","status": 2,"memo": $("#Memo").val()};
+            post(para);
+        });
+    });
+    var sign = 0;
+    function post( para)
+    {
+        if (sign == 0) {
+            sign = 1;
+            loading(0)
+            $.ajax({
+                url: "/Quit/QuitCheck",
+                type: "post",
+                data: para,
+                dataType: "json",
+                success: function (data) {
+                    loading(1)
+                    $.messager.alert('提示', data, "info", function () {
+                        parent.$('#checkDiv').dialog('close');
+                        parent.$('#List').datagrid('reload');
+                        parent.$('#List').datagrid("clearSelections");
+                            sign = 0;
+                        });
+                },
+                error: function () {
+                    loading(1);
+                    sign = 0;
+                }
+            });
+        }
+    }
+</script>

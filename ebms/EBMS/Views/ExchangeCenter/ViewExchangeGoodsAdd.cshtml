@@ -1,0 +1,697 @@
+﻿@model EBMS.Models.T_ExchangeCenter
+@{
+    ViewBag.Title = "ViewExchangeGoodsAdd";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<style>
+    .setTextWidth600 input[type="text"] {
+        width: 600px;
+    }
+
+    #Sex {
+        width: 60px;
+        text-align: center;
+    }
+
+    #Memo {
+        width: 600px;
+        height: 60px;
+        margin: 10px 0;
+        resize: none;
+    }
+
+    #data-tr p {
+        float: left;
+        margin-right: 15px;
+    }
+
+        #data-tr p input[type="checkbox"] {
+            float: left;
+            margin: 1px 5px 0 0;
+        }
+
+    .uploadBtn {
+        color: #2299ee;
+    }
+
+        .uploadBtn:hover {
+            color: #1d51a5;
+        }
+
+    .multiple-hidden {
+        display: none;
+    }
+
+    #files-btn {
+        color: #333;
+        margin-right: 15px;
+        padding-left: 16px;
+        margin-bottom: 10px;
+        display: table;
+        margin-top: 15px;
+    }
+
+        #files-btn:hover {
+            color: #2299ee;
+        }
+
+    #files-box {
+        margin: 10px 0;
+        float: left;
+    }
+
+        #files-box li {
+            height: 25px;
+            line-height: 25px;
+            float: left;
+            margin-right: 10px;
+        }
+
+    .files-name {
+        height: 25px;
+        overflow: hidden;
+    }
+
+    .files-size {
+        margin: 0 10px;
+        color: #999;
+    }
+
+    #files-box li a {
+        color: #333;
+    }
+
+    #files-box li .files-delete {
+        color: #2299ee;
+    }
+
+    .no-border {
+        border: 0;
+    }
+</style>
+<script type="text/javascript">
+    var grid; //定义全局变量datagrid
+    var editRow = -1;
+    //加载数据
+    function op(name, url) {
+        self.parent.addTab(name, url, '');
+        getContextmenu()
+    }
+    $(function () {
+        grid = $('#List').datagrid({
+            width: $(window).width() - 10,
+            height: $(window).height() * 0.45,
+            fitColumns: true,
+            showFooter: true,
+            sortName: 'ID',
+            sortOrder: 'desc',
+            idField: 'ID',
+            pageSize: 10,
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                { field: 'SendProductCode', title: '寄回产品编码', width: 100, align: 'center' },
+                    { field: 'SendProductName', title: '寄回产品名称', width: 140, align: 'center' },
+                    { field: 'SendProductNum', title: '寄回产品数量', width: 80, align: 'center', editor: { type: 'numberbox' } },
+                    { field: 'NeedProductCode', title: '需发产品编码', width: 100, align: 'center' },
+                    { field: 'NeedProductName', title: '需发产品名称', width: 140, align: 'center' },
+                    { field: 'NeedProductNum', title: '需发产品数量', width: 80, align: 'center', editor: { type: 'numberbox' } },
+                                     {
+                                         field: 'action', title: '操作', width: 100, align: 'center', formatter: function (value, row, index) {
+                                             return '<div class="btn-bar"><a herf="#"  onclick="removeRow(' + index + ')" class="icon-remove">删除</a></div>';
+                                         }
+
+                                     }
+            ]],
+            onClickCell: function (index, field) {
+
+                //只有数量可以编辑
+                if (field == 'SendProductNum' || field == 'NeedProductNum')
+                    editCell(index, field);
+                else if (field == "NeedProductCode" || field == "NeedProductName") {
+                    $('#openIframeproduct')[0].src = "ViewProduct?index=" + index;
+                    $('#productDiv').dialog('open');
+                    grid.datagrid('endEdit', index);
+                }
+                else if (field == "SendProductCode" || field == "SendProductName") {
+                    $('#openIframeproduct')[0].src = "ViewSendProduct?index=" + index;
+                    $('#productDiv').dialog('open');
+                    grid.datagrid('endEdit', index);
+                } else
+                    grid.datagrid('endEdit', index);
+
+            }, onAfterEdit: function (value, row) {
+                saveJson();
+            }
+        });
+        enterSearch("#btnQuery");
+        var sign = 0;
+        $("#btnQuery").click(function () {
+            if ($("#OrderCode").val().trim() == "") {
+                $.messager.alert('提示', "请输入订单号", "info");
+                return false;
+            }
+            if (sign == 0) {
+                loading(0);
+                $.post("GetExchangeByGy", { "code": $("#OrderCode").val().trim() }, function (data) {
+                    sign++;
+                  if (data.State == "Success") {
+                        if (data.ModelList["SystemRemark"] != "") {
+                            $.messager.confirm('提示', data.ModelList["SystemRemark"] + "是否继续", function (r) {
+                                if (r) {
+                                    $("#OrderCode").val(data.ModelList["OrderCode"]);
+                                    $("#VipName").val(data.ModelList["VipName"]);
+                                    $("#StoreName").val(data.ModelList["StoreName"]);
+                                    $("#ReceivingName").val(data.ModelList["ReceivingName"]);
+                                    $("#NeedPostalCode").val(data.ModelList["NeedPostalCode"]);
+                                    $("#ReceivingPhone").val(data.ModelList["ReceivingPhone"]);
+                                    $("#ReceivingTelPhone").val(data.ModelList["ReceivingTelPhone"]);
+                                    $("#VipCode").val(data.ModelList["VipCode"]);
+                                    $("#OrderScode").val(data.ModelList["OrderScode"]);
+                                    
+                                    $("#ReceivingAddress").val(data.ModelList["ReceivingAddress"]);
+                                    $("#AddressMessage").val(data.ModelList["AddressMessage"]);
+                                    $("#SingleTime").val(data.ModelList["SingleTime"]);
+                                    $("#StoreCode").val(data.ModelList["StoreCode"]);
+                                    $("#SystemRemark").val(data.ModelList["SystemRemark"]);
+                                    grid.datagrid('loadData', { total: 0, rows: [] });
+                                    if ($("#SystemRemark").val() != "")
+                                        $("#SystemRemark").css("color", "#d02e2e")
+                                    $(data.Json.rows).each(function (i, item) {
+                                        $('#List').datagrid('appendRow', { SendProductCode: item.SendProductCode, SendProductName: item.SendProductName, SendProductNum: item.SendProductNum })
+                                    });
+                                } else
+                                    window.location.reload();
+                            });
+                        } else {
+                            $("#OrderCode").val(data.ModelList["OrderCode"]);
+                            $("#VipName").val(data.ModelList["VipName"]);
+                            $("#StoreName").val(data.ModelList["StoreName"]);
+                            $("#ReceivingName").val(data.ModelList["ReceivingName"]);
+                            $("#NeedPostalCode").val(data.ModelList["NeedPostalCode"]);
+                            $("#OrderScode").val(data.ModelList["OrderScode"]);
+                            $("#ReceivingPhone").val(data.ModelList["ReceivingPhone"]);
+                            $("#ReceivingTelPhone").val(data.ModelList["ReceivingTelPhone"]);
+                            $("#VipCode").val(data.ModelList["VipCode"]);
+                            $("#ReceivingAddress").val(data.ModelList["ReceivingAddress"]);
+                            $("#AddressMessage").val(data.ModelList["AddressMessage"]);
+                            $("#SingleTime").val(data.ModelList["SingleTime"]);
+                            $("#StoreCode").val(data.ModelList["StoreCode"]);
+                            $("#SystemRemark").val(data.ModelList["SystemRemark"]);
+                            grid.datagrid('loadData', { total: 0, rows: [] });
+                            if ($("#SystemRemark").val() != "")
+                                $("#SystemRemark").css("color", "#d02e2e")
+                            $(data.Json.rows).each(function (i, item) {
+                                $('#List').datagrid('appendRow', { SendProductCode: item.SendProductCode, SendProductName: item.SendProductName, SendProductNum: item.SendProductNum })
+                            });
+                        }
+                        loading(1);
+                        sign = 0;
+                    } else {
+                        $.messager.alert('提示', data.Message, "info", function () {
+                            window.location.reload();
+                        });
+                    }
+                });
+            }
+        })
+        @*addtext("@ViewData["code"]");*@
+
+
+
+        var sign = 0;
+        $("#btnSave").click(function () {
+            if ($("#ReceivingPhone").val().trim() == "" && $("#ReceivingTelPhone").val().trim() == "") {
+                $.messager.alert('提示', "固定电话或移动电话必须填一个", "info")
+                return false;
+            }
+            if ($("#ExchangeReson option:selected").text() == "快递破损" && $("#jsonStr1").val() == "") {
+                $.messager.alert('提示', "快递破损必须上传图片", "info")
+                return false;
+            }
+            if ($("#NeedExpress option:selected").text() == "" || $("#NeedExpress option:selected").val() == "") {
+                $.messager.alert('提示', "发货快递不能为空", "info")
+                return false;
+            }
+            if ($("#NeedWarhouse option:selected").text() == "" || $("#NeedWarhouse option:selected").val() == "") {
+                $.messager.alert('提示', "发货仓库不能为空", "info")
+                return false;
+            }
+            if ($("#EditForm").valid()) {
+                grid.datagrid("endEdit", editRow);
+                var rows = $('#List').datagrid("getRows");
+                if (rows.length == 0) {
+                    $.messager.alert('提示', "详情不能为空", "info")
+                    return false;
+                }
+                for (var i = 0; i < rows.length; i++) {
+                    if (rows[i].SendProductNum == undefined || rows[i].SendProductNum == "" || rows[i].SendProductNum == "0" || rows[i].NeedProductNum == "0" || rows[i].NeedProductNum == undefined || rows[i].NeedProductNum == "") {
+                        $.messager.alert('提示', "数量不能为空", "info")
+                        return false;
+                    }
+                    if (rows[i].NeedProductCode == undefined || rows[i].NeedProductCode == "") {
+                        $.messager.alert('提示', "需发产品不能为空", "info")
+                        return false;
+                    }
+                }
+                if (sign == 0) {
+                    sign++;
+                    loading(0);
+                    $.ajax({
+                        url: "ExchangeGoodsAddSave",
+                        type: "Post",
+                        data: $("#EditForm").serialize(),
+                        success: function (data) {
+                            loading(1);
+                            if (data.State == "Success") {
+                                $.messager.alert('提示', '@Lib.MessageRes.SaveOK', "info", function () {
+                                    window.location.reload();
+                                });
+                            } else {
+                                $.messager.alert('提示', data.Message, "info", function () {
+                                    sign = 0
+                                });
+                            }
+                        },
+                        error: function () {
+                            loading(1);
+                            sign = 0;
+                        }
+                    });
+                }
+            }
+        });
+
+        //新增明细
+        $('#btnAdd').bind('click', function () {
+            if (editRow != -1) {
+                grid.datagrid("endEdit", editRow);
+                editRow = -1;
+            }
+            else {
+                $('#List').datagrid('appendRow', {
+                    SendProductCode: "",
+                    SendProductName: "",
+                    SendProductNum: "",
+                    NeedProductCode: "",
+                    NeedProductName: "",
+                    NeedProductNum: ""
+                })
+            }
+        });
+
+        $("#ExchangeReson").change(function () {
+            if ($("#ExchangeReson option:selected").text() == "快递破损") {
+                $("#Uplod").show();
+            } else
+                $("#Uplod").hide();
+        });
+
+        $("#files-btn").click(function () {
+            $("#file").click();
+        })
+
+        $("#file").change(function () {
+            var files = $("#file")[0].files
+            var $li = "";
+            var $size = 0;
+            var postSize = files[0].size;
+            if (postSize > 10485760) {
+                $.messager.alert('提示', "单个文件不能大于10M", "info")
+                return;
+            }
+            var formData = new FormData($("#EditForm")[0]);
+            $.ajax({
+                type: "POST",
+                data: formData,
+                url: "Upload",
+                contentType: false,
+                processData: false,
+            }).success(function (data) {
+                if (data.status) {
+                    $size = files[0].size / 1024;
+                    $li += "<li data-name=" + files[0].name + " data-url=" + data.link + " data-size = " + $size.toFixed(2) + " data-path=" + data.title + "><a href='" + data.link + "' target='_blank'><span class='files-name'>" + files[0].name + "</span><span  class='files-size'>(" + $size.toFixed(2) + "KB)</span></a><a href='#' onclick='DeleteFile(this,\"" + data.title + "\")' title=" + data.title + " class='files-delete'>删除</a></li>";
+                    $("#files-box").append($li);
+                    saveJson1();
+                } else {
+                    $.messager.alert('提示', data.msg, "info")
+                }
+
+            }).error(function (data) {
+                alert(data);
+            });
+        })
+
+    });
+
+    function saveJson1() {
+        JsonText = "[";
+        var rows = $('#files-box li');
+        if (rows.length == 0) {
+            $("#jsonStr1").val("");
+            return
+        }
+        for (var i = 0; i < rows.length; i++) {
+            var row = $(rows[i]);
+            JsonText += '{';
+            JsonText += '"ScName":' + '"' + row.attr("data-name") + '",';
+            JsonText += '"Url":' + '"' + row.attr("data-url") + '",';
+            JsonText += '"Size":' + '"' + row.attr("data-size") + '",';
+            JsonText += '"Path":' + '"' + row.attr("data-path") + '"},';
+        }
+        JsonText = JsonText.substring(0, JsonText.length - 1);
+        JsonText += "]";
+        $("#jsonStr1").val(JsonText);
+    }
+    saveJson1()
+
+    //删除附件图片
+    function DeleteFile(_this, path) {
+        $(_this).closest("li").remove();
+        $.ajax({
+            type: "POST",
+            url: "DeleteModelFile?path=" + path,
+            contentType: false,
+            processData: false,
+        }).success(function (data) {
+            saveJson1()
+        }).error(function (data) {
+            alert(data);
+        });
+    }
+
+    function removeRow(index) {
+        $('#List').datagrid('deleteRow', index);
+        var rows = $('#List').datagrid("getRows");
+        $('#List').datagrid("loadData", rows);
+        saveJson();
+    }
+
+    function QueryexpressNumber() {
+        if ($("#ReturnExpressCode").val() != "" && $("#ReturnExpressCode").val() != null) {
+            var expressNumber = $("#ReturnExpressCode").val();
+            $.post("GetExpressNumberIsAgain", { "number": expressNumber }, function (data) {
+                if (data.State == "Faile") {
+                    $.messager.alert('提示', data.Message, "info")
+                }
+            });
+            var ss = "已收产品：";
+            $.post("QuyerExchangeDetailsexpressBYcode", { "expressNumber": expressNumber }, function (data) {
+                if (data != "") {
+                    $(data.rows).each(function (i, item) {
+                        ss += "" + item.item_name + " 数量：" + item.qty + "";
+                        var ax = 0;
+                        var rows = $('#List').datagrid('getRows');
+                        for (var x = 0; x < rows.length; x++) {
+                            if (rows[x].SendProductCode == item.item_code) {
+                                ax = 1;
+                            }
+                        }
+                        if (ax == 0) {
+                            $('#List').datagrid('appendRow', { SendProductCode: item.item_code, SendProductName: item.item_name, SendProductNum: item.qty })
+                        }
+                    });
+                    $.messager.alert('提示', ss, "info")
+                    saveJson();
+                }
+
+            });
+        }
+    }
+
+    function addproduct(row, index) {
+        $('#productDiv').dialog('close');
+        var rows = $('#List').datagrid('getRows');
+        for (var i = 0; i < rows.length; i++) {
+            if (row.goods_no == rows[i].NeedProductCode) {
+                $.messager.alert('提示', '重复编码', "info");
+                return false;
+            }
+        }
+    
+        $('#List').datagrid('updateRow', {
+            index: index,
+            row: {
+                NeedProductCode: row.goods_no,
+                NeedProductName: row.goods_name
+            }
+        });
+        saveJson();
+    }
+
+    function addSendproduct(row, index) {
+        $('#productDiv').dialog('close');
+        var rows = $('#List').datagrid('getRows');
+        for (var i = 0; i < rows.length; i++) {
+            if (row.goods_no == rows[i].SendProductCode) {
+                $.messager.alert('提示', '重复编码', "info");
+                return false;
+            }
+        }
+        $('#List').datagrid('updateRow', {
+            index: index,
+            row: {
+                SendProductCode: row.goods_no,
+                SendProductName: row.goods_name
+            }
+        });
+        saveJson();
+    }
+
+    //function addtext(code) {
+    //    grid.datagrid('loadData', { total: 0, rows: [] });
+    //    $.post("GetOrderDetail", { "oid": code }, function (data) {
+    //        $(data).each(function (i, item) {
+    //            $('#List').datagrid('appendRow', { SendProductCode: item.item_code, SendProductName: item.item_name, SendProductNum: item.qty })
+    //        });
+    //    });
+    //}
+    ////关闭当前页面
+    //function closeCurTab(name) {
+    //    var parentTab = parent.$('#mainTab').tabs('select', name);
+    //    var curTab = self.parent.$('#mainTab').tabs('getSelected');// 当前tab
+    //    var index = self.parent.$('#mainTab').tabs('getTabIndex', curTab);
+    //    self.parent.$('#mainTab').tabs('close', index);
+    //}
+    //function addTab() {
+    //    op("换货新增订单", "../ExchangeCenter/ViewOrderList");
+    //    closeCurTab("换货新增");//关闭当前页面
+    //}
+
+    function saveJson() {
+
+        JsonText = "[";
+        var rows = $('#List').datagrid('getRows');
+
+        for (var i = 0; i < rows.length; i++) {
+            JsonText += '{';
+            JsonText += '"SendProductCode":' + '"' + rows[i].SendProductCode + '",';
+            JsonText += '"SendProductName":' + '"' + rows[i].SendProductName + '",';
+            JsonText += '"SendProductNum":' + '"' + rows[i].SendProductNum + '",';
+            JsonText += '"NeedProductCode":' + '"' + rows[i].NeedProductCode + '",';
+            JsonText += '"NeedProductName":' + '"' + rows[i].NeedProductName + '",';
+            JsonText += '"NeedProductNum":' + '"' + rows[i].NeedProductNum + '"},';
+        }
+        JsonText = JsonText.substring(0, JsonText.length - 1);
+        JsonText += "]";
+        if (rows.length == 0)
+            JsonText = "";
+        $("#jsonStr").val(JsonText);
+    }
+    function editCell(index, field) {
+        grid.datagrid('endEdit', editRow);
+        editRow = index;
+        grid.datagrid('selectRow', index);
+        grid.datagrid('beginEdit', index);
+        var editor = grid.datagrid('getEditor', { index: index, field: field });
+        //numberbox 特殊处理
+        setTimeout(function () {
+            editor.target.focus();
+        }, 0);
+
+        var editors = grid.datagrid('getEditors', index);
+        for (var i = 0; i < editors.length; i++) {
+            editors[i].target.bind('keydown', { field: editors[i].field }, function (e) {
+                if (e.keyCode == 13) {
+                    grid.datagrid('endEdit', index);
+                    editRow = -1;;
+                } else if (e.keyCode == 38) {	// up
+
+                    if (editRow > 0) {
+                        editCell(editRow - 1, e.data.field);
+                    }
+                } else if (e.keyCode == 40) {	// down
+
+                    if (editRow < grid.datagrid('getRows').length - 1) {
+                        editCell(parseInt(editRow) + 1, e.data.field);
+                    }
+                }
+                if (i < 2) {
+                    if (!(event.keyCode == 46) && !(event.keyCode == 9) && !(event.keyCode == 8) && !(event.keyCode == 37) && !(event.keyCode == 39))
+                        if (!((event.keyCode >= 48 && event.keyCode <= 57) || (event.keyCode >= 96 && event.keyCode <= 105)))
+                            event.returnValue = false;
+                }
+            });
+        }
+    }
+    $(document).not(grid).on("click", function () {
+        grid.datagrid("endEdit", editRow);
+        grid.datagrid('unselectAll');
+    });
+</script>
+<div class="mvctool">
+    <a href="#" class="easyui-linkbutton" plain="true" iconcls="icon-add" id="btnAdd">添加详情</a>
+    <input id="btnSave" class="modal-btn modal-btn-save" type="submit" value="提交">
+</div>
+@using (Html.BeginForm("EditForm", "Controller", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+    <table class="fromEditTable setTextWidth300">
+        <tr>
+            <td style="width: 10%; text-align: right">
+                @Html.Hidden("jsonStr")
+                @Html.Hidden("jsonStr1")
+                @Html.HiddenFor(model => model.SingleTime)
+                @Html.HiddenFor(model => model.StoreCode)
+                  @Html.HiddenFor(model => model.OrderScode)
+                @Html.LabelFor(model => model.OrderCode)：
+            </td>
+            <td style="width: 30%;">@Html.TextBoxFor(model => model.OrderCode)
+                <input type="button" value="查询" id="btnQuery" class="icon-search">
+            </td>
+            <td style="width: 16.5%;">@Html.ValidationMessageFor(model => model.OrderCode)</td>
+
+            <td style="width: 10%; text-align: right">
+                @Html.LabelFor(model => model.StoreName)：
+            </td>
+            <td style="width: 16.5%;">@Html.TextBoxFor(model => model.StoreName, new { @readonly = "readonly" })</td>
+            <td style="width: 16.5%; text-align: left">@Html.ValidationMessageFor(model => model.StoreName)</td>
+        </tr>
+        <tr>
+            <td style="text-align: right">
+                @Html.LabelFor(model => model.ReturnExpressCode)：
+            </td>
+            <td>@Html.TextBoxFor(model => model.ReturnExpressCode, new { @onBlur = "QueryexpressNumber()" })</td>
+            <td style="text-align: left">@Html.ValidationMessageFor(model => model.ReturnExpressCode)</td>
+            <td style="text-align: right">
+                @Html.LabelFor(model => model.ReceivingAddress)：
+            </td>
+            <td>@Html.TextBoxFor(model => model.ReceivingAddress)</td>
+            <td style="text-align: left">@Html.ValidationMessageFor(model => model.ReceivingAddress)</td>
+        </tr>
+        <tr>
+
+            <td style="text-align: right">
+                @Html.LabelFor(model => model.ReturnExpressName)：
+            </td>
+            <td>@Html.DropDownListFor(model => model.ReturnExpressName, ViewData["ReturnExpressNameList"] as List<SelectListItem>)</td>
+            <td style="text-align: left">@Html.ValidationMessageFor(model => model.ReturnExpressName)</td>
+            <td style="text-align: right">
+                @Html.LabelFor(model => model.VipName)：
+            </td>
+            <td>@Html.TextBoxFor(model => model.VipName)</td>
+            <td style="text-align: left">@Html.ValidationMessageFor(model => model.VipName)</td>
+
+        </tr>
+        <tr>
+
+            <td style="text-align: right">
+                @Html.LabelFor(model => model.ReturnWarhouse)：
+            </td>
+            <td>@Html.DropDownList("ReturnWarhouse", ViewData["returnwarhouseName"] as List<SelectListItem>)</td>
+            <td style="text-align: left">@Html.ValidationMessageFor(model => model.ReturnWarhouse)</td>
+            <td style="text-align: right">
+                @Html.LabelFor(model => model.ReceivingPhone)：
+            </td>
+            <td>@Html.TextBoxFor(model => model.ReceivingPhone)</td>
+            <td style="text-align: left">@Html.ValidationMessageFor(model => model.ReceivingPhone)</td>
+        </tr>
+        <tr>
+            <td style="text-align: right">
+                @Html.LabelFor(model => model.NeedExpress)：
+            </td>
+            <td>@Html.DropDownList("NeedExpress", ViewData["NeedexpressName"] as List<SelectListItem>)</td>
+            <td style="text-align: left">@Html.ValidationMessageFor(model => model.NeedExpress)</td>
+            <td style="text-align: right">
+                @Html.LabelFor(model => model.AddressMessage)：
+            </td>
+            <td>@Html.TextBoxFor(model => model.AddressMessage, new { @placeholder = "格式:省-市-区" })</td>
+            <td style="text-align: left">@Html.ValidationMessageFor(model => model.AddressMessage)</td>
+        </tr>
+        <tr>
+            <td style="text-align: right">
+                @Html.LabelFor(model => model.NeedWarhouse)：
+            </td>
+            <td>@Html.DropDownList("NeedWarhouse", ViewData["warhouse"] as List<SelectListItem>)</td>
+            <td style="text-align: left">@Html.ValidationMessageFor(model => model.NeedWarhouse)</td>
+            <td style="text-align: right">
+                @Html.LabelFor(model => model.ReceivingName)：
+            </td>
+            <td>@Html.TextBoxFor(model => model.ReceivingName)</td>
+            <td style="text-align: left">@Html.ValidationMessageFor(model => model.ReceivingName)</td>
+        </tr>
+        <tr>
+
+            <td style="text-align: right">
+                @Html.LabelFor(model => model.ExchangeReson)：
+            </td>
+            <td>@Html.DropDownListFor(model => model.ExchangeReson, ViewData["reson"] as List<SelectListItem>)
+            </td>
+            <td style="text-align: left">@Html.ValidationMessageFor(model => model.ExchangeReson)</td>
+            <td style="text-align: right">
+                @Html.LabelFor(model => model.ReceivingTelPhone)：
+            </td>
+            <td>@Html.TextBoxFor(model => model.ReceivingTelPhone)</td>
+            <td style="text-align: left">@Html.ValidationMessageFor(model => model.ReceivingTelPhone)</td>
+        </tr>
+        <tr>
+
+            <td style="text-align: right">
+                @Html.LabelFor(model => model.SalesRemark)：
+            </td>
+            <td>@Html.TextBoxFor(model => model.SalesRemark, new { placeholder = "除了,或.请不要出现其他特殊字符如(* + - ;等)" })</td>
+            <td></td>
+            <td style="text-align: right">
+                @Html.LabelFor(model => model.VipCode)：
+            </td>
+            <td>@Html.TextBoxFor(model => model.VipCode)</td>
+            <td style="text-align: left">@Html.ValidationMessageFor(model => model.VipCode)</td>
+        </tr>
+        <tr>
+            <td style="text-align: right">
+                @Html.LabelFor(model => model.BuyRemark)：
+            </td>
+            <td>@Html.TextBoxFor(model => model.BuyRemark, new { placeholder = "除了,或 .请不要出现其他特殊字符如(* + - ;等)" })</td>
+            <td></td>
+            <td style="text-align: right">
+                @Html.LabelFor(model => model.NeedPostalCode)：
+            </td>
+            <td>@Html.TextBoxFor(model => model.NeedPostalCode)</td>
+            <td style="text-align: left">@Html.ValidationMessageFor(model => model.NeedPostalCode)</td>
+        </tr>
+        <tr>
+            <td style="text-align: right">系统备注：
+            </td>
+            <td colspan="5">@Html.TextBoxFor(model => model.SystemRemark, new { @readonly = "readonly" })</td>
+        </tr>
+        <tr>
+            <td></td>
+            <td colspan="5">
+                <div id="Uplod" style="display: none">
+                    <ul id="files-box"></ul>
+                    <a href="#" style="color: red" class="icon-add" id="files-btn">上传破损图片</a>
+                    <div class="multiple-hidden">
+                        <input type="file" name="file" id="file" accept="image/*" />
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </table>
+}
+<table id="List"></table>
+<div id="openOrder" class="easyui-dialog" closed="true" modal="true" title="选择订单信息" style="width: 750px; height: 400px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIframeOrder' frameborder="0" src="" style="width: 100%; height: 98%;"></iframe>
+</div>
+<div id="productDiv" class="easyui-dialog" closed="true" modal="true" title="选择需发产品" style="width: 500px; height: 420px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIframeproduct' frameborder="0" src="" style="width: 98%; height: 98%;"></iframe>
+</div>

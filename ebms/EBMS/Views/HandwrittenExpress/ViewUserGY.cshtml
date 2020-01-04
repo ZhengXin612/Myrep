@@ -1,0 +1,100 @@
+﻿@{
+    ViewBag.Title = "ViewSupplier";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<div class="Company-top-box">
+    <div class="search-box">
+        <input type="text" placeholder="名称/编码" id="txtQuery" class="icon-search-txt">
+        <input type="button" value="查询" id="btnQuery" class="icon-search">
+           <input type="button" value="确定" id="btnQD" class="icon-search">
+      @*  <a href="#" class="easyui-linkbutton" plain="true" iconcls="icon-add" id="btnOk">添加</a>*@
+    </div>
+</div>
+<table id="List"></table>
+<script type="text/javascript">
+    enterSearch("#btnQuery");
+    $(function () {
+        var url = "GetUserGY";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() - 50,
+            fitColumns: true,
+            sortName: 'ID',
+            sortOrder: 'desc',
+            idField: 'ID',
+            pageSize: 20,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: false,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                    { field: 'ID', title: 'ID', width: 80, checkbox: true },
+                 { field: 'Nickname', title: '花名', width: 80, align: 'center' },
+                { field: 'Name', title: '真名', width: 80, align: 'center' },
+                { field: 'DepartmentId', title: '部门', width: 80, align: 'center' },            ]],
+         
+        });
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            });
+        });
+        //得到选中行集合的id
+      
+        function myfunction() {
+            var rows = getSelections();
+        
+            parent.addshop(rows);
+        }
+       
+        $("#btnQD").click(function () {
+            myfunction();
+        });
+        
+        $("#btnQuery").click(function () {
+            var queryStr = $("#txtQuery").val().trim();
+            //如果查询条件为空默认查询全部
+            if (queryStr == null) {
+                queryStr = "%";
+            }
+            $('#List').datagrid({
+                url: 'GetUserGY?queryStr=' + encodeURI(queryStr)
+            });
+        });
+    });
+    //function getSelections() {
+    //    var ss = [];
+    //    var rows = $('#List').datagrid('getSelections');
+    //    alert(rows.length)
+    //    for (var i = 0; i < rows.length; i++) {
+
+    //        var row = rows[i];
+    //        ss.push(row.ID);
+    //    }
+    //    return ss;
+    //}
+    function getSelections() {
+        var ss = "";
+        var rows = $('#List').datagrid('getSelections');
+      
+        for (var i = 0; i < rows.length; i++) {
+            var row = rows[i];
+
+            if (ss == "") {
+                ss += row.Nickname;
+            }
+            else {
+                ss += "," + row.Nickname;
+            }
+        }
+        return ss;
+    }
+</script>

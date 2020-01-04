@@ -1,0 +1,21 @@
+﻿@{
+    ViewBag.Title = "ViewImportExcel";
+}
+
+<form method="post" id="form1" action="/Personnel/ImportExcel"
+enctype="multipart/form-data"  data-ajax="false" > 
+    <div style="line-height:30px">
+       <label><span style="color:red;font-size:large">&nbsp;&nbsp;文件格式顺序：</span><br />
+         <span style="font-size:small">&nbsp;&nbsp;序号,编号,姓名,性别,部门,岗位,职务,手机,出生年月,身份证号,婚姻状况,<br />
+           &nbsp;&nbsp;毕业学校,学历,专业,民族,籍贯,政治面貌,户籍地址，家庭地址，家庭电话，<br />
+              &nbsp;&nbsp;入职日期，本单位工龄,保险办理,工龄,备注,离职日期,是否办理工资卡,花名<br />
+           </span> 
+       </label>
+    
+                        <input name="file" type="file" id="file" /> 
+                    <br />
+       
+          <input type="submit" name="Upload" value="导入"  />
+     </div>
+
+</form>

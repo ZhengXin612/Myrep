@@ -1,0 +1,74 @@
+﻿@{
+    ViewBag.Title = "ViewGeneralizeExceptionApprove";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<script type="text/javascript">
+    $(function () {
+        $("#btnAgree").click(function () {
+            $.messager.confirm("操作提示", "您确定要执行操作吗？", function (data) {
+                if (data) {
+                    post(1);
+                }
+            });
+        });
+        //$("#btnUnAgree").click(function () {
+        //    $.messager.confirm("操作提示", "您确定要执行操作吗？", function (data) {
+        //        if (data) {
+        //            post(2);
+        //        }
+        //    });
+        //});
+    });
+    var sign = 0;
+    function post(status) {
+        var memo = $("#Memo").val().trim();
+        var para = { "ids": "@ViewData["ids"]", "status": status, "memo": memo };
+        if (sign == 0) {
+            sign++;
+            loading(0);
+            $.ajax({
+                url: "CheckException",
+                type: "Post",
+                data: para,
+                success: function (data) {
+                    loading(1);
+                    if (data.State == "Success") {
+                        $.messager.alert('提示', '操作成功', "info", function () {
+                            parent.$('#approveDiv').dialog('close');
+                            parent.$("#List").datagrid("reload");
+                            sign = 0
+                        });
+                    } else {
+                        $.messager.alert('提示', data.Message, "info", function () {
+                            parent.$('#approveDiv').dialog('close');
+                            parent.$("#List").datagrid("reload");
+                            sign = 0
+                        });
+                    }
+                    parent.$('#List').datagrid("clearSelections");
+                },
+                error: function () {
+                    loading(1);
+                    sign = 0;
+                }
+            });
+        }
+    }
+</script>
+<table class="fromEditTable setTextWidth300">
+    <tr>
+        <td>
+            <div class="approve-btn-box">
+                <div class="btn-bar">
+                    <a href="#" id="btnAgree" class="icon-agree">同意</a>
+                 @*   <a href="#" id="btnUnAgree" class="icon-disagree">不同意</a>*@
+                </div>
+            </div>
+        </td>
+        <td style="text-align: right">处理意见：
+        </td>
+        <td>
+            <input type="text" id="Memo" /></td>
+    </tr>
+</table>

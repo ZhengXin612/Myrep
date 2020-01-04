@@ -1,0 +1,151 @@
+﻿
+@{
+    ViewBag.Title = "ViewInterviewConfig";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+<div class="Company-top-box">
+   
+     <div class="search-box">
+         <input type="text" placeholder="花名.." id="txtQuery"  class="icon-search-txt">
+     
+         <input type="button" value="查询" id="btnQuery" class="icon-search">
+         
+    </div>
+    <div class="btn-bar">
+        <a href="#" id="btnAdd" class="icon-check">添加</a>
+           <a href="#" id="btnEdit" class="icon-check">编辑</a>
+         <a href="#" id="btnDelete" class="icon-remove">删除</a>
+
+    </div>
+ </div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+
+<script type="text/javascript">
+   
+    enterSearch("#btnQuery");
+    $(function () {
+        var url = "/Recruit/GetInterviewConfigList/";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width()-15,
+            method: 'post',
+            height: $(window).height() - 45,
+            fitColumns: true,
+           // sortName: 'ID',
+            sortOrder: 'desc',
+            idField: 'ID',
+            pageSize: 20,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                { field: 'ID', title: '', width: 60, align: 'center',checkbox:true },
+                { field: 'Step', title: '步骤', width: 60, align: 'center' },
+                { field: 'Name', title: '名称', width: 80, align: 'center' },
+                { field: 'Type', title: '类型', width: 60, align: 'center' },
+                {
+                    field: 'isMultiple', title: '多人审核', width: 100, align: 'center', formatter: function (value, row, index) {
+                        if (value == "0") {
+                            return "否";
+                        }
+                        else { return "是"; }
+                    }
+                },
+               
+            ]],
+            onDblClickRow: function (rowIndex, rowData) {
+            
+            },
+        })
+
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 40
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 40
+            });
+        });
+
+
+    })
+
+ function Query()
+    {
+     var queryStr = $("#txtQuery").val();
+     $('#List').datagrid({
+         url: '/Recruit/GetInterviewConfigList?queryStr=' + encodeURI(queryStr) //+ '&State=' + State// + '&EndDate=' + EndDate + '&dianming=' + dianming
+
+        });
+        $("#txtQuery").focus().select();
+    }
+ $('#btnQuery').click(function () {
+     Query();
+ });
+ $('#btnAdd').click(function () {
+     $('#AddDiv').dialog('open');
+     $('#IframeAdd')[0].src = "ViewInterviewConfigAdd";
+ })
+ $('#btnEdit').click(function () {
+     var row = $('#List').datagrid('getSelected');
+     if (row) {
+         $('#EditDiv').dialog('open');
+         $('#IframeEdit')[0].src = "ViewInterviewConfigEdit?ID=" + row.ID;
+     }
+     else { $.messager.alert('提示', '@Lib.MessageRes.PleaseSelect', "info"); }
+ })
+    $('#btnDelete').click(function () {
+        var row = $('#List').datagrid('getSelected');
+        if (row) {
+            $.messager.confirm('提示', "@Lib.MessageRes.DelConfirm", function (r) {
+                if (r) {
+                    loading(0);
+                    var flag = 0
+                    if (flag == 0) {
+                        flag++
+                        $.ajax({
+                            url: "/Recruit/InterviewConfigDelete?ID=" + row.ID,
+                            type: "Post",
+                            contentType: "application/json",
+                            // data: JSON.stringify(p),
+                            dataType: "json",
+                            success: function (data) {
+                                loading(1);
+                                if (data > 0) {
+                                    $('#List').datagrid('reload');
+                                    $.messager.alert('提示', '@Lib.MessageRes.DelOK', "info");
+                                }
+                                else {
+                                    flag = 0;
+                                    $.messager.alert('提示', '删除失败', "info");
+                                    }
+                            },
+                            error: function (data) {
+                                    loading(1);
+                                    flag = 0;
+                                    $.messager.alert('提示', data, "info");
+                                }
+
+                            });
+                        }
+                    }
+          });
+        }
+        else { $.messager.alert('提示', '@Lib.MessageRes.PleaseSelect', "info"); }
+    })
+</script>
+<div id="AddDiv" class="easyui-dialog" closed="true" modal="true" title="新增" style="width:400px; height:260px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='IframeAdd' frameborder="0" src="" style="width:100%;height:98%;"></iframe>
+</div>
+<div id="EditDiv" class="easyui-dialog" closed="true" modal="true" title="编辑" style="width:400px; height:260px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='IframeEdit' frameborder="0" src="" style="width:100%;height:98%;"></iframe>
+</div>
+<div id="DetailDiv" class="easyui-dialog" closed="true" modal="true" title="详情" style="width:50%; height:50%;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='IframeDetail' frameborder="0" src="" style="width:100%;height:98%;"></iframe>
+</div>
+
+

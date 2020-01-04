@@ -1,0 +1,326 @@
+﻿@model EBMS.Models.T_BorrowGoods
+@{
+    ViewBag.Title = "ViewApply";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<script type="text/javascript">
+    var grid; //定义全局变量datagrid
+    var editRow = -1;
+  
+    //加载数据
+    $(function () {
+        enterSearch("#btnQuery");
+        var date = "@DateTime.Now.ToShortDateString()";
+        
+        for (var i = 0; i < $(".easyui-datebox").length ; i++) {
+
+            $(".easyui-datebox").eq(i).datebox("setValue", date);
+        }
+        //创建一个新的Grid
+        grid = $('#List').datagrid({
+            width: $(window).width() *0.98,
+            height: $(window).height()*0.65,
+            fitColumns: true,
+            nowrap:false,
+            //showFooter: true,
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                
+                {
+                    field: 'GoodsCode', title: '产品编码', width: 40,align:"center"
+                },
+                {
+                    field: 'GoodsName', title: '产品名称', width: 80, align: "center"
+                },
+                {
+                    field: 'qty', title: '数量', width: 60, align: "center", editor: { type: 'text' }
+                },
+                
+                {
+                    field: 'action', title: '操作', width: 40, align: 'center', formatter: function (value, row, index) {
+                        return '<div class="btn-bar"><a onclick="removeRow(' + index + ')" class="icon-remove">删除</a></div>';
+                    }
+                },
+            ]],
+            onClickCell: function (index, field) {
+                if (field == "GoodsName" || field == "GoodsCode") {
+                    grid.datagrid("endEdit", editRow);
+                    $('#openIframeGoodsGY')[0].src = "/Retreat/ViewGoodsGY?index=" + index;
+                    $('#GoodsGYDiv').dialog('open');
+                }
+               
+                else if (field != 'action') {
+                   
+                    editCell(index, field);
+                }
+            },
+            onAfterEdit: function (index) {
+                grid.datagrid('refreshRow', index);
+               
+               
+            }
+        });
+        grid.datagrid('loadData', { total: 0, rows: [] });
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 10,
+                height: $(window).height() - 191
+            })
+        });
+
+        //提交后台方法
+        var sign = 0;
+        $("#btnSave").click(function () {
+            saveJson();
+            loading(0);
+            grid.datagrid("endEdit", editRow);
+            grid.datagrid('clearSelections');
+            var rows = $('#List').datagrid("getRows");
+            if (rows.length == 0) {
+                $.messager.alert('提示', "请添加详情", "info")
+                loading(1);
+                return;
+            }
+            //循环验证数据
+            for (var i = 0; i < rows.length; i++) {
+                if (rows[i].GoodsCode == null || rows[i].GoodsCode == ""||rows[i].GoodsCode == undefined) {
+                    $.messager.alert('提示', "产品不能为空", "info")
+                    loading(1);
+                    return false;
+                }
+               
+            }
+            
+            if ($("#EditForm").valid()) {
+                if (sign == 0) {
+                    sign = 1;
+                    $.ajax({
+                        url: "ApplySave",
+                        type: "Post",
+                        data: $("#EditForm").serialize(),
+                        success: function (data) {
+                            if (data.State == "Success") {
+                                loading(1);
+                                $.messager.alert('提示', '保存成功', "info", function () {
+                                    window.location.reload();
+                                    sign = 0
+                                });
+                            } else {
+                                loading(1);
+                                $.messager.alert('提示', data.Message, "info", function () {
+
+                                    sign = 0
+                                });
+                            }
+                        },
+                        error: function (data)
+                        {
+                            sign = 0;
+                            loading(1);
+                            $.messager.alert('提示', data, "info")
+                        }
+                    });
+                }
+            }
+        });
+      
+    });
+
+
+
+    //添加一行空的数据
+    function addRow() {
+        var rows = $('#List').datagrid("getRows");
+        if (rows.length > 4) {
+            $.messager.alert('提示', "每次申请不能超过5件", "info")
+        }
+        else {
+            $('#List').datagrid('appendRow', {
+                GoodsCode: "",
+                GoodsName: "",
+                qty: "",
+               
+            })
+        }
+    }
+    //删除某一行数据
+    function removeRow(index) {
+       // editCell(index, "Qty")
+       
+        $('#List').datagrid('deleteRow', index);
+        var rows = $('#List').datagrid("getRows");
+        $('#List').datagrid("loadData", rows);
+        
+      
+    }
+    
+    //序列化数据
+    function saveJson() {
+        JsonText = "[";
+        var rows = $('#List').datagrid('getRows');
+        for (var i = 0; i < rows.length; i++) {
+            JsonText += '{';
+            JsonText += '"GoodsCode":' + '"' + rows[i].GoodsCode + '",';
+            JsonText += '"GoodsName":' + '"' + rows[i].GoodsName + '",';
+           
+            JsonText += '"qty":' + '"' + rows[i].qty + '"},';
+        }
+        JsonText = JsonText.substring(0, JsonText.length - 1);
+        JsonText += "]";
+        $("#jsonStr").val(JsonText);
+    }
+    //编辑触发的方法
+    function editCell(index, field) {
+        grid.datagrid('endEdit', editRow);
+        editRow = index;
+        grid.datagrid('selectRow', index);
+        grid.datagrid('beginEdit', index);
+        var editor = grid.datagrid('getEditor', { index: index, field: field });
+        setTimeout(function () {
+            editor.target.focus();
+        }, 0);
+
+        var editors = grid.datagrid('getEditors', index);
+       
+        for (var i = 0; i < editors.length; i++) {
+            editors[i].target.bind('keydown', { field: editors[i].field }, function (e) {
+                if (e.keyCode == 13) {
+                    grid.datagrid('endEdit', index);
+                    editRow = -1;;
+                } else if (e.keyCode == 38) {	// up
+
+                    if (editRow > 0) {
+                        editCell(editRow - 1, e.data.field);
+                    }
+                } else if (e.keyCode == 40) {	// down
+
+                    if (editRow < grid.datagrid('getRows').length - 1) {
+                        editCell(parseInt(editRow) + 1, e.data.field);
+                    }
+                }
+                if (i < 2) {
+                    if (!(event.keyCode == 46) && !(event.keyCode == 9) && !(event.keyCode == 8) && !(event.keyCode == 37) && !(event.keyCode == 39))
+                        if (!((event.keyCode >= 48 && event.keyCode <= 57) || (event.keyCode >= 96 && event.keyCode <= 105)))
+                            event.returnValue = false;
+                }
+            });
+        }
+
+    }
+    //选择其他地方取消编辑
+    $(document).not(grid).on("click", function () {
+        grid.datagrid("endEdit", editRow);
+        grid.datagrid('unselectAll');
+    });
+
+
+   
+    function addshop(rows, index) {//添加产品
+       
+        $('#GoodsGYDiv').dialog('close');
+        $('#List').datagrid('updateRow', {
+            index: index,
+            row: {
+                GoodsCode: rows[0].code,
+                GoodsName: rows[0].name,
+                qty: 1,
+               
+            }
+        });
+    }
+    function addStore(rows, index) {//添加店铺
+
+        $('#ShopDiv').dialog('close');
+        $('#List').datagrid('updateRow', {
+            index: index,
+            row: {
+                ShopName: rows[0].name,
+            }
+        });
+    }
+
+
+</script>
+<style>
+    .lab {
+  width: 110px; 
+  text-align: right;}
+</style>
+<div class="mvctool">
+    <input id="btnSave" class="modal-btn modal-btn-save" type="submit" value="保存">
+    
+
+</div>
+@using (Html.BeginForm("EditForm", "Controller", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    
+    @Html.ValidationSummary(true)
+      <table class="fromEditTable setTextWidth300">
+           <tr>
+              <td class="lab">
+                   @Html.Label("借货人:")
+                   </td>
+                <td>
+                    @Html.TextBoxFor(model=>model.PostUser, new { @readonly=true})
+                  </td>
+              
+              </tr>
+           <tr>
+              <td class="lab">
+                   @Html.Label("部门:")
+                   </td>
+                <td>
+                    @Html.TextBoxFor(model=>model.Dept)
+                  </td>
+              
+              </tr>
+          <tr>
+              <td class="lab">
+                   @Html.Label("用途:")
+                   </td>
+                <td>
+                    @Html.TextBoxFor(model=>model.Purpose)
+                  </td>
+              
+              </tr>
+          <tr>
+              <td class="lab">
+                   @Html.Label("预计归还日期:")
+                   </td>
+                <td>
+                    @Html.TextBoxFor(model => model.ReturnDate, new { @class="easyui-datebox"})
+                  </td>
+              
+              </tr>
+          <tr>
+              <tr>
+              <td class="lab">
+                   @Html.Label("备注:")
+                   </td>
+                <td>
+                    @Html.TextAreaFor(model => model.Memo)
+                  </td>
+              
+              </tr>
+          <tr>
+              <td class="lab">
+                   @Html.Label("审核人:")
+                  </td>
+                <td>
+                    @Html.DropDownListFor(model=>model.CurrentApprove,ViewData["ApproveList"] as List<SelectListItem>)
+                  </td>
+              
+              </tr>
+          </table>
+  
+    @Html.Hidden("jsonStr")
+}
+<div class="detail-list">
+    <a href="#" class="easyui-linkbutton" plain="true" iconcls="icon-add" id="BtnAdd" onclick="addRow()">添加产品</a>
+    <table id="List"></table>
+</div>
+<div id="GoodsGYDiv" class="easyui-dialog" closed="true" modal="true" title="选择产品" style="width: 500px; height: 420px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIframeGoodsGY' frameborder="0" src="" style="width: 98%; height: 98%;"></iframe>
+</div>
+

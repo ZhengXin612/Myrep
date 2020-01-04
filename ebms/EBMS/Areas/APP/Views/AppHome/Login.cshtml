@@ -1,0 +1,123 @@
+﻿
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>title</title>
+<link href="~/Areas/App/AppContent/css/api.css" rel="stylesheet" type="text/css" />
+<style>
+ html, body {height:100%}
+body{background:url("/Areas/App/AppContent/image/loginBG.png") no-repeat #f1f9fc center bottom;background-size:cover;position:relative}
+#loginWin{font-size:0.2rem;}
+.icon{ font-size:0.22rem;margin:0.10rem 0;color:#333;}
+.form{width:80%;margin:0 auto}
+.hhs-title{color:#666;font-size:0.16rem;text-align:center;padding-bottom:0.6rem}
+.login-btn{color:#333;display:block;background:#07a0ee}
+.login-btn{margin-top:0.8rem;color:#fff;height:0.4rem;line-height: 0.4rem;text-align:center;font-size:0.16rem;border-radius:0.20rem}
+.login-btn span{padding:0 0.15rem}
+.bot-line{border-bottom:1px solid #666;}
+.in-txt{font-size:0.18rem;margin:0 0.06rem;color:#666;outline:none;border:none}
+.remenber{position:relative;margin-top:0.2rem}
+.logo{text-align:center;margin:0 auto 0.2rem auto;padding-top:0.45rem}
+.ck{opacity:0;position:absolute;left:0;top:0;width:0.22rem;height:0.22rem}
+.iconCK:before{margin-right:0.05rem;font-size:0.22rem;float:left;margin-top:-0.02rem}
+.iconCK{font-size:0.18rem;color:#666}
+#loading{position:absolute;top:0;left:0;z-index:999;background:url("/Areas/App/AppContent/image/Preloader_8.gif") #fff no-repeat center center;background-size:0.8rem 0.8rem;display:none;}
+#mes{color:#ffffff;width:100%;height:0.3rem;background:#E66961;font-size:0.14rem;margin:0;line-height:0.3rem;text-indent:2em;color:#EBD275;margin:0.2rem 0 0 0 ;border-radius:3px;display:none;}
+#mes:before{padding-right:0.05rem}                                                                                                                                                                                                                                                                .td-txt{margin-bottom:0.1rem;color:#999;font-size:0.10rem}
+</style>
+</head>
+    <body>
+<div id="loading"></div>
+<div id="loginWin">
+	       <div class="logo"><img src="/Areas/App/AppContent/image/logo.png"></div>
+			<form class="form">
+				<fieldset>
+					<legend class="hhs-title">好护士EBMS管理系统</legend>
+					<p class="bot-line"><label for="Account" class="icon iconfont icon-account"></label><input id="NickName" name="Account"  class="in-txt Account wwt-border-bot" type="text" placeholder="请输入帐号"/></p>
+					<p class="bot-line"><label for="PassWord" class= "icon iconfont icon-mima1"></label><input id="PassWord" name="PassWord" class="in-txt PassWord wwt-border-bot" type="password" placeholder="请输入密码"/></p>
+				    <p class="remenber"><input class="ck" type="checkbox" id="Ck"><label class="iconCK iconfont icon-success">记住我？</label></p>    
+				   <p id="mes" class="icon iconfont icon-information"></p>
+				</fieldset>
+				<a href="javascript:;" id="login-btn" class="login-btn">登<span></span>录</a>
+			</form>
+	</div>
+<script src="~/Areas/App/AppContent/js/jquery-2.2.1.min.js"></script>
+<script>
+  
+    //记住我样式
+    $("#Ck").click(function () {
+        if ($(this).is(":checked")) {
+            $(".iconCK").css("color", "#07a0ee")
+        } else {
+            $(".iconCK").css("color", "#666")
+        }
+    })
+    //自动登录检测
+    var myAccount = localStorage.getItem("zh");//帐号
+    var myPassWord = localStorage.getItem("mm");//密码
+    if (myAccount != "" && myPassWord != "") {
+        $("#NickName").val(myAccount);
+        $("#PassWord").val(myPassWord);
+        $('#Ck').attr("checked", "checked");
+        $(".iconCK").css("color", "#07a0ee")
+    }
+    //登录
+    var flag = 0;
+    $("#login-btn").click(function(){
+		   
+        var NickName = $("#NickName").val();
+        var PassWord = $("#PassWord").val();
+        if($.trim(NickName)==""){
+            alert("请输入帐号")
+            return false;	
+        }
+        if($.trim(PassWord)==""){
+            alert("请输入密码")
+            return false;	
+        }
+        var a = 0;//是否记住密码 0 否 1是
+        if ($('#Ck').is(':checked')) { 
+            a = 1 
+        }
+        if(flag==0){
+            flag ++;
+            //加载界面
+            $("#loading").show(); 
+            //验证登录
+            $.post('/AppHome/Login', { UserName: NickName, Password: PassWord, remenberMe: a },
+           function (data) {
+               if (data.message == "1") {
+                   if(a==1){
+                       localStorage.setItem("zh",$("#NickName").val());
+                       localStorage.setItem("mm",$("#PassWord").val());
+                   }else{
+                       localStorage.setItem("zh","");
+                       localStorage.setItem("mm","");
+                   } 
+                   localStorage.setItem("CurUser",data.CurUser);
+                    
+                   $("#loading").hide();
+
+                   //验证通过
+                   window.location = "/App/AppHome/Index?CurUser=" + localStorage.getItem("CurUser");
+                   flag = 0;
+                   
+               } else {
+                   $("#mes").html(data.message).show();
+                   $("#loading").hide();
+                   flag = 0;
+               }
+                   
+           }, "json");
+        }
+		    
+		  
+		  
+    })
+    
+</script>
+ </body>
+</html>

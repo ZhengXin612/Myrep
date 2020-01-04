@@ -1,0 +1,175 @@
+﻿@{
+    ViewBag.Title = "ViewOrderList";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<div class="Company-top-box">
+    <div class="search-box">
+   <input type="text" placeholder="物流单号/姓名/电话/分拣人" id="txtQuery" class="icon-search-txt">
+         <input type="text" placeholder="产品名称或代码/委外单" id="txtDetailsQuery" class="icon-search-txt">
+          仓库： @Html.DropDownList("RetreatWarehouseList",ViewData["RetreatWarehouseList"] as List<SelectListItem>) 
+         快递公司： @Html.DropDownList("RetreatexpressNameList",ViewData["RetreatexpressNameList"] as List<SelectListItem>) 
+          <select id="selStatus" name="selStatus" class="sel-box">
+                    <option value="9999" selected="">匹配情况</option>
+                    <option value="无">未匹配</option>
+                    <option value="换货">换货</option>
+                    <option value="退货退款">退货退款</option>
+              <option value="退货退款拦截">退货退款拦截</option>
+              <option value="拦截">拦截</option>
+              <option value="退货退款换货">退货退款换货</option>
+              <option value="换货拦截">换货拦截</option>
+              </select>
+
+        <select id="selSorting" name="selSorting" class="sel-box">
+            <option value="" selected="">分拣情况</option>
+            <option value="0" >未分拣</option>
+            <option value="1">已分拣</option>
+        </select>
+       
+         <span style="color: #808080; padding-right: 10px; font-size: 13px; margin-top: 3px; margin-left: 10px;">收货时间</span>
+        <input name="statethisdate" style="float: left;" value="" id="statethisdate" class="easyui-datebox" data-options="sharedCalendar:'#statethisdate'">
+        <span style="color: #808080; padding-right: 10px; font-size: 13px; margin-top: 3px; margin-left: 10px;">至</span>
+        <input name="Endthisdate" style="float: left;" value="" id="Endthisdate" class="easyui-datebox" data-options="sharedCalendar:'#Endthisdate'">
+        
+      
+    </div>
+    <div class="search-box">
+           <span style="color: #808080; padding-right: 10px; font-size: 13px; margin-top: 3px; margin-left: 10px;">分拣时间</span>
+        <input name="Fjstatethisdate" style="float: left;" value="" id="Fjstatethisdate" class="easyui-datebox" data-options="sharedCalendar:'#statethisdate'">
+        <span style="color: #808080; padding-right: 10px; font-size: 13px; margin-top: 3px; margin-left: 10px;">至</span>
+        <input name="FjEndthisdate" style="float: left;" value="" id="FjEndthisdate" class="easyui-datebox" data-options="sharedCalendar:'#Endthisdate'">
+
+        <input type="button" value="查询" id="btnQuery" class="icon-search">
+        </div>
+</div>
+<div class="btn-bar">
+    @*@if (ViewData["ExpressRecord"].ToString() == "财务")
+    {*@
+        <a href="#" rel="external" ajax-data="false" class="icon-edit" onclick="getExcel(this)">导出已分拣Excel</a>
+    @*}*@
+</div>
+<div class="btn-bar">
+        <a href="#" rel="external" ajax-data="false" class="icon-edit" onclick="getExcelList(this)">导出未分拣数据</a>
+</div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+<script type="text/javascript">
+    function op(name, url) {
+        self.parent.addTab(name, url, '');
+        getContextmenu()
+    }
+    $(function () {
+        //回车触发查询
+        enterSearch("#btnQuery");
+        var url = "../ReturnToStorage/GetReturnToStorageList";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() - 55,
+            fitColumns: true,
+            sortName: 'ID',
+            pageSize: 30,
+            sortOrder: 'desc',
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                { field: 'Retreat_expressName', title: '快递名称', width: 100, align: 'center' },
+                { field: 'Retreat_expressNumber', title: '快递单号', width: 80, align: 'center' },
+                { field: 'CollectName', title: '顾客姓名', width: 80, align: 'center' },
+                { field: 'CollectAddress', title: '顾客地址', width: 70, align: 'center' },
+                { field: 'receivermobile', title: '电话', width: 80, align: 'center' },
+                      { field: 'SortingDate', title: '分拣时间', width: 70, align: 'center', formatter: formatDateBoxFull },
+                { field: 'SortingName', title: '分拣人', width: 80, align: 'center' },
+                  { field: 'ExternalSingle', title: '委外单号', width: 80, align: 'center' },
+                 { field: 'GoodsReceiptDate', title: '收货时间', width: 80, align: 'center', formatter: formatDateBoxFull },
+                  //{ field: 'GoodsReceiptName', title: '收货人', width: 80, align: 'center' },
+                { field: 'Retreat_Warehouse', title: '收货仓库', width: 80, align: 'center' },
+                   {
+                       field: 'isSorting', title: '是否分拣', width: 80, align: 'center', formatter: function (value, row, index) {
+                           switch (value) {
+                               case 0:
+                                   return "<font color=red>未分拣</font>"
+                                   break;
+                               case 1:
+                                   return "<font color=blue>已分拣</font>"
+                                   break;
+                           }
+                       }
+                   },
+                { field: 'Retreat_Remarks', title: '备注', width: 80, align: 'center' },
+            ]],
+            onDblClickRow: function (rowIndex, rowData) {
+                var url = "../ReturnToStorage/ViewReturnToStorageletDetails?ID=" + rowData.ID
+                window.open(url, "_blank", "height=" + (window.screen.availHeight * 0.7) + ",width=" + (window.screen.availWidth * 0.7) + ",scrollbars=yes,resizable=1,modal=false,alwaysRaised=yes");
+            },
+        });
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            });
+        });
+    
+       
+
+        $("#btnQuery").click(function () {
+            var RetreatWarehouseList = $('#RetreatWarehouseList').val();
+            var RetreatexpressNameList = $('#RetreatexpressNameList').val();
+            var queryStr = $("#txtQuery").val().trim();
+            var DetailsQuery = $("#txtDetailsQuery").val().trim();
+            var statedate = $('#statethisdate').datebox('getValue');
+            var EndDate = $('#Endthisdate').datebox('getValue');
+            var Fjstatethisdate = $('#Fjstatethisdate').datebox('getValue');
+            var FjEndthisdate = $('#FjEndthisdate').datebox('getValue');
+     
+            //如果查询条件为空默认查询全部
+            var val = $("#selStatus").val();
+            var selSorting = $("#selSorting").val();
+            
+            $('#List').datagrid({
+                url: '../ReturnToStorage/GetReturnToStorageList?queryStr=' + queryStr + "&status=" + val + "&RetreatWarehouseList=" + RetreatWarehouseList + "&RetreatexpressNameList=" + RetreatexpressNameList + "&DetailsQuery=" + DetailsQuery + "&statedate=" + statedate + "&EndDate=" + EndDate + "&Fjstatethisdate=" + Fjstatethisdate + "&FjEndthisdate=" + FjEndthisdate + "&selSorting=" + selSorting
+            });
+
+        });
+
+    });
+    function getExcel(_this) {
+        var queryStr = $("#txtQuery").val();
+        var statedate = $('#Fjstatethisdate').datebox('getValue');
+        var EndDate = $('#FjEndthisdate').datebox('getValue');
+        var RetreatWarehouseList = $('#RetreatWarehouseList').val();
+        var RetreatexpressNameList = $('#RetreatexpressNameList').val();
+        if (statedate == null || statedate == "") {
+            alert("请选择一个开始时间");
+            return
+        }
+        if (EndDate == null || EndDate == "") {
+            alert("请选择一个结束时间");
+            return
+        }
+        _this.href = '../ReturnToStorage/getExcel?queryStr=' + queryStr + '&statedate=' + statedate + '&EndDate=' + EndDate + "&RetreatWarehouseList=" + RetreatWarehouseList + "&RetreatexpressNameList=" + RetreatexpressNameList;
+    }
+    function getExcelList(_this) {
+        var queryStr = $("#txtQuery").val();
+        var statedate = $('#statethisdate').datebox('getValue');
+        var EndDate = $('#Endthisdate').datebox('getValue');
+        var RetreatWarehouseList = $('#RetreatWarehouseList').val();
+        var RetreatexpressNameList = $('#RetreatexpressNameList').val();
+        if (statedate == null || statedate == "") {
+            alert("请选择一个开始时间");
+            return
+        }
+        if (EndDate == null || EndDate == "") {
+            alert("请选择一个结束时间");
+            return
+        }
+        _this.href = '../ReturnToStorage/getExcelList?queryStr=' + queryStr + '&statedate=' + statedate + '&EndDate=' + EndDate + "&RetreatWarehouseList=" + RetreatWarehouseList + "&RetreatexpressNameList=" + RetreatexpressNameList;
+    }
+</script>

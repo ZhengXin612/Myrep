@@ -1,0 +1,91 @@
+﻿@{
+    ViewBag.Title = "ViewInterviewList";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<style>
+    .datebox .combo-arrow {margin: 6px 0 0 -20px;}
+    .datebox-lable-s{color: #808080; padding-right: 10px; font-size: 13px; margin-top: 3px; margin-left: 10px;}
+</style>
+<div class="Company-top-box">
+     <div class="search-box">
+         <input type="text" placeholder="平台单号/发货人员" id="txtQuery"  class="icon-search-txt">
+         <span class="datebox-lable-s">开始时间</span>
+         <input name="statethisdate" editable="false" style="float: left;" value="" id="statethisdate" class="easyui-datebox" data-options="sharedCalendar:'#statethisdate'">
+         <span class="datebox-lable-s">结束时间</span>
+         <input name="Endthisdate" editable="false"  style="float: left;" value="" id="Endthisdate" class="easyui-datebox" data-options="sharedCalendar:'#Endthisdate'">
+         <input type="button" value="查询" id="btnQuery" class="icon-search">
+        
+    </div>
+</div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+<div id="DivDetails"  class="easyui-dialog" closed="true" modal="true" title="发货详情"style="width:600px; height:400px;" resizable="true" closable="true"  spellcheck="false" >
+    <iframe scrolling="auto" id='IframeDetails' frameborder="0" src="" style="width: 100%; height: 98%;position:relative"></iframe>
+</div>
+
+<script type="text/javascript">
+    $("body").css({ "padding": "5px 0px 0px 7px", "overflow": "hidden" });
+    function op(name, url) {
+        self.parent.addTab(name, url, '');
+        getContextmenu()
+    }
+    enterSearch("#btnQuery");
+    $(function () {
+        var url = "GetList";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            height: $(window).height() - 50,
+            method: 'post',
+            fitColumns: true,
+            // sortName: 'Code',
+            sortOrder: 'desc',
+            idField: 'ID',
+            pageSize: 20,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                  { field: 'PostName', title: '发货人员', width: 100, align: 'center' },
+                  { field: 'MailNo', title: '单据编号', width: 100, align: 'center' },
+                  { field: 'WarehouseCode', title: '产品编码', width: 60, align: 'center' },
+                  { field: 'OrderNum', title: '订单号', width:180, align: 'center' },
+                  { field: 'PostTime', title: '发货时间', width: 100, align: 'center' },
+                  { field: 'Note', title: '备注', width:140, align: 'center' }
+            ]],
+            onDblClickRow: function (rowIndex, rowData) {
+                Show(rowData.ID)
+            }
+        })
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            });
+        });
+    })
+    function Query() {
+        var queryStr = $("#txtQuery").val();
+        var queryStr = $("#txtQuery").val();
+        var statedate = $('#statethisdate').datebox('getValue');
+        var EndDate = $('#Endthisdate').datebox('getValue');
+        //var State = $("#State").val();
+        $('#List').datagrid({
+            url: 'GetList?queryStr=' + encodeURI(queryStr)  + "&startSendTime=" + statedate + "&endSendTime=" + EndDate
+        });
+        $("#txtQuery").focus().select();
+    }
+    $('#btnQuery').click(function () {
+        Query();
+    });
+    function Show(id) {
+        $('#IframeDetails')[0].src = "Detail?ID=" + id;
+        $('#DivDetails').dialog('open');
+    }
+
+</script>

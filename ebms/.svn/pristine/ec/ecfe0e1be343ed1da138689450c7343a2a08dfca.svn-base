@@ -1,0 +1,158 @@
+﻿@model EBMS.Models.T_HandwrittenExpress
+@{
+    ViewBag.Title = "手工单";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<style>
+    .btn-bar {
+        margin: 10px;
+    }
+
+    .note-box {
+        margin: 10px 0 0 10px;
+    }
+
+        .note-box p {
+            margin-bottom: 10px;
+        }
+</style>
+<div class="btn-bar">
+    <a href="javascript:;" id="btnAgree" class="icon-agree">同意</a>
+    <a href="javascript:;" id="btnDisAgree" class="icon-disagree">不同意</a>
+</div>
+<div class="note-box">
+    <p>审核备注：</p>
+    <textarea cols="20" id="Memo" name="Memo" rows="3" style="height: 60px; width: 380px; resize: none; overflow-y: scroll;"></textarea>
+</div>
+<table class="fromEditTable setTextWidth300">
+  
+    <tr>
+        <td style="width: 100px; text-align: right">
+            @Html.HiddenFor(model => model.ID)
+            @Html.HiddenFor(model => model.Status)
+            @Html.LabelFor(model => model.ApplyPurpose)：   
+        </td>
+        <td style="position: relative">
+            @Html.DisplayFor(model => model.ApplyPurpose)
+
+        </td>
+        <td style="width: 100px; text-align: right">
+            @Html.LabelFor(model => model.ApplyNumber)：   
+        </td>
+        <td>
+            @Html.DisplayFor(model => model.ApplyNumber)
+        </td>
+          <td style="width: 100px; text-align: right">
+            @Html.LabelFor(model => model.Address)：   
+        </td>
+        <td>
+            @Html.DisplayFor(model => model.Address)
+        </td>
+    </tr>
+    <tr>
+      
+
+        <td style="width: 100px; text-align: right">
+            @Html.LabelFor(model => model.Telephone)：   
+        </td>
+        <td>
+            @Html.DisplayFor(model => model.Telephone)
+        </td>
+
+        <td style="width: 100px; text-align: right">
+            @Html.LabelFor(model => model.AddressName)：    
+        </td>
+        <td>
+            @Html.DisplayFor(model => model.AddressName)
+        </td>
+        <td style="width: 100px; text-align: right">
+            @Html.LabelFor(model => model.Zip)：   
+        </td>
+        <td>
+            @Html.DisplayFor(model => model.Zip)
+        </td>
+    </tr>
+
+</table>
+<div class="note-box">
+    <p>抄送给：</p>
+    <input  type="text" id="CSG"  readonly="true" />
+      <input type="button" value="增加" id="btnZJ" class="icon-search">
+</div>
+
+<div class="history-box">@Html.Raw(ViewData["history"])</div>
+<script src="@Url.Content("~/Scripts/jquery.zclip.min.js")" type="text/javascript"></script>
+<script type="text/javascript">
+    $(function () {
+        var $Id = "@ViewData["ID"]";
+        $('#btnZJ').click(function () {
+            $('#openIframedetail')[0].src = "../HandwrittenExpress/ViewUserGY";
+            $('#detailDiv').dialog('open');
+        });
+        $("#btnAgree").click(function () {
+            var Actualjine = 0;
+
+
+            var checkMan = $("#checkSelect").val();
+            if (checkMan == null || checkMan == "" || checkMan === "undefined") {
+                checkMan = "";
+            }
+            var para = { "id": "@ViewData["ID"]", "status": 1, "memo": $("#Memo").val() };
+            post(para);
+        });
+        $("#btnDisAgree").click(function () {
+            var checkMan = $("#checkSelect").val();
+            var para = { "id": "@ViewData["ID"]", "status": 2, "memo": $("#Memo").val() };
+            post(para);
+        });
+    });
+   
+    var sign = 0;
+    function post(para) {
+        var CSG = $("#CSG").val();
+        if (sign == 0) {
+            sign = 1;
+            loading(0)
+            $.ajax({
+                url: "/HandwrittenExpress/HandwrittenExpressCheckCheck?CSG=" + CSG,
+                type: "post",
+                data: para,
+                dataType: "json",
+                success: function (data) {
+                    loading(1)
+                    $.messager.alert('提示', data, "info", function () {
+                        parent.$('#checkDiv').dialog('close');
+                        parent.$('#List').datagrid('reload');
+                        parent.$('#List').datagrid("clearSelections");
+                        parent.Query();
+                        sign = 0;
+                    });
+                },
+                error: function () {
+                    loading(1);
+                    parent.$('#checkDiv').dialog('close');
+                    parent.$('#List').datagrid('reload');
+                    parent.$('#List').datagrid("clearSelections");
+                    parent.Query();
+                    sign = 0;
+                }
+            });
+        }
+    }
+    function addshop(rows) {
+        var ss = $("#CSG").val();
+        if (ss == "") {
+            ss = rows;
+            $("#CSG").val(ss);
+        }
+        else {
+            ss += "," + rows;
+            $("#CSG").val(ss);
+        }
+        $('#detailDiv').dialog('close');
+    
+    }
+</script>
+<div id="detailDiv" class="easyui-dialog" closed="true" modal="true" title="详情" style="width: 500px; height: 300px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIframedetail' frameborder="0" src="" style="width: 98%; height: 98%;"></iframe>
+</div>

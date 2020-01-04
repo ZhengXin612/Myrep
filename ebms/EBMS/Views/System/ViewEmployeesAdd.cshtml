@@ -1,0 +1,190 @@
+﻿@model  EBMS.Models.T_User
+@using Lib;
+@{
+    ViewBag.Title = "添加员工";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml"; 
+}
+<script src="/Scripts/jquery.validate.min.js" type="text/javascript"></script><script type="text/javascript">
+    $(function () {
+        var flag = 0;
+        var theId = $("#Pid").val()
+        $("#btnSave").click(function () {
+            if (flag == 0) {
+                loading(0);
+                flag++;
+                //判断帐号是否存在
+                $.ajax({
+                    url: "../System/checkUserName",
+                    type: "Post",
+                    data: $("#EditForm").serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        if (data == "1") {
+                            $.messager.alert('提示', '帐号已存在', "info", function () {
+                                flag = 0;
+                                loading(1);
+                            });
+                            }
+                            else {
+                            //帐号不存在
+                            var isSupervisor = $("#IsManagers").find("option:selected").val()
+                            if (isSupervisor == 1) {
+                                $.ajax({
+                                    url: "../System/checkSupervisor?Pid=" + theId,
+                                    type: "Post",
+                                    data: $("#EditForm").serialize(),
+                                    dataType: "json",
+                                    success: function (data) {
+                                        if (data == "1") {
+                                            if ($("#EditForm").valid()) {
+                                                $.ajax({
+                                                    url: "../System/EmployeesAddSave?Pid=" + theId,
+                                                    type: "Post",
+                                                    data: $("#EditForm").serialize(),
+                                                    dataType: "json",
+                                                    success: function (data) {
+                                                        if (data == "1") {
+                                                            loading(1);
+                                                            $.messager.alert('提示', '保存成功', "info", function () {
+                                                    parent.$('#creatEmployeesDiv').dialog('close');
+                                                    parent.$('#List').datagrid('reload');
+                                                    flag = 0;
+                                                });
+                                            }
+                                        }
+                                    });
+                                } else {
+                                                flag = 0;
+                                                loading(1);
+                                }
+                            }
+                            else {
+                                $.messager.alert('提示', '已有主管', "info", function () {
+                                    flag = 0;
+                                    loading(1);
+                                });
+                            }
+                        },
+                        Error: function (data) {
+                            loading(1);
+                            flag = 0;
+                        }
+                    });
+                } else {
+                    if ($("#EditForm").valid()) {
+                        $.ajax({
+                            url: "../System/EmployeesAddSave?Pid=" + theId,
+                            type: "Post",
+                            data: $("#EditForm").serialize(),
+                            dataType: "json",
+                            success: function (data) {
+                                if (data == "1") {
+                                    $.messager.alert('提示', '保存成功', "info", function () {
+                                    parent.$('#creatEmployeesDiv').dialog('close');
+                                    parent.$('#List').datagrid('reload');
+                                    loading(1);
+                                    flag = 0;
+                                });
+                            }
+                        }
+                    });
+                    } else {
+                        loading(1);
+                    flag = 0;
+                }
+            }
+}
+ },
+                    Error: function (data) {
+                        loading(1);
+                      flag = 0;
+                  }
+              });
+            }
+        });
+    });
+</script>
+<div class="mvctool">
+    <a id="btnSave" href="javascript:;" class="modal-btn modal-btn-save">保存</a>
+</div>
+@using (Html.BeginForm("EditForm", "Controllers", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+       <input type="hidden" id="Pid" name="type" value="@ViewData["Pid"]" />
+    <table class="fromEditTable setTextWidth300">
+        <tbody>
+            <tr>
+                <td style="width: 100px; text-align: right;">
+                    @Html.LabelFor(model => model.Name)：
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.Name)
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.Name)
+                </td>
+            </tr>
+              <tr>
+                <td style="width: 100px; text-align: right;">
+                    @Html.LabelFor(model => model.Nickname)：
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.Nickname)
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.Nickname)
+                </td>
+            </tr>
+             <tr>
+                <td style="width: 100px; text-align: right;">
+                    @Html.LabelFor(model => model.Tel)：
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.Tel)
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.Tel)
+                </td>
+            </tr>
+            
+              <tr>
+                <td style="width: 100px; text-align: right;">
+                    @Html.LabelFor(model => model.PassWord)：
+                </td>
+
+                <td>
+                    @Html.TextBoxFor(model => model.PassWord)
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.PassWord)
+                </td>
+            </tr>
+              <tr>
+                <td style="width: 100px; text-align: right;">
+                    @Html.LabelFor(model => model.Power)：
+                </td>
+
+                <td>
+                      @Html.DropDownList("Power")
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.Power)
+                </td>
+            </tr>
+             
+            <tr>
+                <td style="width: 100px; text-align: right;">
+                    @Html.LabelFor(model => model.IsManagers)：
+                </td>
+                <td>
+                     @Html.DropDownListFor(model => model.IsManagers, ViewData["options"] as List<SelectListItem>)
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.IsManagers)
+                </td>
+            </tr>
+            @Html.HiddenFor(model => model.ID)
+        </tbody>
+    </table>
+}
+ 

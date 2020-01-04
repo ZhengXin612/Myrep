@@ -1,0 +1,466 @@
+﻿@model EBMS.Models.T_Intercept
+@{
+    ViewBag.Title = "ViewInterceptEdit";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+@*<script src="~/Content/chart/Area.js" type="text/javascript"></script>
+<script src="~/Content/chart/AreaData_min.js" type="text/javascript"></script>*@
+<script type="text/javascript">
+    var grid; //定义全局变量datagrid
+    var editRow = -1;
+    //加载数据
+    function op(name, url) {
+        self.parent.addTab(name, url, '');
+        getContextmenu()
+    }
+    $(function () {
+
+
+ @*       $.ajax({
+            url: 'GetApproveByReson',
+            type: 'POST',
+            data: JSON.stringify({ reson: "@Model.Reson" }),
+            dataType: 'json',
+            contentType: 'application/json',
+            success: function (data) {
+                $('select#InterceptNextApprove').empty();
+                $.each(data, function (key, value) {
+                    if (value.Key == "@Model.NextApproveName.ToString()") {
+                        $('select#InterceptNextApprove').append(
+                            '<option value="' + value.Key + '" selected="selected">'
+                                    + value.Value +
+                                '</option>');
+                    } else {
+                        $('select#InterceptNextApprove').append(
+                            '<option value="' + value.Key + '">'
+                            + value.Value +
+                            '</option>');
+                    }
+                });
+            }
+        });*@
+
+        //原因下拉框联动
+        //$('select#Reson').change(function () {
+        //    var resone = $(this).val();
+        //    $.ajax({
+        //        url: 'GetApproveByReson',
+        //        type: 'POST',
+        //        data: JSON.stringify({ reson: resone }),
+        //        dataType: 'json',
+        //        contentType: 'application/json',
+        //        success: function (data) {
+        //            $('select#InterceptNextApprove').empty();
+        //            $.each(data, function (key, value) {
+        //                $('select#InterceptNextApprove').append(
+        //                    '<option value="' + value.Key + '">'
+        //                    + value.Value +
+        //                    '</option>');
+        //            });
+        //        }
+        //    });
+        //});
+        @*        initComplexArea('seachprov', 'seachcity', 'seachdistrict', area_array, sub_array, '0', '0', '0');
+
+        var province = "@ViewData["province"]";
+        var city = "@ViewData["city"]";
+        var distrct = "@ViewData["distrct"]";
+        //省
+        for (var i = 0; i < $("#seachprov").find("option").length; i++) {
+
+            //直辖市
+            if (province.trim() == "北京" || province.trim() == "上海" || province.trim() == "天津" || province.trim() == "重庆") {
+                if ($("#seachprov").find("option").eq(i).text().trim() == province.trim() + "市") {
+                    $("#seachprov").find("option").eq(i).attr("selected", true);
+                    initComplexArea('seachprov', 'seachcity', 'seachdistrict', area_array, sub_array, $("#seachprov").find("option").eq(i).val(), '0', '0');
+                    changeComplexProvince($("#seachprov").find("option").eq(i).val(), sub_array, 'seachcity', 'seachdistrict');
+                    break;
+                }
+            }
+            //港澳台
+            if (province.trim() == "香港" || province.trim() == "澳门" || province.trim() == "台湾省") {
+                if ($("#seachprov").find("option").eq(i).text().trim() == province.trim()) {
+                    $("#seachprov").find("option").eq(i).attr("selected", true);
+                    initComplexArea('seachprov', 'seachcity', 'seachdistrict', area_array, sub_array, $("#seachprov").find("option").eq(i).val(), '0', '0');
+                    changeComplexProvince($("#seachprov").find("option").eq(i).val(), sub_array, 'seachcity', 'seachdistrict');
+                    break;
+                }
+            }
+            //省
+            if ($("#seachprov").find("option").eq(i).text().trim() == province.trim()) {
+                $("#seachprov").find("option").eq(i).attr("selected", true);
+                initComplexArea('seachprov', 'seachcity', 'seachdistrict', area_array, sub_array, $("#seachprov").find("option").eq(i).val(), '0', '0');
+                changeComplexProvince($("#seachprov").find("option").eq(i).val(), sub_array, 'seachcity', 'seachdistrict');
+                break;
+            }
+        }
+
+        //市
+        for (var i = 0; i < $("#seachcity").find("option").length; i++) {
+            //直辖市与港澳台直接取区
+            if (province.trim() == "北京" || province.trim() == "上海" || province.trim() == "天津" || province.trim() == "重庆" || province.trim() == "香港" || province.trim() == "澳门" || province.trim() == "台湾省") {
+                if ($("#seachcity").find("option").eq(i).text().trim() == distrct.trim()) {
+                    $("#seachcity").find("option").eq(i).attr("selected", true);
+                    break;
+                }
+            } else {
+                if ($("#seachcity").find("option").eq(i).text().trim() == city.trim()) {
+                    $("#seachcity").find("option").eq(i).attr("selected", true);
+                    changeCity($("#seachcity").find("option").eq(i).val(), 'seachdistrict', 'seachdistrict');
+                    break;
+                }
+            }
+        }
+
+
+        //非直辖市需要取区
+        if (province.trim() != "北京" && province.trim() != "上海" && province.trim() != "天津" && province.trim() != "重庆" && province.trim() != "香港" && province.trim() != "澳门" && province.trim() != "台湾省") {
+            //区
+            for (var i = 0; i < $("#seachdistrict").find("option").length; i++) {
+                if ($("#seachdistrict").find("option").eq(i).text().trim() == distrct.trim()) {
+                    $("#seachdistrict").find("option").eq(i).attr("selected", true);
+                    break;
+                }
+            }
+        }*@
+
+        var url = "../InterceptManger/GetInterceptDetail?interceptId=" + "@Model.ID";
+        grid = $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() * 0.65,
+            fitColumns: true,
+            sortName: 'ID',
+            sortOrder: 'desc',
+            idField: 'ID',
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                  { field: 'Code', title: '需发产品编码', width: 100, align: 'center' },
+                    { field: 'Name', title: '需发产品名称', width: 140, align: 'center' },
+                    { field: 'Num', title: '需发产品数量', width: 80, align: 'center', editor: { type: 'numberbox' } },
+                { field: 'LoadCode', title: '原产品编码', width: 100, align: 'center' },
+                    { field: 'LoadName', title: '原产品名称', width: 140, align: 'center' },
+                    { field: 'LoadNum', title: '原产品数量', width: 80, align: 'center' },
+                                     {
+                                         field: 'action', title: '操作', width: 100, align: 'center', formatter: function (value, row, index) {
+                                             return '<div class="btn-bar"><a herf="#"  onclick="removeRow(' + index + ')" class="icon-remove">删除</a></div>';
+                                         }
+                                     }
+            ]],
+            onClickCell: function (index, field) {
+
+                //只有数量可以编辑
+                if (field == 'Num' || field == 'Num')
+                    editCell(index, field);
+                else if (field == "Code" || field == "Name") {
+                    $('#openIframeproduct')[0].src = "../ExchangeCenter/ViewProduct?index=" + index;
+                    $('#productDiv').dialog('open');
+                    grid.datagrid('endEdit', index);
+                } else
+                    grid.datagrid('endEdit', index);
+
+            }, onAfterEdit: function (value, row) {
+                saveJson();
+            }
+        });
+
+        $("#btnClear").click(function () {
+            var rows = $('#List').datagrid('getRows');
+            for (var i = 0; i < rows.length ; i++) {
+                $('#List').datagrid('updateRow', {
+                    index: i,
+                    row: {
+                        Code: "",
+                        Name: "",
+                        Num: 0
+                    }
+                });
+            }
+        })
+
+        var sign = 0;
+        $("#btnSave").click(function () {
+            var province = $("#seachprov option:selected");
+            var city = $("#seachcity option:selected");
+            var district = $("#seachdistrict option:selected");
+            var hidden = $("#seachdistrict_div").is(':hidden');
+            if ($("#Phone").val().trim() == "" && $("#TelPhone").val().trim() == "") {
+                $.messager.alert('提示', "固定电话或移动电话必须填一个", "info")
+                return false;
+            }
+            if ($("#EditForm").valid()) {
+                grid.datagrid("endEdit", editRow);
+                saveJson();
+                var rows = $('#List').datagrid("getRows");
+                for (var i = 0; i < rows.length; i++) {
+                    //if (rows[i].Num == undefined || rows[i].Num == "") {
+                    //    $.messager.alert('提示', "数量不能为空", "info")
+                    //    return false;
+                    //}
+                    //if (rows[i].Code == undefined || rows[i].Code == "") {
+                    //    $.messager.alert('提示', "产品不能为空", "info")
+                    //    return false;
+                    //}
+                    if (rows[i].Code != "" && (rows[i].Num == undefined || rows[i].Num == "" || rows[i].Num == "0")) {
+                        $.messager.alert('提示', "数量不能为空", "info")
+                        return false;
+                    }
+                }
+                if (sign == 0) {
+                    sign++;
+                    loading(0);
+                    $.ajax({
+                        //url: "InterceptEditSave?hidden=" + hidden + "&province=" + province.text() + "&city=" + city.text() + "&district=" + district.text(),
+                        url: "InterceptEditSave",
+                        type: "Post",
+                        data: $("#EditForm").serialize(),
+                        success: function (data) {
+                            loading(1);
+                            if (data.State == "Success") {
+                                $.messager.alert('提示', '@Lib.MessageRes.SaveOK', "info", function () {
+                                    addTab("@Model.ID");
+                                    sign = 0
+                                });
+                            } else {
+                                $.messager.alert('提示', data.Message, "info", function () {
+                                    sign = 0
+                                });
+                            }
+                        },
+                        error: function () {
+                            loading(1);
+                            sign = 0;
+                        }
+                    });
+                }
+            }
+        });
+
+        //新增明细
+        $('#btnAdd').bind('click', function () {
+            if (editRow != -1) {
+                grid.datagrid("endEdit", editRow);
+                editRow = -1;
+            }
+            else {
+                $('#List').datagrid('appendRow', {
+                    Code: "",
+                    Name: "",
+                    Num: 0,
+                    LoadCode: "",
+                    LoadName: "",
+                    LoadNum: 0
+                })
+            }
+        });
+
+    });
+
+
+    function removeRow(index) {
+        $('#List').datagrid('deleteRow', index);
+        var rows = $('#List').datagrid("getRows");
+        $('#List').datagrid("loadData", rows);
+        saveJson();
+    }
+
+    function addproduct(row, index) {
+        $('#productDiv').dialog('close');
+        var rows = $('#List').datagrid('getRows');
+        for (var i = 0; i < rows.length; i++) {
+            if (row.code == rows[i].Code) {
+                $.messager.alert('提示', '重复编码', "info");
+                return false;
+            }
+        }
+        $('#List').datagrid('updateRow', {
+            index: index,
+            row: {
+                Code: row.code,
+                Name: row.name
+            }
+        });
+        saveJson();
+    }
+    //关闭当前页面
+    function closeCurTab(name) {
+        var parentTab = parent.$('#mainTab').tabs('select', name);
+        var curTab = self.parent.$('#mainTab').tabs('getSelected');// 当前tab
+        var index = self.parent.$('#mainTab').tabs('getTabIndex', curTab);
+        self.parent.$('#mainTab').tabs('close', index);
+    }
+    function addTab(id) {
+        op("我的未发货拦截", "../InterceptManger/ViewInterceptForMy");
+        closeCurTab("拦截编辑" + id + "");//关闭当前页面
+    }
+
+    function saveJson() {
+
+        JsonText = "[";
+        var rows = $('#List').datagrid('getRows');
+
+        for (var i = 0; i < rows.length; i++) {
+            JsonText += '{';
+            JsonText += '"Code":' + '"' + rows[i].Code + '",';
+            JsonText += '"Name":' + '"' + rows[i].Name + '",';
+            JsonText += '"Num":' + '"' + rows[i].Num + '",';
+            JsonText += '"LoadCode":' + '"' + rows[i].LoadCode + '",';
+            JsonText += '"LoadName":' + '"' + rows[i].LoadName + '",';
+            JsonText += '"LoadNum":' + '"' + rows[i].LoadNum + '"},';
+        }
+        JsonText = JsonText.substring(0, JsonText.length - 1);
+        JsonText += "]";
+        if (rows.length == 0)
+            JsonText = "";
+        $("#jsonStr").val(JsonText);
+    }
+    function editCell(index, field) {
+        grid.datagrid('endEdit', editRow);
+        editRow = index;
+        grid.datagrid('selectRow', index);
+        grid.datagrid('beginEdit', index);
+        var editor = grid.datagrid('getEditor', { index: index, field: field });
+        //numberbox 特殊处理
+        setTimeout(function () {
+            editor.target.focus();
+        }, 0);
+
+        var editors = grid.datagrid('getEditors', index);
+        for (var i = 0; i < editors.length; i++) {
+            editors[i].target.bind('keydown', { field: editors[i].field }, function (e) {
+                if (e.keyCode == 13) {
+                    grid.datagrid('endEdit', index);
+                    editRow = -1;;
+                } else if (e.keyCode == 38) {	// up
+
+                    if (editRow > 0) {
+                        editCell(editRow - 1, e.data.field);
+                    }
+                } else if (e.keyCode == 40) {	// down
+
+                    if (editRow < grid.datagrid('getRows').length - 1) {
+                        editCell(parseInt(editRow) + 1, e.data.field);
+                    }
+                }
+                if (i < 2) {
+                    if (!(event.keyCode == 46) && !(event.keyCode == 9) && !(event.keyCode == 8) && !(event.keyCode == 37) && !(event.keyCode == 39))
+                        if (!((event.keyCode >= 48 && event.keyCode <= 57) || (event.keyCode >= 96 && event.keyCode <= 105)))
+                            event.returnValue = false;
+                }
+            });
+        }
+    }
+    $(document).not(grid).on("click", function () {
+        grid.datagrid("endEdit", editRow);
+        grid.datagrid('unselectAll');
+    });
+</script>
+<div class="mvctool">
+    <a href="#" class="easyui-linkbutton" plain="true" iconcls="icon-add" id="btnAdd">添加详情</a>
+    <input id="btnSave" class="modal-btn modal-btn-save" type="submit" value="提交">
+    <input type="button" name="btnClear" value="清空编码" id="btnClear" />
+</div>
+@using (Html.BeginForm("EditForm", "Controller", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+    <table class="fromEditTable setTextWidth300">
+        <tr>
+            <td style="width: 16.5%; text-align: right">
+                @Html.Hidden("jsonStr")
+                @Html.HiddenFor(model => model.ID)
+                @Html.HiddenFor(model => model.Status)
+                @Html.HiddenFor(mode => mode.Step)
+                @Html.LabelFor(model => model.OrderNumber)：
+            </td>
+            <td style="width: 16.5%;">@Html.TextBoxFor(model => model.OrderNumber, new { @readonly = "readonly" })</td>
+            <td style="width: 16.5%;">@Html.ValidationMessageFor(model => model.OrderNumber)</td>
+
+            <td style="width: 16.5%; text-align: right">
+                @Html.LabelFor(model => model.Receiver)：
+            </td>
+            <td style="width: 16.5%;">@Html.TextBoxFor(model => model.Receiver)</td>
+            <td style="width: 16.5%; text-align: left">@Html.ValidationMessageFor(model => model.Receiver)</td>
+        </tr>
+        <tr>
+
+            <td style="text-align: right">
+                @Html.LabelFor(model => model.ExpressName)：
+            </td>
+            <td>@Html.DropDownListFor(model => model.ExpressName, ViewData["express"] as List<SelectListItem>)</td>
+            <td style="text-align: left">@Html.ValidationMessageFor(model => model.ExpressName)</td>
+            <td style="text-align: right">
+                @Html.LabelFor(model => model.TelPhone)：
+            </td>
+            <td>@Html.TextBoxFor(model => model.TelPhone)</td>
+            <td style="text-align: left">@Html.ValidationMessageFor(model => model.TelPhone)</td>
+        </tr>
+        <tr>
+            <td style="text-align: right">
+                @Html.LabelFor(model => model.AddressMessage)：
+            </td>
+            @*            <td colspan="3">
+                <select id="seachprov" name="seachprov" onchange="changeComplexProvince(this.value, sub_array, 'seachcity', 'seachdistrict');"></select>
+                &nbsp;
+                <select id="seachcity" name="homecity" onchange="changeCity(this.value,'seachdistrict','seachdistrict');"></select>
+                &nbsp;
+                <span id="seachdistrict_div">
+                    <select id="seachdistrict" name="seachdistrict"></select></span>
+            </td>*@
+            <td>@Html.TextBoxFor(model => model.AddressMessage)</td>
+            <td style="text-align: left">@Html.ValidationMessageFor(model => model.AddressMessage)</td>
+            <td style="text-align: right">@Html.LabelFor(model => model.Address)：</td>
+            <td>@Html.TextBoxFor(model => model.Address)</td>
+            <td style="text-align: left">@Html.ValidationMessageFor(model => model.Address)</td>
+        </tr>
+        <tr>
+
+            <td style="text-align: right">
+                @Html.LabelFor(model => model.Phone)：
+            </td>
+            <td>@Html.TextBoxFor(model => model.Phone)</td>
+            <td style="text-align: left">@Html.ValidationMessageFor(model => model.Phone)</td>
+            <td style="text-align: right">
+                @Html.LabelFor(model => model.Postalcode)：
+            </td>
+            <td>@Html.TextBoxFor(model => model.Postalcode)</td>
+            <td style="text-align: left">@Html.ValidationMessageFor(model => model.Postalcode)</td>
+        </tr>
+        <tr>
+            <td style="text-align: right">
+                @Html.LabelFor(model => model.Warhouse)：
+            </td>
+            <td>@Html.DropDownListFor(model => model.Warhouse, ViewData["war"] as List<SelectListItem>)</td>
+            <td style="text-align: left">@Html.ValidationMessageFor(model => model.Warhouse)</td>
+            <td style="text-align: right">
+                @Html.LabelFor(model => model.MailNo)：
+            </td>
+            <td>@Html.TextBoxFor(model => model.MailNo, new { @readonly = "readonly" })</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td style="text-align: right">
+                @Html.LabelFor(model => model.Reson)：
+            </td>
+           <td>@Html.DropDownListFor(model => model.Reson, ViewData["re"] as List<SelectListItem>)
+              @*   下级审核人:
+                                <select id="InterceptNextApprove" name="InterceptNextApprove">
+                                </select>*@
+            </td>
+            <td style="text-align: left">@Html.ValidationMessageFor(model => model.Reson)</td>
+            <td style="text-align: right">
+                @Html.LabelFor(model => model.Memo)：
+            </td>
+            <td>@Html.TextBoxFor(model => model.Memo)</td>
+            <td style="text-align: left">@Html.ValidationMessageFor(model => model.Memo)</td>
+        </tr>
+    </table>
+}
+<table id="List"></table>
+<div id="productDiv" class="easyui-dialog" closed="true" modal="true" title="选择产品" style="width: 500px; height: 420px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIframeproduct' frameborder="0" src="" style="width: 98%; height: 98%;"></iframe>
+</div>
+

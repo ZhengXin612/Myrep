@@ -1,0 +1,173 @@
+﻿@model EBMS.Models.T_Retreat
+@using Lib
+@{
+    ViewBag.Title = "ViewPurchaseEdit";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<script type="text/javascript">
+    var tiaoshu = 0;
+    var ID = "@ViewData["ID"]";
+    var type = "@ViewData["type"]";
+    $(function () {
+        $.ajax({
+            url: "../Retreat/RetreatbuliangpCKDetails?ID=" + ID + "&type=" + type,
+            type: "Post",
+            data: $("#EditForm").serialize(),
+            dataType: "json",
+            success: function (data) {
+                tiaoshu = data.rows.length;
+                var ss = "";
+                if (type == "2") {
+                    ss = "<tr><td><div class=\"okprint\" >退货清单</div></td></tr>";
+                    for (var i = 0; i < data.rows.length; i++) {
+                        if (i == 0) {
+                            ss += "<tr> <td>产品名称：<label>" + data.rows[i].ProductName + "</label></td>  <td> 产品代码：<label>" + data.rows[i].ProductCode + "</label> </td> <td>所属仓库：<label id=\"WarehouseCode" + i + "\" >" + data.rows[i].WarehouseCode + "</label></td>  <td>单位：<label>" + data.rows[i].Simplename + "</label></td> <td><div class=\"noprint\" >需退货总数量：<label id=\"shenyushul" + i + "\">" + data.rows[i].UnqualifiedNumber + "</label> </div></td> <td >  数量： </td> <td > <input type=\"text\" style=\"width:50px;\"   data=" + data.rows[i].ID + " id=\"kechuli" + i + "\"   onkeyup=\"value=value.replace(/[^\\d]/g,'') \"value=\"" + data.rows[i].UnqualifiedNumber + "\" /></td></tr>";
+                        }
+                        else {
+                            ss = "<tr> <td>产品名称：<label>" + data.rows[i].ProductName + "</label></td> <td> 产品代码：<label>" + data.rows[i].ProductCode + "</label> </td>  <td>所属仓库：<label id=\"WarehouseCode" + i + "\">" + data.rows[i].WarehouseCode + "</label></td> <td>单位：<label>" + data.rows[i].Simplename + "</label></td> <td><div class=\"noprint\" >需退货总数量：<label id=\"shenyushul" + i + "\">" + data.rows[i].UnqualifiedNumber + "</label> </div></td> <td >  数量： </td> <td > <input type=\"text\" style=\"width:50px;\"   data=" + data.rows[i].ID + " id=\"kechuli" + i + "\"   onkeyup=\"value=value.replace(/[^\\d]/g,'') \"value=\"" + data.rows[i].UnqualifiedNumber + "\" /></td></tr>";
+
+                        }
+                        $('#tableture').append(ss);
+                    }
+                }
+                else if (type == "1") {
+                    ss = "<tr><td><div class=\"okprint\" >移库清单</div></td></tr>";
+                    for (var i = 0; i < data.rows.length; i++) {
+                        if (i == 0) {
+                            ss += "<tr> <td>产品名称：<label>" + data.rows[i].ProductName + "</label></td> <td> 产品代码：<label>" + data.rows[i].ProductCode + "</label> </td> <td>所属仓库：<label id=\"WarehouseCode" + i + "\">" + data.rows[i].WarehouseCode + "</label></td> <td>单位：<label>" + data.rows[i].Simplename + "</label></td> <td><div class=\"noprint\" >可移库总数量：<label  id=\"shenyushul" + i + "\" >" + data.rows[i].QualifiedNumber + "</label></div> </td> <td >  数量： </td> <td > <input type=\"text\" style=\"width:50px;\" data=" + data.rows[i].ID + "  id=\"kechuli" + i + "\"  onkeyup=\"value=value.replace(/[^\\d]/g,'') \"  value=\"" + data.rows[i].QualifiedNumber + "\" /></td></tr>";
+                        }
+                        else {
+                            ss = "<tr> <td>产品名称：<label>" + data.rows[i].ProductName + "</label></td> <td> 产品代码：<label>" + data.rows[i].ProductCode + "</label> </td> <td>所属仓库：<label id=\"WarehouseCode" + i + "\">" + data.rows[i].WarehouseCode + "</label></td> <td>单位：<label>" + data.rows[i].Simplename + "</label></td> <td><div class=\"noprint\" >可移库总数量：<label  id=\"shenyushul" + i + "\" >" + data.rows[i].QualifiedNumber + "</label></div> </td> <td >  数量： </td> <td > <input type=\"text\" style=\"width:50px;\" data=" + data.rows[i].ID + "  id=\"kechuli" + i + "\"  onkeyup=\"value=value.replace(/[^\\d]/g,'') \"  value=\"" + data.rows[i].QualifiedNumber + "\" /></td></tr>";
+                        } $('#tableture').append(ss);
+                    }
+                }
+                else {
+                    ss = "<tr><td><div class=\"okprint\" >退还顾客清单</div></td></tr>";
+                    for (var i = 0; i < data.rows.length; i++) {
+                        if (i == 0) {
+                            ss += "<tr> <td>产品名称：<label>" + data.rows[i].ProductName + "</label></td> <td> 产品代码：<label>" + data.rows[i].ProductCode + "</label> <td>所属仓库：<label id=\"WarehouseCode" + i + "\" >" + data.rows[i].WarehouseCode + "</label></td> </td> <td>单位：<label>" + data.rows[i].Simplename + "</label></td> <td><div class=\"noprint\" >可退还总数量：<label  id=\"shenyushul" + i + "\" >" + data.rows[i].QualifiedNumber + "</label></div> </td> <td >  数量： </td> <td > <input type=\"text\" style=\"width:50px;\" data=" + data.rows[i].ID + "  id=\"kechuli" + i + "\"  onkeyup=\"value=value.replace(/[^\\d]/g,'') \"  value=\"" + data.rows[i].QualifiedNumber + "\" /></td></tr>";
+                        }
+                        else {
+                            ss = "<tr> <td>产品名称：<label>" + data.rows[i].ProductName + "</label></td> <td> 产品代码：<label>" + data.rows[i].ProductCode + "</label>  <td>所属仓库：<label id=\"WarehouseCode" + i + "\">" + data.rows[i].WarehouseCode + "</label></td></td> <td>单位：<label>" + data.rows[i].Simplename + "</label></td> <td><div class=\"noprint\" >可退还总数量：<label  id=\"shenyushul" + i + "\" >" + data.rows[i].QualifiedNumber + "</label></div> </td> <td >  数量： </td> <td > <input type=\"text\" style=\"width:50px;\" data=" + data.rows[i].ID + "  id=\"kechuli" + i + "\"  onkeyup=\"value=value.replace(/[^\\d]/g,'') \"  value=\"" + data.rows[i].QualifiedNumber + "\" /></td></tr>";
+                        } $('#tableture').append(ss);
+                    }
+                }
+            }
+        });
+
+
+
+        $("#btnGuanBi").click(function () {
+            parent.$('#openDivchuku').dialog('close');
+            parent.$('#openDivruku').dialog('close');
+        });
+        //$("#btnSave").click(function () {
+          
+        //});
+    });
+
+    function baocun()
+    {
+        if ($("#Retreat_Warehouse").val() == "") {
+            $.messager.alert('提示', "请选择仓库", "info")
+            loading(1);
+            return
+        }
+        var INcode=$("#Retreat_Warehouse").val();
+      
+        if ($("#EditForm").valid()) {
+
+            var param = {};
+            var list = new Array();
+            for (var i = 0; i < tiaoshu; i++) {
+                var kechuli = $("#kechuli" + i).val();
+                var WarehouseCode = document.getElementById("WarehouseCode" + i).innerText;
+                var shenyushul = $("#shenyushul" + i).html();
+                if (Number(kechuli) > Number(shenyushul)) {
+                    alert("数量不允许大于剩余数量！");
+                    return;
+                }
+                param["keyWordList[" + i + "].WarehouseCode"] = WarehouseCode;
+                param["keyWordList[" + i + "].shul"] = kechuli;
+                var sid = $("#kechuli" + i).attr("data");
+                param["keyWordList[" + i + "].ID"] = sid;
+            }
+            var beizhu = $("#beizhu").val();
+            $.post("../Retreat/RetreatWarehouseEdit?ID=" + ID + "&type=" + type + "&beizhu=" + beizhu + "&INcode=" + INcode, param, function (data) {
+                if (data.State == "Success") {
+                    $.messager.alert('提示', '保存成功', "info", function () {
+                        parent.$('#openDivchuku').dialog('close');
+                        parent.$('#openDivruku').dialog('close');
+                        parent.$('#List').datagrid("clearSelections");
+                        parent.query();
+                    });
+                }
+                else {
+                    $.messager.alert('提示',data.miss, "info", function () {
+                        parent.$('#openDivchuku').dialog('close');
+                        parent.$('#openDivruku').dialog('close');
+                        parent.$('#List').datagrid("clearSelections");
+                        parent.query();
+                    });
+                }
+
+            });
+            
+        }
+        return false;
+    }
+</script>
+<style>
+     @@media print { 
+.noprint { display: none;color:green; } 
+ .okprint {
+    display:block
+    }
+}
+    .Batch-number{
+       float:left
+    }
+    .okprint {
+    display:none
+    }
+    select {
+    -moz-appearance: none;
+-webkit-appearance: none;
+
+
+    }
+ 
+</style>
+<a style="display: none" id="UpLoadAjax" href="" data-ajax-update="#UpLoadDialog" data-ajax-mode="replace" data-ajax-method="GET" data-ajax="true">Upload</a>
+<div id="UpLoadDialog"></div>
+<div class="mvctool bgb">
+    <div class="noprint" >
+ <a href="javascript:window.print(); " onclick="baocun()" style="float: left;" class="l-btn l-btn-plain" ><span class="l-btn-left"><span class="l-btn-text icon-save" style="padding-left: 20px;">保存&打印</span></span></a>
+</div>
+</div>
+
+
+
+@using (Html.BeginForm("EditForm", "Controllers", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+    <table class="fromEditTable setTextWidth300" id="tableture">
+        <tbody>
+                <tr>
+                    <td style="text-align: right;">
+                        <label>仓库：</label>
+                    </td>
+                    <td colspan="2">
+                    @Html.DropDownListFor(model => model.Retreat_Warehouse, ViewData["RetreatWarehouseList"] as List<SelectListItem>) 
+                    </td>
+               <td style="text-align: right;">
+                  <label>备注：</label>
+                </td>
+                <td colspan="3">
+                  <input type="text" id="beizhu" name="beizhu"  />
+                </td>
+            </tr>    
+               
+        </tbody>
+    </table>
+}

@@ -1,0 +1,215 @@
+﻿@model EBMS.Models.T_Borrow
+@{
+    ViewBag.Title = "ViewBorrowAdd";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<script type="text/javascript">
+    $(function () {
+        $.ajax({
+            url: 'GetApproveByDeptID',
+            type: 'POST',
+            data: JSON.stringify({ ID: "@Model.BorrowerDep" }),
+            dataType: 'json',
+            contentType: 'application/json',
+            success: function (data) {
+                $('select#BorrowNextApprove').empty();
+                $.each(data, function (key, value) {
+                    $('select#BorrowNextApprove').append(
+                        '<option value="' + value.Key + '">'
+                        + value.Value +
+                        '</option>');
+                });
+            }
+        });
+        //部门下拉框联动
+        $('select#BorrowerDep').change(function () {
+            var deptId = $(this).val();
+            $.ajax({
+                url: 'GetApproveByDeptID',
+                type: 'POST',
+                data: JSON.stringify({ ID: deptId }),
+                dataType: 'json',
+                contentType: 'application/json',
+                success: function (data) {
+                    $('select#BorrowNextApprove').empty();
+                    $.each(data, function (key, value) {
+                        $('select#BorrowNextApprove').append(
+                            '<option value="' + value.Key + '">'
+                            + value.Value +
+                            '</option>');
+                    });
+                }
+            });
+        });
+        var sign = 0;
+        $("#btnSave").click(function () {
+            if ($("#BorrowNeedDate").datebox('getValue') == "") {
+                $.messager.alert('提示', "请选择需款时间", "info");
+                return false;
+            }
+            if ($("#EditForm").valid()) {
+                if (sign == 0) {
+                    sign++;
+                    loading(0);
+                    $.ajax({
+                        url: "ViewBorrowAddSave",
+                        type: "Post",
+                        data: $("#EditForm").serialize(),
+                        success: function (data) {
+                            loading(1);
+                            if (data.State == "Success") {
+                                $.messager.alert('提示', '操作成功', "info", function () {
+                                    window.location.reload();
+                                    sign = 0
+                                });
+                            } else {
+                                $.messager.alert('提示', data.Message, "info", function () {
+                                    $("#List").datagrid("reload");
+                                    sign = 0
+                                });
+                            }
+                        },
+                        error: function () {
+                            loading(1);
+                            sign = 0;
+                        }
+                    });
+                }
+            }
+        });
+    });
+
+</script>
+<div class="mvctool">
+    <input id="btnSave" class="modal-btn modal-btn-save" type="submit" value="保存">
+</div>
+@using (Html.BeginForm("EditForm", "Controller", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+   
+    @Html.ValidationSummary(true)
+   
+    <table class="fromEditTable setTextWidth300">
+        <tbody>
+            <tr>
+                <td style="width: 170px; text-align: right;">
+                    @Html.LabelFor(model => model.BorrowName)：    
+                </td>
+                <td style="width: 250px;">
+                    @Html.TextBoxFor(model => model.BorrowName, new { @readonly = true, style = "width:120px;" })
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.BorrowName)
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right;">
+                    @Html.LabelFor(model => model.BorrowCode)：    
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.BorrowCode, new { @readonly = true, style = "width:170px;" })
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.BorrowCode)
+                </td>
+            </tr>
+			<tr>
+				<td style="text-align: right;">
+					@Html.Label("公司")：
+				</td>
+				<td>
+					@Html.DropDownListFor(model => model.Company, ViewData["CompanyList"] as List<SelectListItem>)
+				</td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">
+					@Html.LabelFor(model => model.BorrowerDep)：
+				</td>
+				<td>
+					@Html.DropDownList("BorrowerDep", ViewData["ReportDepartment"] as List<SelectListItem>)
+				</td>
+				<td>
+					@Html.ValidationMessageFor(model => model.BorrowerDep)
+				</td>
+			</tr>
+            <tr>
+                <td style="text-align: right;">
+                    @Html.LabelFor(model => model.BorrowAccountID)：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.BorrowAccountID, new { style = "width:200px;" })
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.BorrowAccountID)
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right;">
+                    @Html.LabelFor(model => model.BorrowBank)：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.BorrowBank, new { style = "width:200px;" })
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.BorrowBank)
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right;">
+                    @Html.LabelFor(model => model.BorrowAccountName)：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.BorrowAccountName, new { style = "width:200px;" })
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.BorrowAccountName)
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right;">
+                    @Html.LabelFor(model => model.BorrowNeedDate)：
+                </td>
+                <td>
+                    <input name="BorrowNeedDate" value="" id="BorrowNeedDate" class="easyui-datebox" editable="false" data-options="sharedCalendar:'#BorrowNeedDate'">
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.BorrowNeedDate)
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right;">
+                    @Html.LabelFor(model => model.BorrowMoney)：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.BorrowMoney, new { style = "width:50px;" })
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.BorrowMoney)
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right;">
+                    @Html.LabelFor(model => model.BorrowNextApprove)：   
+                </td>
+                <td>
+                    <select id="BorrowNextApprove" name="BorrowNextApprove">
+                    </select>
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.BorrowNextApprove)
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right;">
+                    @Html.LabelFor(model => model.BorrowReason)：   
+                </td>
+                <td>
+                    @Html.TextAreaFor(model => model.BorrowReason, new { style = "height:120px;width:200px;" })
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.BorrowReason)
+                </td>
+            </tr>
+        </tbody>
+    </table>
+}

@@ -1,0 +1,571 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="wdt_bakModel.Store" Provider="MySql.Data.MySqlClient" ProviderManifestToken="8.0" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="sales_trade">
+          <Key>
+            <PropertyRef Name="trade_id" />
+          </Key>
+          <Property Name="trade_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="trade_no" Type="varchar" MaxLength="40" Nullable="false" />
+          <Property Name="platform_id" Type="tinyint" Nullable="false" />
+          <Property Name="shop_id" Type="smallint" Nullable="false" />
+          <Property Name="warehouse_id" Type="smallint" Nullable="false" />
+          <Property Name="warehouse_type" Type="tinyint" Nullable="false" />
+          <Property Name="src_tids" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="pay_account" Type="varchar" MaxLength="128" Nullable="false" />
+          <Property Name="trade_status" Type="tinyint" Nullable="false" />
+          <Property Name="check_step" Type="tinyint" Nullable="false" />
+          <Property Name="consign_status" Type="int" Nullable="false" />
+          <Property Name="trade_from" Type="bool" Nullable="false" />
+          <Property Name="trade_type" Type="bool" Nullable="false" />
+          <Property Name="delivery_term" Type="tinyint" Nullable="false" />
+          <Property Name="freeze_reason" Type="smallint" Nullable="false" />
+          <Property Name="refund_status" Type="bool" Nullable="false" />
+          <Property Name="unmerge_mask" Type="bool" Nullable="false" />
+          <Property Name="fenxiao_type" Type="tinyint" Nullable="false" />
+          <Property Name="fenxiao_nick" Type="varchar" MaxLength="40" Nullable="false" />
+          <Property Name="trade_time" Type="datetime" Precision="0" Nullable="false" />
+          <Property Name="pay_time" Type="datetime" Precision="0" Nullable="false" />
+          <Property Name="delay_to_time" Type="int" Nullable="false" />
+          <Property Name="goods_count" Type="decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="goods_type_count" Type="smallint" Nullable="false" />
+          <Property Name="single_spec_no" Type="varchar" MaxLength="40" Nullable="false" />
+          <Property Name="raw_goods_count" Type="decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="raw_goods_type_count" Type="smallint" Nullable="false" />
+          <Property Name="customer_type" Type="tinyint" Nullable="false" />
+          <Property Name="customer_id" Type="int" Nullable="false" />
+          <Property Name="buyer_nick" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="id_card_type" Type="tinyint" Nullable="false" />
+          <Property Name="id_card" Type="varchar" MaxLength="40" Nullable="false" />
+          <Property Name="receiver_name" Type="varchar" MaxLength="40" Nullable="false" />
+          <Property Name="receiver_country" Type="smallint" Nullable="false" />
+          <Property Name="receiver_province" Type="int" Nullable="false" />
+          <Property Name="receiver_city" Type="int" Nullable="false" />
+          <Property Name="receiver_district" Type="int" Nullable="false" />
+          <Property Name="receiver_address" Type="varchar" MaxLength="256" Nullable="false" />
+          <Property Name="receiver_mobile" Type="varchar" MaxLength="40" Nullable="false" />
+          <Property Name="receiver_telno" Type="varchar" MaxLength="40" Nullable="false" />
+          <Property Name="receiver_zip" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="receiver_area" Type="varchar" MaxLength="128" Nullable="false" />
+          <Property Name="receiver_ring" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="receiver_dtb" Type="varchar" MaxLength="128" Nullable="false" />
+          <Property Name="to_deliver_time" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="pre_charge_time" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="currency" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="is_prev_notify" Type="tinyint" Nullable="false" />
+          <Property Name="logistics_id" Type="smallint" Nullable="false" />
+          <Property Name="logistics_no" Type="varchar" MaxLength="40" Nullable="false" />
+          <Property Name="buyer_message" Type="varchar" MaxLength="1024" Nullable="false" />
+          <Property Name="cs_remark" Type="varchar" MaxLength="1024" Nullable="false" />
+          <Property Name="remark_flag" Type="tinyint" Nullable="false" />
+          <Property Name="print_remark" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="note_count" Type="smallint" Nullable="false" />
+          <Property Name="buyer_message_count" Type="tinyint" Nullable="false" />
+          <Property Name="cs_remark_count" Type="tinyint" Nullable="false" />
+          <Property Name="cs_remark_change_count" Type="smallint" Nullable="false" />
+          <Property Name="goods_amount" Type="decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="post_amount" Type="decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="other_amount" Type="decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="discount" Type="decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="receivable" Type="decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="discount_change" Type="decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="trade_prepay" Type="decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="dap_amount" Type="decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="cod_amount" Type="decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="pi_amount" Type="decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="ext_cod_fee" Type="decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="goods_cost" Type="decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="post_cost" Type="decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="other_cost" Type="decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="profit" Type="decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="paid" Type="decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="weight" Type="decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="volume" Type="decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="tax" Type="decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="tax_rate" Type="decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="commission" Type="decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="invoice_type" Type="tinyint" Nullable="false" />
+          <Property Name="invoice_title" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="invoice_content" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="invoice_id" Type="int" Nullable="false" />
+          <Property Name="salesman_id" Type="int" Nullable="false" />
+          <Property Name="sales_score" Type="int" Nullable="false" />
+          <Property Name="checker_id" Type="int" Nullable="false" />
+          <Property Name="fchecker_id" Type="int" Nullable="false" />
+          <Property Name="checkouter_id" Type="int" Nullable="false" />
+          <Property Name="split_package_num" Type="int" Nullable="false" />
+          <Property Name="flag_id" Type="smallint" Nullable="false" />
+          <Property Name="bad_reason" Type="int" Nullable="false" />
+          <Property Name="is_sealed" Type="bool" Nullable="false" />
+          <Property Name="gift_mask" Type="tinyint" Nullable="false" />
+          <Property Name="split_from_trade_id" Type="int" Nullable="false" />
+          <Property Name="large_type" Type="tinyint" Nullable="false" />
+          <Property Name="stockout_no" Type="varchar" MaxLength="40" Nullable="false" />
+          <Property Name="logistics_template_id" Type="int" Nullable="false" />
+          <Property Name="sendbill_template_id" Type="int" Nullable="false" />
+          <Property Name="revert_reason" Type="smallint" Nullable="false" />
+          <Property Name="cancel_reason" Type="smallint" Nullable="false" />
+          <Property Name="is_unpayment_sms" Type="bool" Nullable="false" />
+          <Property Name="package_id" Type="int" Nullable="false" />
+          <Property Name="trade_mask" Type="int" Nullable="false" />
+          <Property Name="reserve" Type="varchar" MaxLength="40" Nullable="false" />
+          <Property Name="version_id" Type="smallint" Nullable="false" />
+          <Property Name="modified" Type="timestamp" Precision="0" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="created" Type="timestamp" Precision="0" Nullable="false" />
+        </EntityType>
+        <EntityType Name="sales_trade_order">
+          <Key>
+            <PropertyRef Name="rec_id" />
+          </Key>
+          <Property Name="rec_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="trade_id" Type="int" Nullable="false" />
+          <Property Name="spec_id" Type="int" Nullable="false" />
+          <Property Name="platform_id" Type="tinyint" Nullable="false" />
+          <Property Name="src_oid" Type="varchar" MaxLength="40" Nullable="false" />
+          <Property Name="suite_id" Type="int" Nullable="false" />
+          <Property Name="src_tid" Type="varchar" MaxLength="40" Nullable="false" />
+          <Property Name="gift_type" Type="bool" Nullable="false" />
+          <Property Name="refund_status" Type="tinyint" Nullable="false" />
+          <Property Name="guarantee_mode" Type="tinyint" Nullable="false" />
+          <Property Name="delivery_term" Type="tinyint" Nullable="false" />
+          <Property Name="bind_oid" Type="varchar" MaxLength="40" Nullable="false" />
+          <Property Name="num" Type="decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="price" Type="decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="actual_num" Type="decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="refund_num" Type="decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="order_price" Type="decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="share_price" Type="decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="adjust" Type="decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="discount" Type="decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="share_amount" Type="decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="share_amount2" Type="decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="share_post" Type="decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="paid" Type="decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="tax_rate" Type="decimal" Precision="8" Scale="4" Nullable="false" />
+          <Property Name="goods_name" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="goods_id" Type="int" Nullable="false" />
+          <Property Name="goods_no" Type="varchar" MaxLength="40" Nullable="false" />
+          <Property Name="spec_name" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="spec_no" Type="varchar" MaxLength="40" Nullable="false" />
+          <Property Name="spec_code" Type="varchar" MaxLength="40" Nullable="false" />
+          <Property Name="suite_no" Type="varchar" MaxLength="40" Nullable="false" />
+          <Property Name="suite_name" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="suite_num" Type="decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="suite_amount" Type="decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="suite_discount" Type="decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="is_print_suite" Type="bool" Nullable="false" />
+          <Property Name="api_goods_name" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="api_spec_name" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="weight" Type="decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="commission" Type="decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="goods_type" Type="tinyint" Nullable="false" />
+          <Property Name="flag" Type="int" Nullable="false" />
+          <Property Name="is_zero_cost" Type="bool" Nullable="false" />
+          <Property Name="stock_reserved" Type="tinyint" Nullable="false" />
+          <Property Name="is_consigned" Type="tinyint" Nullable="false" />
+          <Property Name="large_type" Type="bool" Nullable="false" />
+          <Property Name="invoice_type" Type="tinyint" Nullable="false" />
+          <Property Name="invoice_content" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="from_mask" Type="int" Nullable="false" />
+          <Property Name="is_received" Type="tinyint" Nullable="false" />
+          <Property Name="is_master" Type="bool" Nullable="false" />
+          <Property Name="cid" Type="int" Nullable="false" />
+          <Property Name="remark" Type="varchar" MaxLength="60" Nullable="false" />
+          <Property Name="modified" Type="timestamp" Precision="0" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="created" Type="timestamp" Precision="0" Nullable="false" />
+        </EntityType>
+        <EntityContainer Name="wdt_bakModelStoreContainer">
+          <EntitySet Name="sales_trade" EntityType="Self.sales_trade" Schema="wdt_bak" store:Type="Tables" />
+          <EntitySet Name="sales_trade_order" EntityType="Self.sales_trade_order" Schema="wdt_bak" store:Type="Tables" />
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="wdt_bakModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="sales_trade">
+          <Key>
+            <PropertyRef Name="trade_id" />
+          </Key>
+          <Property Name="trade_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="trade_no" Type="String" MaxLength="40" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="platform_id" Type="SByte" Nullable="false" />
+          <Property Name="shop_id" Type="Int16" Nullable="false" />
+          <Property Name="warehouse_id" Type="Int16" Nullable="false" />
+          <Property Name="warehouse_type" Type="SByte" Nullable="false" />
+          <Property Name="src_tids" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="pay_account" Type="String" MaxLength="128" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="trade_status" Type="SByte" Nullable="false" />
+          <Property Name="check_step" Type="SByte" Nullable="false" />
+          <Property Name="consign_status" Type="Int32" Nullable="false" />
+          <Property Name="trade_from" Type="Boolean" Nullable="false" />
+          <Property Name="trade_type" Type="Boolean" Nullable="false" />
+          <Property Name="delivery_term" Type="SByte" Nullable="false" />
+          <Property Name="freeze_reason" Type="Int16" Nullable="false" />
+          <Property Name="refund_status" Type="Boolean" Nullable="false" />
+          <Property Name="unmerge_mask" Type="Boolean" Nullable="false" />
+          <Property Name="fenxiao_type" Type="SByte" Nullable="false" />
+          <Property Name="fenxiao_nick" Type="String" MaxLength="40" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="trade_time" Type="DateTime" Nullable="false" />
+          <Property Name="pay_time" Type="DateTime" Nullable="false" />
+          <Property Name="delay_to_time" Type="Int32" Nullable="false" />
+          <Property Name="goods_count" Type="Decimal" Nullable="false" />
+          <Property Name="goods_type_count" Type="Int16" Nullable="false" />
+          <Property Name="single_spec_no" Type="String" MaxLength="40" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="raw_goods_count" Type="Decimal" Nullable="false" />
+          <Property Name="raw_goods_type_count" Type="Int16" Nullable="false" />
+          <Property Name="customer_type" Type="SByte" Nullable="false" />
+          <Property Name="customer_id" Type="Int32" Nullable="false" />
+          <Property Name="buyer_nick" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="id_card_type" Type="SByte" Nullable="false" />
+          <Property Name="id_card" Type="String" MaxLength="40" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="receiver_name" Type="String" MaxLength="40" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="receiver_country" Type="Int16" Nullable="false" />
+          <Property Name="receiver_province" Type="Int32" Nullable="false" />
+          <Property Name="receiver_city" Type="Int32" Nullable="false" />
+          <Property Name="receiver_district" Type="Int32" Nullable="false" />
+          <Property Name="receiver_address" Type="String" MaxLength="256" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="receiver_mobile" Type="String" MaxLength="40" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="receiver_telno" Type="String" MaxLength="40" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="receiver_zip" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="receiver_area" Type="String" MaxLength="128" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="receiver_ring" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="receiver_dtb" Type="String" MaxLength="128" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="to_deliver_time" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="pre_charge_time" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="currency" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="is_prev_notify" Type="SByte" Nullable="false" />
+          <Property Name="logistics_id" Type="Int16" Nullable="false" />
+          <Property Name="logistics_no" Type="String" MaxLength="40" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="buyer_message" Type="String" MaxLength="1024" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="cs_remark" Type="String" MaxLength="1024" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="remark_flag" Type="SByte" Nullable="false" />
+          <Property Name="print_remark" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="note_count" Type="Int16" Nullable="false" />
+          <Property Name="buyer_message_count" Type="SByte" Nullable="false" />
+          <Property Name="cs_remark_count" Type="SByte" Nullable="false" />
+          <Property Name="cs_remark_change_count" Type="Int16" Nullable="false" />
+          <Property Name="goods_amount" Type="Decimal" Nullable="false" />
+          <Property Name="post_amount" Type="Decimal" Nullable="false" />
+          <Property Name="other_amount" Type="Decimal" Nullable="false" />
+          <Property Name="discount" Type="Decimal" Nullable="false" />
+          <Property Name="receivable" Type="Decimal" Nullable="false" />
+          <Property Name="discount_change" Type="Decimal" Nullable="false" />
+          <Property Name="trade_prepay" Type="Decimal" Nullable="false" />
+          <Property Name="dap_amount" Type="Decimal" Nullable="false" />
+          <Property Name="cod_amount" Type="Decimal" Nullable="false" />
+          <Property Name="pi_amount" Type="Decimal" Nullable="false" />
+          <Property Name="ext_cod_fee" Type="Decimal" Nullable="false" />
+          <Property Name="goods_cost" Type="Decimal" Nullable="false" />
+          <Property Name="post_cost" Type="Decimal" Nullable="false" />
+          <Property Name="other_cost" Type="Decimal" Nullable="false" />
+          <Property Name="profit" Type="Decimal" Nullable="false" />
+          <Property Name="paid" Type="Decimal" Nullable="false" />
+          <Property Name="weight" Type="Decimal" Nullable="false" />
+          <Property Name="volume" Type="Decimal" Nullable="false" />
+          <Property Name="tax" Type="Decimal" Nullable="false" />
+          <Property Name="tax_rate" Type="Decimal" Nullable="false" />
+          <Property Name="commission" Type="Decimal" Nullable="false" />
+          <Property Name="invoice_type" Type="SByte" Nullable="false" />
+          <Property Name="invoice_title" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="invoice_content" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="invoice_id" Type="Int32" Nullable="false" />
+          <Property Name="salesman_id" Type="Int32" Nullable="false" />
+          <Property Name="sales_score" Type="Int32" Nullable="false" />
+          <Property Name="checker_id" Type="Int32" Nullable="false" />
+          <Property Name="fchecker_id" Type="Int32" Nullable="false" />
+          <Property Name="checkouter_id" Type="Int32" Nullable="false" />
+          <Property Name="split_package_num" Type="Int32" Nullable="false" />
+          <Property Name="flag_id" Type="Int16" Nullable="false" />
+          <Property Name="bad_reason" Type="Int32" Nullable="false" />
+          <Property Name="is_sealed" Type="Boolean" Nullable="false" />
+          <Property Name="gift_mask" Type="SByte" Nullable="false" />
+          <Property Name="split_from_trade_id" Type="Int32" Nullable="false" />
+          <Property Name="large_type" Type="SByte" Nullable="false" />
+          <Property Name="stockout_no" Type="String" MaxLength="40" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="logistics_template_id" Type="Int32" Nullable="false" />
+          <Property Name="sendbill_template_id" Type="Int32" Nullable="false" />
+          <Property Name="revert_reason" Type="Int16" Nullable="false" />
+          <Property Name="cancel_reason" Type="Int16" Nullable="false" />
+          <Property Name="is_unpayment_sms" Type="Boolean" Nullable="false" />
+          <Property Name="package_id" Type="Int32" Nullable="false" />
+          <Property Name="trade_mask" Type="Int32" Nullable="false" />
+          <Property Name="reserve" Type="String" MaxLength="40" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="version_id" Type="Int16" Nullable="false" />
+          <Property Name="modified" Type="DateTime" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="created" Type="DateTime" Nullable="false" />
+        </EntityType>
+        <EntityType Name="sales_trade_order">
+          <Key>
+            <PropertyRef Name="rec_id" />
+          </Key>
+          <Property Name="rec_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="trade_id" Type="Int32" Nullable="false" />
+          <Property Name="spec_id" Type="Int32" Nullable="false" />
+          <Property Name="platform_id" Type="SByte" Nullable="false" />
+          <Property Name="src_oid" Type="String" MaxLength="40" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="suite_id" Type="Int32" Nullable="false" />
+          <Property Name="src_tid" Type="String" MaxLength="40" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="gift_type" Type="Boolean" Nullable="false" />
+          <Property Name="refund_status" Type="SByte" Nullable="false" />
+          <Property Name="guarantee_mode" Type="SByte" Nullable="false" />
+          <Property Name="delivery_term" Type="SByte" Nullable="false" />
+          <Property Name="bind_oid" Type="String" MaxLength="40" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="num" Type="Decimal" Nullable="false" />
+          <Property Name="price" Type="Decimal" Nullable="false" />
+          <Property Name="actual_num" Type="Decimal" Nullable="false" />
+          <Property Name="refund_num" Type="Decimal" Nullable="false" />
+          <Property Name="order_price" Type="Decimal" Nullable="false" />
+          <Property Name="share_price" Type="Decimal" Nullable="false" />
+          <Property Name="adjust" Type="Decimal" Nullable="false" />
+          <Property Name="discount" Type="Decimal" Nullable="false" />
+          <Property Name="share_amount" Type="Decimal" Nullable="false" />
+          <Property Name="share_amount2" Type="Decimal" Nullable="false" />
+          <Property Name="share_post" Type="Decimal" Nullable="false" />
+          <Property Name="paid" Type="Decimal" Nullable="false" />
+          <Property Name="tax_rate" Type="Decimal" Nullable="false" />
+          <Property Name="goods_name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="goods_id" Type="Int32" Nullable="false" />
+          <Property Name="goods_no" Type="String" MaxLength="40" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="spec_name" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="spec_no" Type="String" MaxLength="40" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="spec_code" Type="String" MaxLength="40" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="suite_no" Type="String" MaxLength="40" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="suite_name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="suite_num" Type="Decimal" Nullable="false" />
+          <Property Name="suite_amount" Type="Decimal" Nullable="false" />
+          <Property Name="suite_discount" Type="Decimal" Nullable="false" />
+          <Property Name="is_print_suite" Type="Boolean" Nullable="false" />
+          <Property Name="api_goods_name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="api_spec_name" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="weight" Type="Decimal" Nullable="false" />
+          <Property Name="commission" Type="Decimal" Nullable="false" />
+          <Property Name="goods_type" Type="SByte" Nullable="false" />
+          <Property Name="flag" Type="Int32" Nullable="false" />
+          <Property Name="is_zero_cost" Type="Boolean" Nullable="false" />
+          <Property Name="stock_reserved" Type="SByte" Nullable="false" />
+          <Property Name="is_consigned" Type="SByte" Nullable="false" />
+          <Property Name="large_type" Type="Boolean" Nullable="false" />
+          <Property Name="invoice_type" Type="SByte" Nullable="false" />
+          <Property Name="invoice_content" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="from_mask" Type="Int32" Nullable="false" />
+          <Property Name="is_received" Type="SByte" Nullable="false" />
+          <Property Name="is_master" Type="Boolean" Nullable="false" />
+          <Property Name="cid" Type="Int32" Nullable="false" />
+          <Property Name="remark" Type="String" MaxLength="60" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="modified" Type="DateTime" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="created" Type="DateTime" Nullable="false" />
+        </EntityType>
+        <EntityContainer Name="wdt_bakEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="sales_trade" EntityType="Self.sales_trade" />
+          <EntitySet Name="sales_trade_order" EntityType="Self.sales_trade_order" />
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="wdt_bakModelStoreContainer" CdmEntityContainer="wdt_bakEntities">
+          <EntitySetMapping Name="sales_trade">
+            <EntityTypeMapping TypeName="wdt_bakModel.sales_trade">
+              <MappingFragment StoreEntitySet="sales_trade">
+                <ScalarProperty Name="trade_id" ColumnName="trade_id" />
+                <ScalarProperty Name="trade_no" ColumnName="trade_no" />
+                <ScalarProperty Name="platform_id" ColumnName="platform_id" />
+                <ScalarProperty Name="shop_id" ColumnName="shop_id" />
+                <ScalarProperty Name="warehouse_id" ColumnName="warehouse_id" />
+                <ScalarProperty Name="warehouse_type" ColumnName="warehouse_type" />
+                <ScalarProperty Name="src_tids" ColumnName="src_tids" />
+                <ScalarProperty Name="pay_account" ColumnName="pay_account" />
+                <ScalarProperty Name="trade_status" ColumnName="trade_status" />
+                <ScalarProperty Name="check_step" ColumnName="check_step" />
+                <ScalarProperty Name="consign_status" ColumnName="consign_status" />
+                <ScalarProperty Name="trade_from" ColumnName="trade_from" />
+                <ScalarProperty Name="trade_type" ColumnName="trade_type" />
+                <ScalarProperty Name="delivery_term" ColumnName="delivery_term" />
+                <ScalarProperty Name="freeze_reason" ColumnName="freeze_reason" />
+                <ScalarProperty Name="refund_status" ColumnName="refund_status" />
+                <ScalarProperty Name="unmerge_mask" ColumnName="unmerge_mask" />
+                <ScalarProperty Name="fenxiao_type" ColumnName="fenxiao_type" />
+                <ScalarProperty Name="fenxiao_nick" ColumnName="fenxiao_nick" />
+                <ScalarProperty Name="trade_time" ColumnName="trade_time" />
+                <ScalarProperty Name="pay_time" ColumnName="pay_time" />
+                <ScalarProperty Name="delay_to_time" ColumnName="delay_to_time" />
+                <ScalarProperty Name="goods_count" ColumnName="goods_count" />
+                <ScalarProperty Name="goods_type_count" ColumnName="goods_type_count" />
+                <ScalarProperty Name="single_spec_no" ColumnName="single_spec_no" />
+                <ScalarProperty Name="raw_goods_count" ColumnName="raw_goods_count" />
+                <ScalarProperty Name="raw_goods_type_count" ColumnName="raw_goods_type_count" />
+                <ScalarProperty Name="customer_type" ColumnName="customer_type" />
+                <ScalarProperty Name="customer_id" ColumnName="customer_id" />
+                <ScalarProperty Name="buyer_nick" ColumnName="buyer_nick" />
+                <ScalarProperty Name="id_card_type" ColumnName="id_card_type" />
+                <ScalarProperty Name="id_card" ColumnName="id_card" />
+                <ScalarProperty Name="receiver_name" ColumnName="receiver_name" />
+                <ScalarProperty Name="receiver_country" ColumnName="receiver_country" />
+                <ScalarProperty Name="receiver_province" ColumnName="receiver_province" />
+                <ScalarProperty Name="receiver_city" ColumnName="receiver_city" />
+                <ScalarProperty Name="receiver_district" ColumnName="receiver_district" />
+                <ScalarProperty Name="receiver_address" ColumnName="receiver_address" />
+                <ScalarProperty Name="receiver_mobile" ColumnName="receiver_mobile" />
+                <ScalarProperty Name="receiver_telno" ColumnName="receiver_telno" />
+                <ScalarProperty Name="receiver_zip" ColumnName="receiver_zip" />
+                <ScalarProperty Name="receiver_area" ColumnName="receiver_area" />
+                <ScalarProperty Name="receiver_ring" ColumnName="receiver_ring" />
+                <ScalarProperty Name="receiver_dtb" ColumnName="receiver_dtb" />
+                <ScalarProperty Name="to_deliver_time" ColumnName="to_deliver_time" />
+                <ScalarProperty Name="pre_charge_time" ColumnName="pre_charge_time" />
+                <ScalarProperty Name="currency" ColumnName="currency" />
+                <ScalarProperty Name="is_prev_notify" ColumnName="is_prev_notify" />
+                <ScalarProperty Name="logistics_id" ColumnName="logistics_id" />
+                <ScalarProperty Name="logistics_no" ColumnName="logistics_no" />
+                <ScalarProperty Name="buyer_message" ColumnName="buyer_message" />
+                <ScalarProperty Name="cs_remark" ColumnName="cs_remark" />
+                <ScalarProperty Name="remark_flag" ColumnName="remark_flag" />
+                <ScalarProperty Name="print_remark" ColumnName="print_remark" />
+                <ScalarProperty Name="note_count" ColumnName="note_count" />
+                <ScalarProperty Name="buyer_message_count" ColumnName="buyer_message_count" />
+                <ScalarProperty Name="cs_remark_count" ColumnName="cs_remark_count" />
+                <ScalarProperty Name="cs_remark_change_count" ColumnName="cs_remark_change_count" />
+                <ScalarProperty Name="goods_amount" ColumnName="goods_amount" />
+                <ScalarProperty Name="post_amount" ColumnName="post_amount" />
+                <ScalarProperty Name="other_amount" ColumnName="other_amount" />
+                <ScalarProperty Name="discount" ColumnName="discount" />
+                <ScalarProperty Name="receivable" ColumnName="receivable" />
+                <ScalarProperty Name="discount_change" ColumnName="discount_change" />
+                <ScalarProperty Name="trade_prepay" ColumnName="trade_prepay" />
+                <ScalarProperty Name="dap_amount" ColumnName="dap_amount" />
+                <ScalarProperty Name="cod_amount" ColumnName="cod_amount" />
+                <ScalarProperty Name="pi_amount" ColumnName="pi_amount" />
+                <ScalarProperty Name="ext_cod_fee" ColumnName="ext_cod_fee" />
+                <ScalarProperty Name="goods_cost" ColumnName="goods_cost" />
+                <ScalarProperty Name="post_cost" ColumnName="post_cost" />
+                <ScalarProperty Name="other_cost" ColumnName="other_cost" />
+                <ScalarProperty Name="profit" ColumnName="profit" />
+                <ScalarProperty Name="paid" ColumnName="paid" />
+                <ScalarProperty Name="weight" ColumnName="weight" />
+                <ScalarProperty Name="volume" ColumnName="volume" />
+                <ScalarProperty Name="tax" ColumnName="tax" />
+                <ScalarProperty Name="tax_rate" ColumnName="tax_rate" />
+                <ScalarProperty Name="commission" ColumnName="commission" />
+                <ScalarProperty Name="invoice_type" ColumnName="invoice_type" />
+                <ScalarProperty Name="invoice_title" ColumnName="invoice_title" />
+                <ScalarProperty Name="invoice_content" ColumnName="invoice_content" />
+                <ScalarProperty Name="invoice_id" ColumnName="invoice_id" />
+                <ScalarProperty Name="salesman_id" ColumnName="salesman_id" />
+                <ScalarProperty Name="sales_score" ColumnName="sales_score" />
+                <ScalarProperty Name="checker_id" ColumnName="checker_id" />
+                <ScalarProperty Name="fchecker_id" ColumnName="fchecker_id" />
+                <ScalarProperty Name="checkouter_id" ColumnName="checkouter_id" />
+                <ScalarProperty Name="split_package_num" ColumnName="split_package_num" />
+                <ScalarProperty Name="flag_id" ColumnName="flag_id" />
+                <ScalarProperty Name="bad_reason" ColumnName="bad_reason" />
+                <ScalarProperty Name="is_sealed" ColumnName="is_sealed" />
+                <ScalarProperty Name="gift_mask" ColumnName="gift_mask" />
+                <ScalarProperty Name="split_from_trade_id" ColumnName="split_from_trade_id" />
+                <ScalarProperty Name="large_type" ColumnName="large_type" />
+                <ScalarProperty Name="stockout_no" ColumnName="stockout_no" />
+                <ScalarProperty Name="logistics_template_id" ColumnName="logistics_template_id" />
+                <ScalarProperty Name="sendbill_template_id" ColumnName="sendbill_template_id" />
+                <ScalarProperty Name="revert_reason" ColumnName="revert_reason" />
+                <ScalarProperty Name="cancel_reason" ColumnName="cancel_reason" />
+                <ScalarProperty Name="is_unpayment_sms" ColumnName="is_unpayment_sms" />
+                <ScalarProperty Name="package_id" ColumnName="package_id" />
+                <ScalarProperty Name="trade_mask" ColumnName="trade_mask" />
+                <ScalarProperty Name="reserve" ColumnName="reserve" />
+                <ScalarProperty Name="version_id" ColumnName="version_id" />
+                <ScalarProperty Name="modified" ColumnName="modified" />
+                <ScalarProperty Name="created" ColumnName="created" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="sales_trade_order">
+            <EntityTypeMapping TypeName="wdt_bakModel.sales_trade_order">
+              <MappingFragment StoreEntitySet="sales_trade_order">
+                <ScalarProperty Name="rec_id" ColumnName="rec_id" />
+                <ScalarProperty Name="trade_id" ColumnName="trade_id" />
+                <ScalarProperty Name="spec_id" ColumnName="spec_id" />
+                <ScalarProperty Name="platform_id" ColumnName="platform_id" />
+                <ScalarProperty Name="src_oid" ColumnName="src_oid" />
+                <ScalarProperty Name="suite_id" ColumnName="suite_id" />
+                <ScalarProperty Name="src_tid" ColumnName="src_tid" />
+                <ScalarProperty Name="gift_type" ColumnName="gift_type" />
+                <ScalarProperty Name="refund_status" ColumnName="refund_status" />
+                <ScalarProperty Name="guarantee_mode" ColumnName="guarantee_mode" />
+                <ScalarProperty Name="delivery_term" ColumnName="delivery_term" />
+                <ScalarProperty Name="bind_oid" ColumnName="bind_oid" />
+                <ScalarProperty Name="num" ColumnName="num" />
+                <ScalarProperty Name="price" ColumnName="price" />
+                <ScalarProperty Name="actual_num" ColumnName="actual_num" />
+                <ScalarProperty Name="refund_num" ColumnName="refund_num" />
+                <ScalarProperty Name="order_price" ColumnName="order_price" />
+                <ScalarProperty Name="share_price" ColumnName="share_price" />
+                <ScalarProperty Name="adjust" ColumnName="adjust" />
+                <ScalarProperty Name="discount" ColumnName="discount" />
+                <ScalarProperty Name="share_amount" ColumnName="share_amount" />
+                <ScalarProperty Name="share_amount2" ColumnName="share_amount2" />
+                <ScalarProperty Name="share_post" ColumnName="share_post" />
+                <ScalarProperty Name="paid" ColumnName="paid" />
+                <ScalarProperty Name="tax_rate" ColumnName="tax_rate" />
+                <ScalarProperty Name="goods_name" ColumnName="goods_name" />
+                <ScalarProperty Name="goods_id" ColumnName="goods_id" />
+                <ScalarProperty Name="goods_no" ColumnName="goods_no" />
+                <ScalarProperty Name="spec_name" ColumnName="spec_name" />
+                <ScalarProperty Name="spec_no" ColumnName="spec_no" />
+                <ScalarProperty Name="spec_code" ColumnName="spec_code" />
+                <ScalarProperty Name="suite_no" ColumnName="suite_no" />
+                <ScalarProperty Name="suite_name" ColumnName="suite_name" />
+                <ScalarProperty Name="suite_num" ColumnName="suite_num" />
+                <ScalarProperty Name="suite_amount" ColumnName="suite_amount" />
+                <ScalarProperty Name="suite_discount" ColumnName="suite_discount" />
+                <ScalarProperty Name="is_print_suite" ColumnName="is_print_suite" />
+                <ScalarProperty Name="api_goods_name" ColumnName="api_goods_name" />
+                <ScalarProperty Name="api_spec_name" ColumnName="api_spec_name" />
+                <ScalarProperty Name="weight" ColumnName="weight" />
+                <ScalarProperty Name="commission" ColumnName="commission" />
+                <ScalarProperty Name="goods_type" ColumnName="goods_type" />
+                <ScalarProperty Name="flag" ColumnName="flag" />
+                <ScalarProperty Name="is_zero_cost" ColumnName="is_zero_cost" />
+                <ScalarProperty Name="stock_reserved" ColumnName="stock_reserved" />
+                <ScalarProperty Name="is_consigned" ColumnName="is_consigned" />
+                <ScalarProperty Name="large_type" ColumnName="large_type" />
+                <ScalarProperty Name="invoice_type" ColumnName="invoice_type" />
+                <ScalarProperty Name="invoice_content" ColumnName="invoice_content" />
+                <ScalarProperty Name="from_mask" ColumnName="from_mask" />
+                <ScalarProperty Name="is_received" ColumnName="is_received" />
+                <ScalarProperty Name="is_master" ColumnName="is_master" />
+                <ScalarProperty Name="cid" ColumnName="cid" />
+                <ScalarProperty Name="remark" ColumnName="remark" />
+                <ScalarProperty Name="modified" ColumnName="modified" />
+                <ScalarProperty Name="created" ColumnName="created" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="false" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="无" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

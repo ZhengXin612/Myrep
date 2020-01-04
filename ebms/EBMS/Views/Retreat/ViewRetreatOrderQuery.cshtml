@@ -1,0 +1,111 @@
+﻿@{
+    ViewBag.Title = "ViewSupplier";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<div class="Company-top-box">
+    <div class="search-box">
+        <input type="text" placeholder="订单号" id="txtQuery" class="icon-search-txt">
+        <input type="button" value="查询" id="btnQuery" class="icon-search">
+         <p class="showBar">选择订单号 : 请双击需要选择的数据</p>
+
+    </div>
+</div>
+<table id="List"></table>
+<script type="text/javascript">
+    function op(name, url) {
+        self.parent.addTab(name, url, '');
+        getContextmenu()
+    }
+    enterSearch("#btnQuery");
+    $(function () {
+
+        var url = "";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() - 50,
+            fitColumns: true,
+            sortName: 'ID',
+            sortOrder: 'desc',
+            idField: 'ID',
+            pageSize: 30,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            columns: [[
+                   { field: 'platform_code', title: '订单号', width: 180, align: 'center' },
+                   { field: 'shop_name', title: '店铺名称', width: 140, align: 'center' },
+                   { field: 'vip_code', title: '会员代码', width: 140, align: 'center' },
+                   { field: 'vip_name', title: '会员名称', width: 140, align: 'center' },
+                   { field: 'amount', title: '订单金额', width: 80, align: 'center' },
+                   { field: 'payment_amount', title: '支付金额', width: 80, align: 'center' },
+                   { field: 'order_type_name', title: '订单类型', width: 80, align: 'center' },
+                   {
+                       field: 'Status_Retreat', title: '退货退款情况', width: 150, align: 'center', formatter: function (value, row, index) {
+                           switch (row.Status_Retreat) {
+                               case 0:
+                                   return "<font color=#d02e2e>未操作</font>";
+                                   break;
+                               case 1:
+                                   return "<font color=#2967c9>退货审核中</font>";
+                                   break;
+                               case 2:
+                                   return "<font color=#1fc73a>已退款</font>";
+                                   break;
+
+                           }
+                       }
+                   },
+              
+            ]],
+            onDblClickRow: function () {
+                myfunction();
+            }
+        });
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            });
+        });
+
+        //关闭当前页
+        function closeCurTab(tabName) {
+            var parentTab = parent.$('#mainTab').tabs('select', tabName);
+            var curTab = self.parent.$('#mainTab').tabs('getSelected');// 当前tab
+            var url = $(curTab.panel('options')).attr('title');
+            var index = self.parent.$('#mainTab').tabs('getTabIndex', curTab);
+            self.parent.$('#mainTab').tabs('close', index);
+        }
+
+        function myfunction() {
+           
+            var row = $('#List').datagrid('getSelected');
+
+            op("退货退款新增", "../Retreat/ViewRetreatAdd?ID=" + row.ID)
+            closeCurTab("退货退款新增订单");//关闭当前页面
+        }
+        $("#btnOk").click(function () {
+            myfunction();
+        });
+
+        $("#btnQuery").click(function () {
+            var queryStr = $("#txtQuery").val().trim();
+            //如果查询条件为空默认查询全部
+            if (queryStr == null) {
+                queryStr = "%";
+            }
+            $('#List').datagrid({
+                url: 'GetOrderList?code=' + encodeURI(queryStr)
+            });
+        });
+
+    });
+
+</script>

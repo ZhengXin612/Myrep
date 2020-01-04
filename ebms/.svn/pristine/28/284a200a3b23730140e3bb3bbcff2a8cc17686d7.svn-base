@@ -1,0 +1,144 @@
+﻿@model EBMS.Models.T_CashbackApproveConfig
+@using Lib
+@{
+    ViewBag.Title = "选择审核流程";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<style>
+#Shop {cursor:pointer;}
+.select-table {margin:20px 0 0 20px;}
+.select-table tr {margin-bottom:10px;display:table}
+.select-table tr select {padding:2px 3px;width:175px}
+.next {padding:10px 0 0 15px}
+.next a {color:#666}
+.next a:hover {color:#2299ee}
+#nextResult{margin: 20px 0 0 20px;font-size: 14px;color:#2299ee}
+#methodBox {margin:10px 0 0 20px}
+#btnRepeat {outline:none;border:0;background:#fff;font-size:12px;color:#666}
+#btnRepeat:hover {color:#2299ee}
+    
+</style>
+<div class="mvctool">
+    <input id="btnSave" class="modal-btn modal-btn-save" type="submit" value="保存">
+   <input id="btnRepeat" type="button" value="重置">
+
+</div>
+<table class="select-table">
+    <tr>
+        <td width="120px">选择店铺：</td>
+         <td><input type="text" id="Shop" readonly="true" class="cashIn"/></td>
+    </tr>
+     <tr >
+         <td width="120px">选择返现理由：</td>
+         <td> @Html.DropDownList("Reason", ViewData["Reason"] as List<SelectListItem>, new { @class="cashIn"})</td>
+    </tr>
+     <tr>
+        <td width="120px">选择返现金额大小：</td>
+        <td>
+            <select id="Money" class="cashIn">
+                  <option value="0">小于等于10元</option>
+                  <option value="1">大于100元</option>
+                <option value="2">大于10元小于100元</option>
+            </select>
+        </td>
+    </tr>
+     <tr>
+        <td width="120px">选择职务：</td>
+        <td>
+            <select id="Roles" class="cashIn">
+                  <option value="其他">其他</option>
+                  <option value="售前">售前</option>
+                  <option value="售后">售后</option>
+            </select>
+        </td>
+    </tr>
+</table>
+<p class="next"><a href="javascript:;" id="nextBtn">下一步</a></p>
+<p id="nextResult"></p>
+<div id="methodBox"></div>
+<input id="ID" type="hidden" >
+<div id="ShopDiv" class="easyui-dialog" closed="true" modal="true" title="选择店铺" style="width:820px; height:420px;" resizable="true" closable="true">
+    <iframe scrolling="yes" id='openIframeShop' frameborder="0" src="" style="width:100%;height:98%;"></iframe>
+</div>
+<div id="methodDiv" class="easyui-dialog" closed="true" modal="true" title="选择流程" style="width:820px; height:420px;" resizable="true" closable="true">
+    <iframe scrolling="yes" id='openIframeMethod' frameborder="0" src="" style="width:100%;height:98%;"></iframe>
+</div>
+<script type="text/javascript">
+ //选择店铺
+    $("#Shop").click(function () {
+        $('#openIframeShop')[0].src = "/CashBackConfig/ShopList";
+        $('#ShopDiv').dialog('open');
+    })
+    //下一步
+    var next = 0;
+    $("#nextBtn").click(function(){
+        if ($.trim($("#Shop").val()) == "") {
+            $.messager.alert('提示', "请选择店铺", "info", function () { });
+            return;
+        }
+        if (next == 0) {
+            next++;
+            loading(0)
+            var _shop = $("#Shop").val();
+            var _reason = $("#Reason").val();
+            var _money = $("#Money").val();
+            var _roles = $("#Roles").val();
+            $.ajax({
+                url: "NextStep",
+                type: "Post",
+                data: { "shop": _shop, "reason": _reason, "money": _money, "roles": _roles },
+                success: function (data) {
+                    $("#nextResult").html(data.Result);
+                    var $input = "<label>请单击选择审批流程： </label><input readonly=\"true\" id=\"methodIn\" onclick=\"getMethod()\"/>"
+                    $("#methodBox").html($input);
+                    $("#ID").val(data.Id);
+                    $(".cashIn").attr("disabled","disabled")
+                        loading(1);
+                        next = 0
+                }
+            });
+
+        }
+        
+    })
+    function getMethod() {
+        $('#openIframeMethod')[0].src = "/CashBackConfig/MethodList";
+        $('#methodDiv').dialog('open');
+    }
+
+ 
+    var flag = 0
+        $("#btnSave").click(function () {
+            var _method = $("#methodIn").val();
+            var _id = $("#ID").val();
+            var _shop = $("#Shop").val();
+            var _reason = $("#Reason").val();
+            var _money = $("#Money").val();
+            var _roles = $("#Roles").val();
+            if ($.trim(_method) == "") {
+                $.messager.alert('提示', "请选择审批流程", "info", function () { });
+                return
+            }
+            if (flag == 0) {
+                flag++;
+                loading(0);
+                $.ajax({
+                    url: "SelectSave",
+                    type: "Post",
+                    data: {"method":_method,"id":_id,"shop":_shop,"reason":_reason,"money": _money,"roles":_roles},
+                    success: function (data) {
+                        $.messager.alert('提示', data, "info", function () {
+                            window.location.reload();
+                            loading(1);
+                            flag = 0
+                        });
+                    }
+                });
+           
+            }
+        })
+        $("#btnRepeat").click(function () {
+            $.messager.confirm('提示', '确定重置？', function (r) { window.location.reload(); });
+        });
+</script>
+

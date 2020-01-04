@@ -1,0 +1,88 @@
+﻿@model EBMS.Models.T_RulesNotice
+@{
+    ViewBag.Title = "ViewRuleDetails";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+
+<script type="text/javascript">
+    
+    $(function () {
+      
+        document.oncontextmenu = new Function("event.returnValue=false");
+        document.onselectstart = new Function("event.returnValue=false");
+        var str = $("#back-Html").val();
+        var str2 = replaceStr(str)
+        $("#Contens").html(str2)
+         })
+    function replaceStr(str) {
+        str = str.replace(/\&lt;/g, '<');
+        str = str.replace(/\&gt;/g, ">" );
+        //str = str.replace("&quot;", "\"");
+        str = str.replace(/\&quot;/g, "\"");
+        str = str.replace(/\&amp;nbsp;/g, "&nbsp;");
+        str = str.replace(/\&amp;/g, "&");
+        return str;
+    }
+    function Record(id) {
+        //$("#openDivJiluInfo").prev(".panel-header").find(".panel-title").html("浏览详情")
+        $('#IframeRecordInfo')[0].src = "ViewNoticeReader?id=" + id;
+         $('#DivRecordInfo').dialog('open');
+    }
+</script>
+<style>
+    .title {
+    margin-top:2%;
+    margin-bottom:2%;
+
+  text-align:center;
+  font-size:2em;
+  font-family:"黑体";
+    }
+    .naivel {
+     font-size:0.875em;
+     color:#808080;
+     text-align:center;
+       margin-bottom:2%;
+        font-family:"宋体";
+
+    }
+        .naivel span {
+        margin-right:6%;
+        }
+    #Contens {
+     text-align:left;
+     margin-left:2%;
+     margin-right:2%;
+    }
+    li {
+    list-style-type: disc;
+   
+    }
+
+</style>
+<noscript> 
+<iframe src="*.htm"></iframe> 
+</noscript> 
+<input id="back-Html" type="hidden" value=" @Model.Contents" />
+<div class="title">
+    @Model.Title
+
+</div>
+<div class="naivel">
+   
+      <div>
+          发布时间:<span> @Model.CreateDate</span>
+          发布人:<span> @Model.CreateName</span>
+          浏览次数: <span> @ViewData["Times"]次</span>
+          <a onclick="Record(@Model.ID)">查看浏览记录</a>
+    </div>
+   
+</div>
+
+<div id="Contens">
+</div>
+<div id="DivRecordInfo"  class="easyui-dialog" closed="true" modal="true" title=" "
+    style="width:45%; height:90%;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='IframeRecordInfo' frameborder="0" src="" style="width: 100%; height: 98%;"></iframe>
+</div>
+

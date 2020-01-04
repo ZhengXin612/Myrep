@@ -1,0 +1,134 @@
+﻿@{
+    ViewBag.Title = "ViewAfterOrderList";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+
+<div class="Company-top-box">
+    <div class="search-box">
+        <input type="text" placeholder="订单号" id="txtQuery" class="icon-search-txt">
+        <input type="button" value="查询" id="btnQuery" class="icon-search">
+        <a href="#" class="easyui-linkbutton" plain="true" iconcls="icon-add" id="btnOk">添加</a>
+    </div>
+</div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+<script type="text/javascript">
+    function op(name, url) {
+        self.parent.addTab(name, url, '');
+        getContextmenu()
+    }
+    $(function () {
+        //回车触发查询
+        enterSearch("#btnQuery");
+        var url = "";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() - 50,
+            fitColumns: true,
+            sortName: 'ID',
+            pageSize: 30,
+            sortOrder: 'desc',
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                { field: 'platform_code', title: '订单号', width: 100, align: 'center' },
+                 { field: 'vip_code', title: '会员账号', width: 80, align: 'center' },
+                 { field: 'vip_name', title: '会员名称', width: 80, align: 'center' },
+                  { field: 'receiver_name', title: '收货人', width: 70, align: 'center' },
+                  { field: 'receiver_address', title: '收货人地址', width: 80, align: 'center' },
+            { field: 'shop_name', title: '店铺', width: 80, align: 'center' },
+                        {
+                            field: 'ReissueStatus', title: '补发状态', width: 60, align: 'center', formatter: function (value, row, index) {
+                                switch (value) {
+                                    case 0:
+                                        return "<font color=red>未补发</font>"
+                                        break;
+                                    case 1:
+                                        return "<font color=blue>补发中</font>"
+                                        break;
+                                    case 2:
+                                        return "<font color=green>已补发</font>"
+                                        break;
+                                    default:
+                                        return "<font color=red>NULL</font>"
+                                }
+                            }
+                        }
+            ]],
+            onDblClickRow: function () {
+                myfunction();
+            }
+        });
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            });
+        });
+        //关闭当前页
+        function closeCurTab(tabName) {
+            var parentTab = parent.$('#mainTab').tabs('select', tabName);
+            var curTab = self.parent.$('#mainTab').tabs('getSelected');// 当前tab
+            var url = $(curTab.panel('options')).attr('title');
+            var index = self.parent.$('#mainTab').tabs('getTabIndex', curTab);
+            self.parent.$('#mainTab').tabs('close', index);
+        }
+        function myfunction() {
+            var row = $('#List').datagrid('getSelected');
+            if (row == null) {
+                $.messager.alert('提示', '请选择所需要的数据', "info");
+                return false;
+            }
+            $.ajax({
+                url: '../Reissue/GetReissueOrder',
+                type: 'POST',
+                data: JSON.stringify({ code: row.platform_code }),
+                dataType: 'json',
+                contentType: 'application/json',
+                success: function (data) {
+                    if (data.State == "Success") {
+                        $.messager.confirm('提示', '三天内补发货重复否继续?', function (r) {
+                            if (r)
+                                addTab(row.ID);
+                        });
+                    } else {
+                        addTab(row.ID);
+                    }
+                }
+            });
+        }
+        $("#btnOk").click(function () {
+            myfunction();
+        });
+
+        function addTab(ID) {
+            op("售后补发货新增", "../Reissue/ViewReissueForAfterSaleAdd?ID=" + ID)
+            closeCurTab("售后补发货新增订单");//关闭当前页面
+        }
+        $("#btnQuery").click(function () {
+
+            var queryStr = $("#txtQuery").val().trim();
+            //如果查询条件为空默认查询全部
+            if (queryStr == "") {
+                $.messager.alert('提示', '请输入订单号', "info");
+                return false;
+            }
+
+            $('#List').datagrid({
+                url: '../Reissue/GetOrdersList?code=' + queryStr
+            });
+
+        });
+
+    });
+
+</script>

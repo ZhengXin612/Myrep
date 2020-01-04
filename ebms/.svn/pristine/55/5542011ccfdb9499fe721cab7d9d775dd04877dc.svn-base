@@ -1,0 +1,179 @@
+﻿@{
+    ViewBag.Title = "ViewAssetsTransferApplyMy";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+<script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+<div class="Company-top-box">
+   
+     <div class="search-box">
+         <input type="text" placeholder="资产名称或编码.." id="txtQuery"  class="icon-search-txt">
+         <input type="button" value="查询" id="btnQuery" class="icon-search">
+    </div>
+     <div class="btn-bar">
+        <a href="#" id="btnEdit" class="icon-edit">编辑</a>
+        <a href="#" id="btnDelete" class="icon-remove">删除</a>
+        
+    </div>
+</div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+<style type="text/css">
+      .datagrid-cell-group {
+  font-size:1.2em;
+  font-weight:600;
+    }
+</style>
+<script type="text/javascript">
+    enterSearch("#btnQuery");
+    function op(name, url) {
+        self.parent.addTab(name, url, '');
+        getContextmenu()
+    }
+    var isApply="@ViewData["isApply"]"
+    $(function () {
+        var url = "/FixedAssets/GetViewAssetsTransferApplyList?isMy=1";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width()-15,
+            method: 'post',
+            height: $(window).height() - 45,
+            fitColumns: true,
+           // sortName: 'Code',
+            sortOrder: 'desc',
+            idField: 'ID',
+            pageSize: 20,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                { title: '资产', colspan: 2 },
+                { title: '变更前', colspan: 4, },
+                { title: '变更后', colspan: 4, },
+            { title: '其他', colspan: 4, }],
+            [{ field: 'Name', title: '资产名称', width: 120, align: 'center' },
+                
+                { field: 'Code', title: '资产代码', width: 100, align: 'center' },
+               
+                { field: 'Owner', title: '使用人', width: 60, align: 'center' },
+               { field: 'Place', title: '地点', width: 60, align: 'center' },
+               { field: 'Department', title: '部门', width: 60, align: 'center' },
+               { field: 'Responsible', title: '负责人', width: 60, align: 'center' },
+               { field: 'TransferOwner', title: '使用人', width: 60, align: 'center' },
+               { field: 'TransferPlace', title: '地点', width: 60, align: 'center' },
+               { field: 'TransferDepartment', title: '部门', width: 60, align: 'center' },
+               { field: 'TransferResponsible', title: '负责人', width: 60, align: 'center' },
+                { field: 'PostDate', title: '申请时间', width: 100, align: 'center', formatter: formatDatebox },
+                { field: 'TransferType', title: '变更类型', width: 60, align: 'center' },
+                 //{ field: 'CurrentApproveName', title: '当前审核人', width: 60, align: 'center' },
+                  { field: 'Memo', title: '备注', width: 60, align: 'center' },
+                {
+                    field: 'State', title: '审核进度', width: 100, align: 'center', formatter: stateSecond
+                },
+            ]],
+            onDblClickRow: function (rowIndex, rowData) {
+                ApproveDetail(rowData.ID)
+            },
+
+
+        })
+
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 40
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 40
+            });
+        });
+
+
+    })
+
+ function Query()
+    {
+        var queryStr = $("#txtQuery").val();
+       
+        $('#List').datagrid({
+            url: '/FixedAssets/GetViewAssetsTransferApplyList?isMy=1&queryStr=' + encodeURI(queryStr)   //+ '&statedate=' + statedate + '&EndDate=' + EndDate + '&dianming=' + dianming
+
+        });
+        $("#txtQuery").focus().select();
+    }
+    $('#btnQuery').click(function () {
+
+        Query();
+
+    });
+
+    function ApproveDetail(ID)
+    {
+        if (ID != null&&ID>0) {
+            $('#IframeDetail')[0].src = "/FixedAssets/ViewTransferApproveDetail?ID=" +ID;
+            $('#DetailDiv').dialog('open');
+        }
+        else { $.messager.alert('提示', '请选择一条记录', "info"); }
+    }
+
+    $("#btnEdit").click(function () {
+        var row = $('#List').datagrid('getSelected');
+       
+        if (row != null) {
+            if (row.TransferType == "转移") {
+                if (row.State == -1) {
+                    op("编辑：" + row.ID, "/FixedAssets/ViewAssetsTransferEdit?ID=" + row.ID)
+                }
+                else { $.messager.alert('提示', '审核后的记录不允许修改', "info"); }
+            }
+            else { $.messager.alert('提示', '该流程申请后无需修改', "info"); }
+        }
+        else { $.messager.alert('提示', '请选择一条记录', "info"); }
+    });
+    $("#btnDelete").click(function () {
+        var row = $('#List').datagrid('getSelected');
+        if (row != null) {
+            if (row.State == -1) {
+                $.messager.confirm('提示', '确定删除该记录吗？', function (r) {
+                    loading(0);
+                    if (r) {
+                        var flag = 0
+                        if (flag == 0) {
+                            flag++
+                            $.ajax({
+                                url: "/FixedAssets/AssetsTransferDelete?ID=" + row.ID,
+                                type: "Post",
+                                contentType: "application/json",
+                                // data: JSON.stringify(p),
+                                dataType: "json",
+                                success: function (data) {
+                                    if (data > 0) {
+                                        loading(1);
+                                        $('#List').datagrid('reload');
+                                        $.messager.alert('提示', '删除成功', "info");
+                                    }
+                                    else { $.messager.alert('提示', '删除失败', "info"); }
+                                }, error: function (data) {
+                                    loading(1);
+                                    flag = 0;
+                                    $.messager.alert('提示', data, "info");
+                                }
+
+                            });
+                        }
+                    }
+                });
+            }
+            else { $.messager.alert('提示', '已审核数据不允许删除', "info"); }
+        }
+        else {
+            alert("请选择一条记录");
+        }
+    });
+    </script>
+<div id="DetailDiv" class="easyui-dialog" closed="true" modal="true" title="审核详情" style="width:40%; height:50%;"resizable="true" closable="true">
+    <iframe scrolling="yes" id='IframeDetail' frameborder="0" src="" style="width:100%;height:98%;"></iframe>
+</div>
+
+

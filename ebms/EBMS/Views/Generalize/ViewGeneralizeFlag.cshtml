@@ -1,0 +1,95 @@
+﻿@{
+    ViewBag.Title = "ViewGeneralizeFlag";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+
+<script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+<div class="Company-top-box">
+    <div class="search-box">
+        店铺:
+        @Html.DropDownList("shop", ViewData["shop"] as List<SelectListItem>)
+        <span style="color: #808080; padding-right: 10px; font-size: 13px; margin-top: 3px; margin-left: 10px;">开始时间</span>
+        <input name="statethisdate" style="float: left;" value="" id="statethisdate" class="easyui-datebox" data-options="sharedCalendar:'#statethisdate'">
+        <span style="color: #808080; padding-right: 10px; font-size: 13px; margin-top: 3px; margin-left: 10px;">结束时间</span>
+        <input name="Endthisdate" style="float: left;" value="" id="Endthisdate" class="easyui-datebox" data-options="sharedCalendar:'#Endthisdate'">
+        <input type="button" value="查询" id="btnQuery" class="icon-search">
+    </div>
+    <div class="btn-bar">
+        <a href="#" onclick="OutputExcel(this)" class="icon-check">导出Excel</a>
+    </div>
+</div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+<script type="text/javascript">
+    //回车触发查询
+    enterSearch("#btnQuery");
+    $(function () {
+        var url = "";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() * 0.95,
+            fitColumns: true,
+            sortName: 'ID',
+            sortOrder: 'desc',
+            idField: 'id',
+            pageSize: 30,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                 { field: 'paytime', title: '支付时间', width: 80, align: 'center', formatter: formatDatebox },
+                { field: 'shop_name', title: '店铺名称', width: 100, align: 'center' },
+                { field: 'platform_code', title: '平台单号', width: 120, align: 'center' },
+                { field: 'vip_name', title: '会员名称', width: 120, align: 'center' },
+                 { field: 'warehouse_name', title: '仓库', width: 60, align: 'center' },
+                 { field: 'payment', title: '支付金额', width: 100, align: 'center' },
+                { field: 'order_type_name', title: '订单类型', width: 70, align: 'center' }
+            ]]
+        });
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            });
+        });
+    });
+
+    function OutputExcel(s) {
+        var query = $("#shop option:selected").text();
+        if (query == "==请选择==")
+            query = "";
+        var statedate = $('#statethisdate').datebox('getValue');
+        var EndDate = $('#Endthisdate').datebox('getValue');
+        if (statedate == "" || EndDate == "") {
+            $.messager.alert('提示', "请选择时间段", "info");
+            return false;
+        }
+        s.href = 'OutPutFlagExcel?query=' + query + '&startDate=' + statedate + '&EndDate=' + EndDate
+    }
+
+    $("#btnQuery").click(function () {
+
+        var queryStr = $("#shop option:selected").text();
+        if (queryStr == "==请选择==")
+            queryStr = "";
+        var statedate = $('#statethisdate').datebox('getValue');
+        var EndDate = $('#Endthisdate').datebox('getValue');
+        if (statedate == "" || EndDate == "") {
+            $.messager.alert('提示', "请选择时间段", "info");
+            return false;
+        }
+        $('#List').datagrid({
+            url: 'GetOrderListFlag?query=' + queryStr + '&startDate=' + statedate + '&endDate=' + EndDate
+        });
+
+    });
+
+</script>

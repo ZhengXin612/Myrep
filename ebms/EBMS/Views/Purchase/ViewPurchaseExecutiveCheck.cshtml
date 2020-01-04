@@ -1,0 +1,150 @@
+﻿@model  EBMS.Models.T_Purchase
+@{
+    //商品列表
+    ViewBag.Title = "采购未审核";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+<script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+<div class="Company-top-box">
+    <div class="search-box">
+         <input type="text" placeholder="采购申请人/编码.." id="txtQuery"  class="icon-search-txt">
+         <input type="button" value="查询" id="btnQuery" class="icon-search">
+    </div>
+    <div class="btn-bar">
+          <a href="#" id="btnCheck" class="icon-edit">审核</a>
+         <p class="showBar">查看采购详情 : 请双击需要查看的数据</p>
+    </div>
+</div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+<script type="text/javascript">
+    enterSearch("#btnQuery");
+    function op(name, url) {
+        self.parent.addTab(name, url, '');
+        getContextmenu()
+    }
+    var statusVal = $("#selStatus").val();
+    $(function () {
+        var url = "../Purchase/UnCheckPurchaseExecutiveReportList";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() - 50,
+            fitColumns: true,
+            sortName: 'ID',
+            sortOrder: 'desc',
+            idField: 'ID',
+            pageSize: 20,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            columns: [[
+                 { field: 'ApplyName', title: '申请人', width: 100, align: 'center' },
+                     { field: 'PurchaseOddNum', title: '采购编码', width: 200, align: 'center' },
+                 { field: 'ApplyDepartment', title: '采购部门', width: 100, align: 'center' },
+                 {
+                     field: 'Status', title: '状态', width: 100, align: 'center', formatter: function (value, row, index) {
+                         switch (row.Status) {
+                             case -1:
+                                 return "<font color=#d02e2e>未审核</font>";
+                                 break;
+                             case 0:
+                                 return "<font color=#2967c9>审核中</font>";
+                                 break;
+                             case 1:
+                                 return "<font color=#1fc73a>已同意</font>";
+                                 break;
+                             case 2:
+                                 return "<font color=#d02e2e>不同意</font>";
+                                 break;
+                             case 3:
+                                 return "<font color=#d02e2e>已作废</font>";
+                                 break;
+
+                         }
+                     }
+                 },
+                 { field: 'ApplyDate', title: '申请时间', width: 100, align: 'center', formatter: formatDatebox },
+            {
+                field: 'action', title: '操作', width: 100, align: 'center',
+                formatter: function (value, row, index) {
+                    var e = ' <div class="btn-bar"><a href="#" class="icon-edit" onclick=Show(' + row.ID + ')>审核详情</a></div>';
+                    return e;
+                }
+            }
+            ]],
+            onClickRow: function (rowIndex, rowData) {
+            },
+            onDblClickRow: function (rowIndex, rowData) {
+                var url = "../Purchase/ViewPurchaseExecutiveDetails?tid=" + rowData.ID
+                window.open(url, "_blank", "height=" + (window.screen.availHeight - 30) + ",width=" + (window.screen.availWidth - 10) + ",scrollbars=yes,resizable=1,modal=false,alwaysRaised=yes");
+            },            onAfterEdit: function (index, rowData) {//回调函数可以直接用于操作页面
+            }
+        });
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            });
+        });
+    });
+    //得到选中行集合的id
+    function getSelections() {
+        var ss = [];
+        var rows = $('#List').datagrid('getSelections');
+        for (var i = 0; i < rows.length; i++) {
+            var row = rows[i];
+            ss.push(row.Id);
+        }
+        return ss;
+    }
+    $("#btnQuery").click(function () {
+        var queryStr = $("#txtQuery").val();
+        //如果查询条件为空默认查询全部
+        if (queryStr == null) {
+            queryStr = "%";
+        }
+        $('#List').datagrid({
+            url: '../Purchase/UnCheckPurchaseExecutiveReportList?queryStr=' + encodeURI(queryStr)
+        });
+
+    });
+    function Show(id) {
+        var url = "../Purchase/ViewPurchaseExecutiveDetails?tid=" + id
+        window.open(url, "_blank", "height=" + (window.screen.availHeight - 30) + ",width=" + (window.screen.availWidth - 10) + ",scrollbars=yes,resizable=1,modal=false,alwaysRaised=yes");
+    }
+    $("#btnCheck").click(function () {
+        var row = $('#List').datagrid('getSelected');
+
+        var type = "@ViewData["ConfigType"]";
+        if (row == null) {
+            $.messager.alert('提示', '请选择一条记录', "info");
+        } else if (type == "采购" && row.Step != "0") {
+
+
+
+            op("采购核价：" + row.ID, "/Purchase/ViewPurchaseExecutivePricing?ID=" + row.ID)
+
+        }
+        else {
+
+            $('#openIframeCheck')[0].src = "../Purchase/ViewPurchaseExecutiveReportCheck?ID=" + row.ID;
+            $('#checkDiv').dialog('open');
+
+        }
+
+    });
+</script>
+
+<div id="checkDiv" class="easyui-dialog" closed="true" modal="true" title="审核" style="width:450px; height:420px;" resizable="true" closable="true">
+    <iframe scrolling="yes"  id='openIframeCheck' frameborder="0" src="" style="width:100%;height:98%;"></iframe>
+</div>
+<div id="pricingDiv" class="easyui-dialog" closed="true" modal="true" title="核价" style="width:450px; height:420px;" resizable="true" closable="true">
+    <iframe scrolling="yes"  id='openIframepricing' frameborder="0" src="" style="width:100%;height:98%;"></iframe>
+</div>
+

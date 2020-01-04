@@ -1,0 +1,127 @@
+﻿@model EBMS.Models.T_FundAllot
+@{
+    ViewBag.Title = "ViewFundAllotPzAdd";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<script type="text/javascript">
+    $(function () {
+        $("#diRection").val("@Model.PZ_Direction");
+        var sign = 0;
+        $("#btnSave").click(function () {
+            var depart = $("#PZ_Department").val().trim();
+            var subject = $("#PZ_Subject").val().trim();
+            var diRection = $("#diRection option:selected").val();
+            if (depart == "") {
+                $.messager.alert('提示', "部门不能为空", "info");
+                return false;
+            }
+            if (subject == "") {
+                $.messager.alert('提示', "科目不能为空", "info");
+                return false;
+            }
+            if (diRection == "") {
+                $.messager.alert('提示', "借贷方向不能为空", "info");
+                return false;
+            }
+            if (sign == 0) {
+                sign++;
+                loading(0);
+                $.ajax({
+                    url: "FundAlotPzAddSave",
+                    type: "Post",
+                    data: { id: "@Model.ID", depart: depart, subject: subject, diRection: diRection },
+                    success: function (data) {
+                        loading(1);
+                        if (data.State == "Success") {
+                            $.messager.alert('提示', '操作成功', "info", function () {
+                                parent.$('#PzDiv').dialog('close');
+                                parent.$("#List").datagrid("reload");
+                                sign = 0
+                            });
+                        } else {
+                            $.messager.alert('提示', data.Message, "info", function () {
+                                parent.$("#List").datagrid("reload");
+                                sign = 0
+                            });
+                        }
+                        parent.$('#List').datagrid("clearSelections");
+                    },
+                    error: function () {
+                        loading(1);
+                        sign = 0;
+                    }
+                });
+            }
+        });
+
+        $("#PZ_Department").click(function () {
+            $('#openIframeshop')[0].src = "ViewAllotPzDepart";
+            $('#shopDiv').dialog('open');
+        });
+
+        $("#PZ_Subject").click(function () {
+            $('#openIexpenseCostType')[0].src = "ViewAlloptPzSubject";
+            $('#expenseCostTypeDiv').dialog('open');
+        });
+    });
+
+    function adddepart(row) {
+        $('#shopDiv').dialog('close');
+        $("#PZ_Department").val(row.Name);
+    }
+
+    function addPzSubject(row) {
+        $('#expenseCostTypeDiv').dialog('close');
+        $("#PZ_Subject").val(row.Name);
+    }
+</script>
+
+<div class="mvctool">
+    <input id="btnSave" class="modal-btn modal-btn-save" type="submit" value="保存">
+</div>
+@using (Html.BeginForm("EditForm", "Controller", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+    <table class="fromEditTable setTextWidth300">
+        @Html.HiddenFor(model => model.FundAllotCode)
+        @Html.HiddenFor(model => model.theMoney)
+        @Html.HiddenFor(model => model.UseOfProceeds)
+        <tr>
+            <td>@Html.LabelFor(model => model.FundAllotCode)</td>
+            <td style="width: 210px;">@Html.DisplayFor(model => model.FundAllotCode)</td>
+            <td>
+                @Html.LabelFor(model => model.theMoney)
+            </td>
+            <td style="width: 210px;">
+                @Html.DisplayFor(model => model.theMoney)
+            </td>
+        </tr>
+        <tr>
+            <td>
+                @Html.LabelFor(model => model.UseOfProceeds)
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.UseOfProceeds)
+            </td>
+            <td>凭证部门</td>
+            <td>
+                @Html.TextBoxFor(model => model.PZ_Department, new { @readonly = "readonly", @style = "width:150px" })
+            </td>
+        </tr>
+        <tr>
+            <td>凭证科目</td>
+            <td>
+                @Html.TextBoxFor(model => model.PZ_Subject, new { @readonly = "readonly", @style = "width:150px" })
+            </td>
+            <td>借贷方向</td>
+            <td>@Html.DropDownList("diRection", ViewData["Rection"] as List<SelectListItem>)</td>
+        </tr>
+    </table>
+}
+<div id="shopDiv" class="easyui-dialog" closed="true" modal="true" title="选择部门" style="width: 500px; height: 420px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIframeshop' frameborder="0" src="" style="width: 98%; height: 98%;"></iframe>
+</div>
+<div id="expenseCostTypeDiv" class="easyui-dialog" closed="true" modal="true" title="选择科目" style="width: 500px; height: 420px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIexpenseCostType' frameborder="0" src="" style="width: 98%; height: 98%;"></iframe>
+</div>

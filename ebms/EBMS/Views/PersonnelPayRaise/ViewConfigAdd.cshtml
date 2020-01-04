@@ -1,0 +1,122 @@
+﻿@model EBMS.Models.T_PersonnelPayRaiseConfig
+@{
+    ViewBag.Title = "ViewConfigAdd";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+
+<script type="text/javascript">
+    $(function () {
+        $('#Step').val("@ViewData["maxStep"]")
+        var flag = 0;
+        $('#btnSave').click(function () {
+           
+            if ($("#EditForm").valid() && flag == 0) {
+                loading(0)
+                flag += 1;
+                $.ajax({
+                    url: "/PersonnelPayRaise/ConfigAddSave",
+                    type: "Post",
+                    data: $("#EditForm").serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        loading(1);
+                        if (data.State == "Success") {
+                            parent.$('#List').datagrid('reload');
+                            $.messager.alert("提示", "@Lib.MessageRes.SaveOK", "info", function () {
+                              parent.$('#AddDiv').dialog('close')
+                            })
+                        }
+                        else {
+                            $.messager.alert("提示", data.Message, "info");
+                            flag = 0;
+                           
+                        }
+                        parent.$('#List').datagrid("clearSelections");
+                    },
+                    error: function (data)
+                    {
+                        flag = 0;
+                        $.messager.alert("提示", data, "info");
+                    }
+                });
+            }
+            return false;
+
+        });
+
+    })
+   
+
+
+</script>
+<style>
+    .lab {
+  width: 110px; 
+  text-align: right;}
+</style>
+<div class="mvctool">
+    <a id="btnSave" href="javascript:;" class="modal-btn modal-btn-save">保存</a>
+    
+</div>
+
+<div>
+    @using (Html.BeginForm("EditForm", "Controllers", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+    <table class="fromEditTable setTextWidth300">
+       
+        <tbody>
+             <tr>
+               <td class="lab">
+                   @Html.LabelFor(model=>model.Type):
+               </td>
+               <td>
+                   @Html.DropDownListFor(model=>model.Type,ViewData["TypeList"] as List<SelectListItem>)
+               </td>
+               <td>
+                   @Html.ValidationMessageFor(model=>model.Type)
+               </td>
+           </tr>
+             <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.Step):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model => model.Step, new { type="tel"})
+               </td>
+                  <td>
+                   @Html.ValidationMessageFor(model => model.Step)
+               </td>
+          </tr> 
+          <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.Name):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model => model.Name)
+               </td>
+               <td>
+                   @Html.ValidationMessageFor(model => model.Name)
+               </td>
+          </tr> 
+            
+             
+             <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.isMultiple):
+               </td>
+               <td>
+                   @Html.DropDownListFor(model => model.isMultiple, ViewData["boolList"] as List<SelectListItem>)
+               </td>
+                   <td>
+                   @Html.ValidationMessageFor(model => model.isMultiple)
+               </td>
+         </tr>
+        </tbody>
+    </table>
+           @Html.HiddenFor(model => model.ID)
+         
+}
+
+</div>
+

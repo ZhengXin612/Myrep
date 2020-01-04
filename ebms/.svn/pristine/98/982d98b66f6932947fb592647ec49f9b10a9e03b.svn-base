@@ -1,0 +1,209 @@
+﻿@{
+    ViewBag.Title = "ViewLazadaOrderList";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/jquery.easyui-min.js")" type="text/javascript"></script>
+<div class="Company-top-box">
+
+    <div class="search-box">
+        <input type="text" placeholder="订单号.." id="txtQuery" class="icon-search-txt">
+        <select id="sel" name="sel" class="sel-box">
+            <option value="0" selected="">未提交</option>
+            <option value="1">已提交</option>
+             
+        </select>
+        <input type="button" value="查询" id="btnQuery" class="icon-search">
+    </div>
+    <div class="btn-bar">
+        <a href="#" id="btnguanyi" class="icon-check">批量上传旺店通</a>
+        <a href="#" id="btndelete" class="icon-remove">批量删除</a>
+    
+        <p class="showBar">双击数据可查看详情</p>
+    </div>
+</div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+
+<script type="text/javascript">
+    //回车触发查询
+    enterSearch("#btnQuery");
+    //加载数据
+    $(function () {
+
+        $('#List').datagrid({
+            url: "GetSuningList",
+            width: $(window).width() - 10,
+            method: 'post',
+            height: $(window).height() - 45,
+            fitColumns: true,
+            sortName: 'ID',
+            sortOrder: 'desc',
+            pageSize: 30,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            rownumbers: false,//行号
+            columns: [[
+                     { field: 'ID', title: 'ID', width: 60, checkbox: true },
+                  { field: 'OrderNumber', title: '订单号', width: 100, align: 'center' },
+                 { field: 'OrderRowNum', title: '订单行号', width: 80, align: 'center' },
+                { field: 'ShopName', title: '店铺名称', width: 80, align: 'center' },
+                { field: 'Channel', title: '渠道', width: 80, align: 'center' },
+                { field: 'OrderState', title: '订单状态', width: 100, align: 'center' },
+                { field: 'Store', title: '门店', width: 100, align: 'center' },
+                { field: 'OrderDate', title: '销售订单时间', width: 80, align: 'center', formatter: formatDatebox },
+                { field: 'OrderRequirementDate', title: '顾客要求到货时间', width: 80, align: 'center', formatter: formatDatebox },
+                { field: 'CustomerName', title: '顾客姓名', width: 100, align: 'center' },
+                { field: 'Telephone', title: '顾客电话', width: 130, align: 'center' },
+                { field: 'CustomerRemarks', title: '备注', width: 80, align: 'center' },
+                { field: 'Province', title: '省', width: 80, align: 'center' },
+                { field: 'City', title: '市', width: 120, align: 'center' },
+                { field: 'Area', title: '区', width: 80, align: 'center' },
+                { field: 'Address', title: '地址', width: 80, align: 'center' },
+                { field: 'CreateTime', title: '上传地址', width: 80, align: 'center', formatter: formatDatebox },
+                  {
+                      field: 'Istijiao', title: '是否旺店通', width: 60, align: 'center',
+                      formatter: function (value, row, index) {
+                          var e;
+                          if (row.Istijiao == 1) {
+                              e = "<font color=blue>已提交</font>";
+                          } else {
+                              e = "<font color=red>未提交</font>";
+                          }
+                          return e;
+                      }
+                  },
+            ]],
+            onDblClickRow: function (rowIndex, rowData) {
+                Detail(rowData.OrderNumber);
+            },
+
+        });
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 10,
+                height: $(window).height() - 40
+            }).datagrid('resize', {
+                width: $(window).width() - 10,
+                height: $(window).height() - 40
+            });
+        });
+    });
+
+    $("#btnQuery").click(function () {
+     
+        var queryStr = $("#txtQuery").val();
+        var sel = $("#sel").val();
+        if (queryStr == null) {
+            queryStr = "";
+        }
+        $('#List').datagrid({
+            url: 'GetSuningList?queryStr=' + encodeURI(queryStr) + "&sel=" + sel
+        });
+        $("#txtQuery").focus().select();
+    });
+
+   
+    var sign = 0;
+    $("#btnguanyi").click(function () {
+        var rows = $('#List').datagrid('getSelections');
+        if (rows.length == 0) {
+            $.messager.alert('提示', "请选中需要操作的数据", "info");
+            return false;
+        }
+        var ids = "";
+        for (var i = 0; i < rows.length; i++) {
+            ids += rows[i].ID + ","
+        }
+        ids = ids.substr(0, ids.length - 1);
+        $.messager.confirm('提示', '是否批量上传到旺店通', function (r) {
+            if (r) {
+                if (sign == 0) {
+                    sign++;
+                    loading(0);
+                    $.ajax({
+                        url: "../SuNing/UpToGY?ids=" + ids,
+                        type: "post",
+                        dataType: "json",
+                        success: function (data) {
+                            loading(1);
+                            if (data.State == "Success") {
+                                $.messager.alert('提示', '操作成功', "info", function () {
+                                    $("#List").datagrid("reload");
+                                    sign = 0
+                                });
+                            } else {
+                                $.messager.alert('提示', data.Message, "info", function () {
+                                    $("#List").datagrid("reload");
+                                    sign = 0
+                                });
+                            }
+                        },
+                        error: function () {
+                            loading(1);
+                            sign = 0;
+                        }
+                    });
+                }
+            } else
+                sign = 0;
+        });
+    });
+    $('#btndelete').click(function () {
+        var rows = $('#List').datagrid('getSelections');
+        if (rows.length == 0) {
+            $.messager.alert('提示', "请选中需要操作的数据", "info");
+            return false;
+        }
+        var ids = "";
+        for (var i = 0; i < rows.length; i++) {
+            ids += rows[i].ID + ","
+        }
+        ids = ids.substr(0, ids.length - 1);
+        $.messager.confirm('提示', '@Lib.MessageRes.DelConfirm', function (r) {
+            if (r) {
+                if (sign == 0) {
+                    sign++;
+                    loading(0);
+                    $.ajax({
+                        url: "/SuNing/SuNingDelete?ids=" + ids,
+                        type: "Post",
+                        contentType: "application/json",
+                        dataType: "json",
+                        success: function (data) {
+                            loading(1);
+                            if (data.State == "Success") {
+                                $.messager.alert('提示', '操作成功', "info", function () {
+                                    $("#List").datagrid("reload");
+                                    sign = 0
+                                });
+                            } else {
+                                $.messager.alert('提示', data.Message, "info", function () {
+                                    $("#List").datagrid("reload");
+                                    sign = 0
+                                });
+                            }
+                        },
+                        error: function () {
+                            loading(1);
+                            sign = 0;
+                        }
+                    });
+                }
+            } else
+                sign = 0;
+        })
+    })
+    function Detail(orderCode) {
+        var url = "/SuNing/ViewSuNingItemsList?orderCode=" + orderCode 
+        window.open(url, '订单详情', "height=" + (window.screen.availHeight * 0.7) + ",width=" + (window.screen.availWidth * 0.7) + ", top=" + (window.screen.availHeight * 0.15) + ", left=" + (window.screen.availWidth * 0.15) + ",scrollbars=yes,resizable=1,modal=false,alwaysRaised=yes");
+    }
+</script>
+<div id="DetailDiv" class="easyui-dialog" closed="true" modal="true" title="详情"
+     style="width: 600px; height: 500px;" resizable="true" closable="true">
+    <iframe scrolling="no" id='frameDetail' frameborder="0" src="" style="width: 100%; height: 98%;"></iframe>
+</div>
+<div id="editDiv" class="easyui-dialog" closed="true" modal="true" title="编辑" style="width: 1000px; height: 350px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIframeEdit' frameborder="0" src="" style="width: 98%; height: 98%;"></iframe>
+</div>

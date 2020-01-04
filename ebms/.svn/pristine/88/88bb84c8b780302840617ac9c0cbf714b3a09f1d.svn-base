@@ -1,0 +1,186 @@
+﻿@model EBMS.Models.T_NoTicketExpenseAccount
+@{
+    ViewBag.Title = "";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<style>
+.datebox .combo-arrow {margin: 6px 0 0 -20px;}
+.datebox-lable-s{color: #808080; padding-right: 10px; font-size: 13px; margin-top: 3px; margin-left: 10px;}
+#Edit,#Del{padding: 2px 8px;color:#666}
+#Edit:hover,#Del:hover {color:#08a2fb}
+.box-main {display:table;width:100%}
+.add-box {float:left;width:500px}
+.list-box {float:left;margin-right:30px}
+.h2-title {color:#2299ee;font-size:14px;margin-bottom:10px}
+#btnSave {margin-top:10px}
+#queryType {margin-left:10px}
+</style>
+<div class="Company-top-box">
+     <div class="search-box "> 
+        <input type="text" placeholder="支出账号" id="txtQuery"  class="icon-search-txt">
+         <select name="queryType" id="queryType">
+                      <option value="">==请选择==</option>
+                      <option value="银行账号">银行账号</option>
+                      <option value="支付宝">支付宝</option>
+                       <option value="微信账号">微信账号</option>
+          </select>
+        <input type="button" value="查询" id="btnQuery" class="icon-search">
+    </div>
+</div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<div class="box-main">
+    <div class="list-box l">
+        <table id="List"></table>
+    </div>
+      <div class="add-box l">
+          <h2 class="h2-title">新增账号</h2>
+@using (Html.BeginForm("EditForm", "Controller", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+      <table class="fromEditTable setTextWidth300">
+          <tr>
+              <td class="label-r">@Html.LabelFor(a=>a.Type):</td>
+              <td>
+                  <select name="Type" id="Type">
+                      <option value="">==请选择==</option>
+                      <option value="银行账号">银行账号</option>
+                      <option value="支付宝">支付宝</option>
+                       <option value="微信账号">微信账号</option>
+                  </select>
+              </td>
+              <td>@Html.ValidationMessageFor(model => model.Type)</td>
+          </tr>
+          <tr>
+              <td class="label-r">@Html.LabelFor(a=>a.Code):</td>
+              <td>@Html.TextBoxFor(a => a.Code)</td>
+              <td>@Html.ValidationMessageFor(model => model.Code)</td>
+          </tr>
+      </table>
+}
+          <input id="btnSave" class="modal-btn modal-btn-save" type="submit" value="保存">
+      </div>
+</div>
+
+
+<div id="DivCheck"  class="easyui-dialog" closed="true" modal="true" title="修改"style="width:600px; height:400px;" resizable="true" closable="true"  spellcheck="false" >
+    <iframe scrolling="auto" id='IframeCheck' frameborder="0" src="" style="width: 100%; height: 98%;position:relative"></iframe>
+</div>
+
+<script type="text/javascript">
+    $("body").css({ "padding": "5px 0px 0px 7px", "overflow": "hidden" });
+    function op(name, url) {
+        self.parent.addTab(name, url, '');
+        getContextmenu()
+    }
+    enterSearch("#btnQuery");
+    $(function () {
+        var url = "NoTicketExpenseAccountList";
+        $('#List').datagrid({
+            url: url,
+            width:600,
+            height: $(window).height() - 50,
+            method: 'post',
+            fitColumns: true,
+            // sortName: 'Code',
+            sortOrder: 'desc',
+            idField: 'ID',
+            pageSize: 20,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                 { field: 'Type', title: '账号类型', width: 100, align: 'center' },
+                 { field: 'Code', title: '支出账号', width: 100, align: 'center' },
+                 {
+                       field: 'action', title: '操作', width: 100, align: 'center',
+                      formatter: function (value, row, index) {
+                          var e = '<a href="#" class="tools-btn" onclick="eEdit(' + row.ID + ')">编辑</a><a href="#" class="tools-btn" onclick="eDelete(' + row.ID + ')">删除</a> ';
+                        return e;
+                 }
+                 }
+            ]],
+            onDblClickRow: function (rowIndex, rowData) {
+          
+            }
+        })
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: 600,
+                height: $(window).height() - 50
+            })
+        });
+    })
+    function Query() {
+        var queryStr = $("#txtQuery").val();
+        var queryType = $("#queryType").val();
+        $('#List').datagrid({
+            url: 'NoTicketExpenseAccountList?queryStr=' + encodeURI(queryStr) + "&queryType=" + queryType
+        });
+        $("#txtQuery").focus().select();
+    }
+    $('#btnQuery').click(function () {
+        Query();
+    });
+    var flag = 0;
+    //新增保存
+    $("#btnSave").click(function () {
+        if ($("#Type").val() == "")
+        {
+            $.messager.alert('提示', "请选择账号类型", "info");
+            return false
+        }
+        if ($.trim($("#Code").val())=="")
+        {
+            $.messager.alert('提示', "支出账号不能为空", "info");
+            return false
+        }
+        if (flag == 0)
+        {
+            flag++;
+            $.ajax({
+                url: "NoTicketExpenseAccountAddSave",
+                type: "Post",
+                data: $("#EditForm").serialize(),
+                success: function (data) {
+                    $.messager.alert('提示', data.Message, "info", function () {
+                        $("#Code").val("");
+                        $("#Type option:first").prop("selected", 'selected');
+                        $("#List").datagrid('reload');
+                    });
+                    flag = 0;
+                },
+                error: function (data) {
+                    $.messager.alert('提示', data.Message, "info")
+                    flag = 0;
+                }
+            });
+        }
+          
+    })
+    //删除
+    var eDelete = function (ID) {
+        $.messager.alert('提示', "确认删除该账号吗？", "info", function () {
+            $.ajax({
+                url: "NoTicketExpenseAccountDel?ID="+ID,
+                type: "Post",
+                data: $("#EditForm").serialize(),
+                success: function (data) {
+                    $.messager.alert('提示', data.Message, "info", function () {
+                        $("#List").datagrid('reload');
+                        $('#List').datagrid("clearSelections");
+                    });
+                },
+                error: function (data) {
+                    $.messager.alert('提示', data.Message, "info")
+                }
+            })
+        })
+    }
+    //编辑
+    var eEdit = function (ID) {
+        $('#IframeCheck')[0].src = "NoTicketExpenseAccountEdit?ID=" + ID;
+        $('#DivCheck').dialog('open');
+    }
+</script>

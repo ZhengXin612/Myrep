@@ -1,0 +1,234 @@
+﻿@model EBMS.Models.T_CashBack
+@using Lib
+@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<style>
+    #Repeat {
+        border: 0;
+        outline: 0;
+    }
+</style>
+<div class="mvctool">
+    <input id="btnSave" class="modal-btn modal-btn-save" type="submit" value="保存">
+</div>
+@using (Html.BeginForm("EditForm", "Controller", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+    <table class="fromEditTable setTextWidth300" id="cashback">
+        @Html.HiddenFor(model => model.ID)
+        @Html.HiddenFor(model => model.For_Delete)
+        @Html.HiddenFor(model => model.OrderId)
+        @Html.HiddenFor(model => model.Step)
+        @Html.HiddenFor(model => model.PostTime)
+        @Html.HiddenFor(model => model.Status)
+        <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.OrderNum)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.OrderNum, new { @readonly = true, @style = "cursor:pointer", @class = "ck", @title = "请选择订单号" })
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.OrderNum)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.PostUser)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.PostUser, new { @Value = Server.UrlDecode(Request.Cookies["NickName"].Value), @readonly = true })
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.PostUser)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.VipName)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.VipName, new { @readonly = true, @class = "ck", @title = "请输入会员名称" })
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.VipName)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.ShopName)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.ShopName, new { @readonly = true, @class = "ck", @title = "请输入店铺名称" })
+
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.ShopName)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.WangWang)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.WangWang, new { @class = "ck", @title = "请输入旺旺帐号" })
+
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.WangWang)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.Reason)：   
+            </td>
+            <td>
+                @Html.DropDownListFor(model => model.Reason, ViewData["Reason"] as List<SelectListItem>)
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.Reason)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.BackMoney)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.BackMoney, new { @class = "ck", @title = "请输入返现金额" })
+
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.BackMoney)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.ApproveName)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.ApproveName, new { @class = "ck", @title = "请输入同意人" })
+
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.ApproveName)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.OrderMoney)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.OrderMoney, new { @class = "ck", @title = "请输入订单实付金额" })
+
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.OrderMoney)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.AlipayName)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.AlipayName, new { @class = "ck", @title = "请输入支付宝名称" })
+
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.AlipayName)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.AlipayAccount)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.AlipayAccount, new { @class = "ck", @title = "请输入支付宝账户" })
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.AlipayAccount)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.Note)：   
+            </td>
+            <td>
+                @Html.TextAreaFor(model => model.Note, new { @Style = "resize :none;width:420px;height:100px" })
+
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.Note)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 140px; text-align: right;">
+                @Html.LabelFor(model => model.Repeat)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.Repeat, new { @readonly = "none" })
+            </td>
+            <td></td>
+        </tr>
+    </table>
+}<div id="addDiv" class="easyui-dialog" closed="true" modal="true" title="订单列表" style="width: 820px; height: 420px;" resizable="true" closable="true">
+    <iframe scrolling="yes" id='openIframeAdd' frameborder="0" src="" style="width: 100%; height: 98%;"></iframe>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        var _Reason = "@ViewData["CurReason"]";
+        $("#Reason").val(_Reason)
+    })
+    function op(name, url) {
+        self.parent.addTab(name, url, '');
+        getContextmenu()
+    }
+
+    $("#OrderNum").click(function () {
+        op("订单查询", "/CashBack/ViewOrderList")
+    })
+    var flag = 0;
+    var V = 0;
+    $("#btnSave").click(function () {
+        if (flag == 0) {
+            flag++;
+            loading(0)
+            V = 0;
+            //验证输入;
+            $("#cashback .ck").each(function () {
+                var $val = $(this).val();
+                var require = $(this).attr("title");
+                if ($.trim($val) == "") {
+                    $.messager.alert('提示', require, "info", function () { });
+                    flag = 0;
+                    V = 1;
+                    loading(1)
+                    return false
+                }
+            })
+            if (V == 0 && $("#EditForm").valid()) {
+                $.ajax({
+                    url: "EditSave",
+                    type: "Post",
+                    data: $("#EditForm").serialize(),
+                    success: function (data) {
+                        $.messager.alert('提示', data, "info", function () {
+                            if (data == "保存成功") {
+                                closeReshefTab("我的返现");
+                                loading(1)
+                                flag = 0
+                            }
+                            else {
+                                loading(1)
+                                flag = 0
+                            }
+                        });
+                    }
+                });
+            }
+        }
+    })
+</script>
+

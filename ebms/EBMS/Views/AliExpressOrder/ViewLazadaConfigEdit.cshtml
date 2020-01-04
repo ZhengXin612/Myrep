@@ -1,0 +1,149 @@
+﻿@model EBMS.Models.T_LazadaOrderConfig
+@{
+    ViewBag.Title = "ViewLazadaConfigEdit";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+<style>
+    .l {
+        float: left;
+    }
+</style>
+<script type="text/javascript">
+
+    $(function () {
+        var xp = "@Model.IsDefault";
+        $(".ck[value='" + xp + "']").attr("checked", "checked");
+        var flag = 0;
+        $('#btnSave').click(function () {
+            if ($("#EditForm").valid() && flag == 0) {
+                flag = 1;
+                loading(0);
+                $.ajax({
+                    url: "/AliExpressOrder/LazadaConfigEditSave",
+                    type: "Post",
+                    data: $("#EditForm").serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.State == "Success") {
+                            $.messager.alert("提示", "@Lib.MessageRes.SaveOK", "info", function () {
+                                loading(1)
+                                parent.$('#editDiv').dialog('close')
+                                parent.$('#List').datagrid('reload');
+                            })
+                        }
+                        else {
+                            loading(1)
+                            $.messager.alert("提示", data.Message, "info");
+                            flag = 0;
+                        }
+                        parent.$('#List').datagrid("clearSelections");
+                    },
+                    error: function (data) {
+                        loading(1);
+                        flag = 0;
+                        $.messager.alert('提示', data, "info");
+                    }
+                });
+            }
+        })
+    })
+
+
+</script>
+<div class="mvctool">
+    <a id="btnSave" href="javascript:;" class="modal-btn modal-btn-save">保存</a>
+
+</div>
+
+<div>
+    @using (Html.BeginForm("EditForm", "Controllers", null, FormMethod.Post, new { Id = "EditForm" }))
+    {
+        @Html.ValidationSummary(true)
+        <table class="fromEditTable setTextWidth300">
+
+            <tbody>
+                <tr>
+                    <td class="lab" style="width: 20%; text-align: right">
+                        @Html.LabelFor(model => model.Name):
+                    </td>
+                    <td style="width: 40%;">
+                        @Html.TextBoxFor(model => model.Name, new { @style = "width:200px" })
+                    </td>
+                    <td style="width: 40%;">
+                        @Html.ValidationMessageFor(model => model.Name)
+                    </td>
+                </tr>
+                <tr>
+                    <td class="lab" style="text-align: right">
+                        @Html.LabelFor(model => model.Phone):
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Phone, new { @style = "width:200px" })
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.Phone)
+                    </td>
+                </tr>
+                <tr>
+                    <td class="lab" style="text-align: right">
+                        @Html.LabelFor(model => model.AddressMessage):
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.AddressMessage, new { @style = "width:200px" })
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.AddressMessage)
+                    </td>
+                </tr>
+                <tr>
+                    <td class="lab" style="text-align: right">
+                        @Html.LabelFor(model => model.Address):
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Address, new { @style = "width:200px" })
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.Address)
+                    </td>
+                </tr>
+                <tr>
+                    <td class="lab" style="text-align: right">
+                        @Html.LabelFor(model => model.Express):
+                    </td>
+                    <td>
+                        @Html.DropDownListFor(model => model.Express, ViewData["expres"] as List<SelectListItem>)
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.Express)
+                    </td>
+                </tr>
+                <tr>
+                    <td class="lab" style="text-align: right">
+                        @Html.LabelFor(model => model.Warhouse):
+                    </td>
+                    <td>
+                        @Html.DropDownListFor(model => model.Warhouse, ViewData["warehouse"] as List<SelectListItem>)
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.Warhouse)
+                    </td>
+                </tr>
+                <tr>
+                    <td class="lab" style="text-align: right">
+                        @Html.LabelFor(model => model.IsDefault):
+                    </td>
+                    <td>
+                        <p class="l">
+                            <input class="ck" type="radio" name="IsDefault" value="1" /><label for="IsDefault">是</label></p>
+                        <p class="l">
+                            <input class="ck" type="radio" name="IsDefault" value="0" /><label for="IsDefault">否</label></p>
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.IsDefault)
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        @Html.HiddenFor(model => model.ID)
+    }
+</div>

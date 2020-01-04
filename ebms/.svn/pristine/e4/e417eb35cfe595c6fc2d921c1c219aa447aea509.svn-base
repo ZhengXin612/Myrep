@@ -1,0 +1,471 @@
+﻿@model EBMS.Models.T_ReturnToStorage
+@using Lib
+@{
+    ViewBag.Title = "ViewPurchaseEdit";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<script type="text/javascript">
+    var grid; //定义全局变量datagrid
+    var editRow = -1;
+    //加载数据
+    $(function () {
+        //创建一个新的Grid
+        grid = $('#List').datagrid({
+            width: $(window).width() - 10,
+            height: $(window).height() - 250,
+            fitColumns: true,
+            showFooter: true,
+            singleSelect: true,//单选模式  
+            rownumbers: false,//行号
+            columns: [[
+                      {
+                          field: 'item_code', title: '产品编码', width: 80
+                      },
+                      {
+                          field: 'item_name', title: '产品名称', width: 160
+                      },
+                        {
+                            field: 'simple_name', title: '规格', width: 160
+                        },
+                          {
+                              field: 'UnitName', title: '单位', width: 40
+                          },
+                  {
+                  	field: 'qty', title: '应收总数量', width: 40,
+                  	//editor: {
+                    //      type: 'text', options: { required: true }
+                    //  }
+                  },
+                 {
+                     field: 'qualified', title: '合格品', width: 40, editor: {
+                         type: 'text', options: { required: true }
+                     }
+                 },
+                  {
+                      field: 'Unqualified', title: '不合格', width: 40, editor: {
+                          type: 'text', options: { required: true }
+                      }
+                  },
+                    //{
+                    //    field: 'Notreceived', title: '未收到货', width: 80, editor: {
+                    //        type: 'text', options: { required: true }
+                    //    }
+                    //},
+                       {
+                           field: 'Remarks', title: '备注', width: 80, editor: {
+                               type: 'text', options: { required: true }
+                           }
+                       },
+                     {
+                         field: 'action', title: '操作', width: 120, align: 'center', formatter: function (value, row, index) {
+                        //     return '<div class="btn-bar"><a onclick="addRow('+index+')"  class="icon-add" >添加</a><a onclick="removeRow(' + index + ')" class="icon-remove">删除</a></div>';
+
+                             return '<div class="btn-bar"><a onclick="removeRow(' + index + ')" class="icon-remove">删除</a></div>';
+
+                         }
+                     },
+
+            ]],
+            onClickCell: function (index, field) {
+                if (field == "item_code" || field == "item_name") {
+
+                    $('#openIframeGoodsGY')[0].src = "ViewGoodsGY?index=" + index;
+                    $('#GoodsGYDiv').dialog('open');
+                }
+                else if (field != 'action') {
+                    editCell(index, field);
+                }
+            },
+            onAfterEdit: function (index) {
+                grid.datagrid('refreshRow', index);
+                updateFooter()
+                saveJson();
+            }
+        });
+        grid.datagrid('loadData', { total: 0, rows: [], "footer": [{ "Unit": "合计", "UnitPrice": 0.00, "Qty": 0 }] });
+        var ID = "@ViewData["ID"]";
+        function fLoadData() {
+            $.ajax({
+                type: "POST",
+                url: "SortingAdd?ID=" + ID,
+                success: function (data) {
+                    var vData = $.parseJSON(data);
+                    grid.datagrid('loadData', vData); //将数据绑定到datagrid   
+                    saveJson();
+                    updateFooter();
+                }
+            });
+        }
+        fLoadData();
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 10,
+                height: $(window).height() - 191
+            })
+        });
+        $("#btnQuery").click(function () {
+            var receivermobile = $("#receivermobile").val()
+
+            if (receivermobile != null && receivermobile != "") {
+                $('#OrderGY')[0].src = "ViewOrderList?queryStr=" + receivermobile;
+                $('#OrderDiv').dialog('open');
+            }
+            else {
+                alert("请填写电话号码");
+            }
+
+        });
+        //提交后台方法
+        var sign = 0;
+        $("#btnSave").click(function () {
+
+            loading(0);
+
+            grid.datagrid("endEdit", editRow);
+            grid.datagrid('clearSelections');
+            var rows = $('#List').datagrid("getRows");
+            //循环验证数据
+            for (var i = 0; i < rows.length; i++) {
+
+            	if (rows[i].qualified == null || rows[i].qualified == "undefined" || rows[i].qualified < 0) {
+                	$.messager.alert('提示', "合格品数量不能为空且不能小于0", "info")
+                    loading(1);
+                    return false;
+                }
+                if (rows[i].Unqualified == null || rows[i].Unqualified == "undefined" || rows[i].Unqualified<0) {
+                	$.messager.alert('提示', "不合格品数量不能为空且不能小于0", "info")
+                    loading(1);
+                    return false;
+                }
+
+                //if (rows[i].Notreceived == null || rows[i].Notreceived == "undefined") {
+                //    $.messager.alert('提示', "未收到货数量不能为空", "info")
+                //    loading(1);
+                //    return false;
+                //}
+                // var shul = rows[i].qualified + rows[i].Unqualified + rows[i].Notreceived;
+                var shul = parseInt(rows[i].qualified) + parseInt(rows[i].Unqualified);
+                if (parseInt(shul)<0) {
+                	$.messager.alert('提示', "合格品和不合格品数量相加不能为空且不能小于0", "info")
+                    loading(1);
+                    return false;
+                }
+                //if (parseInt(shul) < parseInt(rows[i].qty)) {
+                //    $.messager.alert('提示', "其他数量不能少于总数量入库", "info")
+                //    loading(1);
+                //    return false;
+                //}
+            }
+          
+            saveJson();
+            //console.log($("#jsonStr").val());
+            //return false;
+            if ($("#EditForm").valid()) {
+                if (sign == 0) {
+                    sign = 1;
+                    $.ajax({
+                        url: "ViewSortingAddSave",
+                        type: "Post",
+                        data: $("#EditForm").serialize(),
+                        success: function (data) {
+                            if (data.State == "Success") {
+                                loading(1);
+                                
+                                $.messager.alert('提示', '保存成功', "info", function () {
+                                    // closeReshefTab("退回件分拣");
+                                    parent.$('#SortingAdd').dialog('close');
+                                    parent.$('#List').datagrid("clearSelections");
+                                    parent.Query();
+                                 
+                                });
+                            } else {
+                                loading(1);
+                                $.messager.alert('提示', data.Message, "info", function () {
+                                    parent.$('#SortingAdd').dialog('close');
+                                    $("#List").datagrid("reload");
+                                    parent.$('#List').datagrid("clearSelections");
+                                    parent.Query();
+                                    sign = 0
+                                });
+                            }
+                        }
+                    });
+                }
+            }
+        });
+    });
+    //添加一行空的数据
+    function addRow(index) {
+        //console.log(999)
+        //$('#List').datagrid('appendRow', {
+        //    ProductName: "",
+        //    PlanNum: "",
+        //    Specifications: "",
+        //    RequirementDate: "",
+        //})
+        var rows = $('#List').datagrid('getRows');
+        if (index == 0)
+            {
+            index = rows.length - 1;
+        }
+        $('#openIframeGoodsGY')[0].src = "ViewGoodsGY?index=" + index;
+        $('#GoodsGYDiv').dialog('open');
+
+
+    }
+    //删除某一行数据
+    function removeRow(index) {
+
+        editCell(index, "Qty")
+        var rows = $('#List').datagrid("getRows");
+        if (rows[index].qty != 0)
+        {
+        	alert("该行不允许删除");
+        	return ;
+        }
+        $('#List').datagrid('deleteRow', index);
+        $('#List').datagrid("loadData", rows);
+        saveJson();
+        updateFooter()
+    }
+    //底部统计
+    function updateFooter() {
+        var billCount = 0;
+        var Total = 0;
+        var rows = grid.datagrid('getRows');
+        for (var i = 0; i < rows.length; i++) {
+            var row = rows[i];
+            if (row.Qty) {
+                billCount += parseInt(row.Qty);
+
+            }
+            if (row.UnitPrice) {
+                Total += parseFloat(row.UnitPrice)
+            }
+        }
+        grid.datagrid('reloadFooter', [{ "Unit": "合计", "UnitPrice": Total.toFixed(2), "Qty": billCount }]);
+    }
+    //序列化数据
+    function saveJson() {
+        JsonText = "[";
+        var rows = $('#List').datagrid('getRows');
+        for (var i = 0; i < rows.length; i++) {
+            JsonText += '{';
+            JsonText += '"item_code":' + '"' + rows[i].item_code + '",';
+            JsonText += '"item_name":' + '"' + rows[i].item_name + '",';
+            JsonText += '"qty":' + '"' + rows[i].qty + '",';
+            JsonText += '"Simplename":' + '"' + rows[i].simple_name + '",';
+            JsonText += '"UnitName":' + '"' + rows[i].UnitName + '",';
+            JsonText += '"qualified":' + '"' + rows[i].qualified + '",';
+            JsonText += '"Unqualified":' + '"' + rows[i].Unqualified + '",';
+            JsonText += '"Remarks":' + '"' + rows[i].Remarks + '",';
+            JsonText += '"Notreceived":' + '0},';
+
+        }
+        JsonText = JsonText.substring(0, JsonText.length - 1);
+        JsonText += "]";
+        $("#jsonStr").val(JsonText);
+    }
+    //编辑触发的方法
+    function editCell(index, field) {
+
+        //给默认值
+        var rows = $('#List').datagrid('getRows');
+        //if (rows[index].Notreceived == null || rows[index].Notreceived == "") {
+        //    rows[index].Notreceived = 0;
+        //}
+        if (rows[index].qualified == null || rows[index].qualified == "") {
+            rows[index].qualified = 0;
+        }
+        if (rows[index].Unqualified == null || rows[index].Unqualified == "") {
+            rows[index].Unqualified = 0;
+        }
+        if (rows[index].Influence == null || rows[index].Influence == "") {
+            rows[index].Influence = 0;
+        }
+        grid.datagrid('endEdit', editRow);
+        editRow = index;
+        grid.datagrid('selectRow', index);
+        grid.datagrid('beginEdit', index);
+        var editor = grid.datagrid('getEditor', { index: index, field: field });
+        setTimeout(function () {
+            editor.target.focus();
+        }, 0);
+
+        var editors = grid.datagrid('getEditors', index);
+        for (var i = 0; i < editors.length; i++) {
+            editors[i].target.bind('keydown', { field: editors[i].field }, function (e) {
+                if (e.keyCode == 13) {
+                    grid.datagrid('endEdit', index);
+                    editRow = -1;;
+                } else if (e.keyCode == 38) {	// up
+
+                    if (editRow > 0) {
+                        editCell(editRow - 1, e.data.field);
+                    }
+                } else if (e.keyCode == 40) {	// down
+
+                    if (editRow < grid.datagrid('getRows').length - 1) {
+                        editCell(parseInt(editRow) + 1, e.data.field);
+                    }
+                }
+                if (i < 2) {
+                    if (!(event.keyCode == 46) && !(event.keyCode == 9) && !(event.keyCode == 8) && !(event.keyCode == 37) && !(event.keyCode == 39))
+                        if (!((event.keyCode >= 48 && event.keyCode <= 57) || (event.keyCode >= 96 && event.keyCode <= 105)))
+                            event.returnValue = false;
+                }
+            });
+        }
+
+    }
+    function addshop(rows, index) {
+        $('#GoodsGYDiv').dialog('close');
+        var rowsd = $('#List').datagrid('getRows');
+        var ax = 0;
+        console.log(1)
+        //var rowsd = $('#List').datagrid('getRows');
+        for (var i = 0; i < rowsd.length; i++) {
+            for (var j = 0; j < rows.length; j++)
+            {
+                if (rowsd[i].item_code == rows[j].goods_no)
+                {
+                    ax = 1;
+                    
+                }
+            }     
+        }
+        console.log(rows)
+        for (var i = 0; i < rows.length; i++) {
+           
+            if (ax == 0) {
+                //$('#List').datagrid('updateRow', {
+                //    index: index,
+                //    row: {
+                //        item_code: rows[0].goods_no,
+                //        item_name: rows[0].goods_name,
+                //        simple_name: rows[0].spec_name,
+                //        UnitName: rows[0].unit_name
+                //    }
+                //});
+                $('#List').datagrid('appendRow', {
+                    item_code: rows[i].goods_no,
+                    item_name: rows[i].goods_name,
+                    simple_name: rows[i].spec_name,
+                    UnitName: rows[i].unit_name,
+                    qty: 0
+                });
+            }
+            else {
+                alert("该商品编码已存在。")
+            }
+            }
+        
+    }
+
+    function addOrderDetail(code) {
+
+        var codes = code[0].platform_code;
+      
+        var name = code[0].receiver_name;
+        var address = code[0].receiver_address;
+     
+        $("#CollectName").val(name) ;
+        $("#CollectAddress").val(address);
+        $('#OrderDiv').dialog('close');
+        $.ajax({
+            url: "GetOrderDetailList?code=" + codes,
+            type: "Post",
+            success: function (data) {
+                $(data.rows).each(function (i, item) {
+               
+                    var ax = 0;
+                    var rows = $('#List').datagrid('getRows');
+                    for (var x = 0; x < rows.length; x++) {
+                        if (rows[x].item_code == item.item_code) {
+                            ax = 1;
+                        }
+                    }
+                    if (ax == 0) {
+                        $('#List').datagrid('appendRow', { item_code: item.item_code, item_name: item.item_name, qty: item.qty })
+                    }
+                });
+               
+            }
+        });
+      
+    }
+    //选择其他地方取消编辑
+    $(document).not(grid).on("click", function () {
+        grid.datagrid("endEdit", editRow);
+        grid.datagrid('unselectAll');
+    });
+
+</script>
+<div class="mvctool">
+    <input id="btnSave" class="modal-btn modal-btn-save" type="submit" value="保存">
+    <a href="#" class="easyui-linkbutton" plain="true" iconcls="icon-add" id="BtnAdd" onclick="addRow(0)">添加商品</a>
+</div>
+@using (Html.BeginForm("EditForm", "Controller", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+    @Html.Hidden("jsonStr")
+    <table class="fromEditTable setTextWidth300">
+        <tr>
+            <td style="width: 120px;">快递公司：    
+            </td>
+            <td>
+                @Html.HiddenFor(model => model.ID)
+                @Html.TextBoxFor(model => model.Retreat_expressName, new { @readonly = true })
+            </td>
+            <td style="width: 120px;">快递单号：    
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.Retreat_expressNumber, new { @readonly = true })
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px;">发货人姓名：    
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.CollectName)
+            </td>
+            <td style="width: 120px;">地址：    
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.CollectAddress)
+            </td>
+        </tr>
+
+        <tr>
+            <td style="width: 120px;">电话号码：    
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.receivermobile)
+                   @*<input type="button" value="查询" id="btnQuery" class="icon-search">*@
+            </td>
+            <td style="width: 120px;">收货仓库：    
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.Retreat_Warehouse, new { @readonly = true })
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px;">备注：    
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.Retreat_Remarks)
+            </td>
+        </tr>
+        <input type="hidden" id="jsonStr" />
+    </table>
+}
+<div class="detail-list">
+    <table id="List"></table>
+</div>
+
+<div id="GoodsGYDiv" class="easyui-dialog" closed="true" modal="true" title="选择产品" style="width: 700px; height: 460px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIframeGoodsGY' frameborder="0" src="" style="width: 98%; height: 98%;"></iframe>
+</div>
+<div id="OrderDiv" class="easyui-dialog" closed="true" modal="true" title="选择订单" style="width: 1000px; height: 420px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='OrderGY' frameborder="0" src="" style="width: 98%; height: 98%;"></iframe>
+</div>

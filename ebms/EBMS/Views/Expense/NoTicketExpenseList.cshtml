@@ -1,0 +1,178 @@
+﻿@{
+    ViewBag.Title = "ViewInterviewList";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<style>
+    .datebox .combo-arrow {margin: 6px 0 0 -20px;}
+    .datebox-lable-s{color: #808080; padding-right: 10px; font-size: 13px; margin-top: 3px; margin-left: 10px;}
+    #check {padding: 2px 8px;color:#666}
+        #check:hover {color:#08a2fb}
+</style>
+<div class="Company-top-box">
+     <div class="search-box "> 
+         <input type="hidden" id="viewUser" value="@ViewData["viewUser"]">
+         <input type="text" placeholder="申请人，流水号" id="txtQuery"  class="icon-search-txt">
+         <span class="datebox-lable-s">开始时间</span>
+         <input name="statethisdate" editable="false" style="float: left;" value="" id="statethisdate" class="easyui-datebox" data-options="sharedCalendar:'#statethisdate'">
+         <span class="datebox-lable-s">结束时间</span>
+         <input name="Endthisdate" editable="false"  style="float: left;" value="" id="Endthisdate" class="easyui-datebox" data-options="sharedCalendar:'#Endthisdate'">
+         <span class="datebox-lable-s">审核状态：</span>
+         <select id="theStatus">
+             <option value="">请选择</option>
+             <option value="0">未审核</option>
+             <option value="1">已同意</option>
+              <option value="2">不同意</option>
+         </select>
+        <input type="button" value="查询" id="btnQuery" class="icon-search">
+         <a href="javascript:;" class="icon-edit" id="check">审核</a>
+    </div>
+</div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+<div id="DivDetails"  class="easyui-dialog" closed="true" modal="true" title="详情"style="width:600px; height:400px;" resizable="true" closable="true"  spellcheck="false" >
+    <iframe scrolling="auto" id='IframeDetails' frameborder="0" src="" style="width: 100%; height: 98%;position:relative"></iframe>
+</div>
+<div id="DivCheck"  class="easyui-dialog" closed="true" modal="true" title="审核"style="width:600px; height:400px;" resizable="true" closable="true"  spellcheck="false" >
+    <iframe scrolling="auto" id='IframeCheck' frameborder="0" src="" style="width: 100%; height: 98%;position:relative"></iframe>
+</div>
+
+<script type="text/javascript">
+    $("body").css({ "padding": "5px 0px 0px 7px", "overflow": "hidden" });
+    function op(name, url) {
+        self.parent.addTab(name, url, '');
+        getContextmenu()
+    }
+    enterSearch("#btnQuery");
+    $(function () {
+        var url = "NoTicketExpenseGetList";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() * 0.95,
+            fitColumns: true,
+            // sortName: 'ID',
+            sortOrder: 'desc',
+            idField: 'id',
+            pageSize: 20,
+            pagination: true,
+            showFooter: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                  { field: 'Code', title: '流水号', width: 100, align: 'center' },
+                  { field: 'PostUser', title: '申请人', width: 100, align: 'center' },
+                  { field: 'PostTime', title: '申请时间', width: 100, align: 'center' },
+                  { field: 'TheContent', title: '报销内容', width: 60, align: 'center' },
+                  { field: 'Total', title: '金额', width: 180, align: 'center' },
+                  {
+                      field: 'Status', title: '审核状态', width: 100, align: 'center', formatter: function (value, row, index) {
+                          switch (row.Status) {
+                              case 0:
+                                  return "<font color=#CC3333>未审核</font>";
+                              case 1:
+                                  return "<font color=#339933>已同意</font>";
+                              case 2:
+                                  return "<font color=#CC3333>不同意</font>";
+                              default:
+                                  return "";
+                          }
+                      }
+                  },
+                  { field: 'ApproveTime', title: '审核时间', width: 100, align: 'center' },
+                  { field: 'Note', title: '备注', width:140, align: 'center' },
+                 {
+                     field: 'action', title: '操作', width: 100, align: 'center',
+                     formatter: function (value, row, index) {
+                         var e = '<a href="#" class="tools-btn" onclick="Del(' + row.ID + ',' + row.Status + ')">删除</a> ';
+                         return e;
+                     }
+                 }
+            ]],
+            onDblClickRow: function (rowIndex, rowData) {
+                Show(rowData.ID)
+            }
+        })
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            });
+        });
+    })
+    function Query() {
+        var queryStr = $("#txtQuery").val();
+        var queryStr = $("#txtQuery").val();
+        var statedate = $('#statethisdate').datebox('getValue');
+        var EndDate = $('#Endthisdate').datebox('getValue');
+        var theStatus = $("#theStatus").val();
+        //var State = $("#State").val();
+        $('#List').datagrid({
+            url: 'NoTicketExpenseGetList?queryStr=' + encodeURI(queryStr) + "&startSendTime=" + statedate + "&endSendTime=" + EndDate + "&theStatus=" + theStatus
+        });
+        $("#txtQuery").focus().select();
+    }
+    $('#btnQuery').click(function () {
+        Query();
+    });
+    function Show(id) {
+        $('#IframeDetails')[0].src = "NoTicketExpenseDetail?ID=" + id;
+        $('#DivDetails').dialog('open');
+    }
+    var flag = 0
+    $("#check").click(function () {
+        if ($("#viewUser").val() != "姜尚") {
+            $.messager.alert('提示', '你没有权限审核', "info");
+            return false
+        }
+        var row = $('#List').datagrid('getSelected');
+        if (row != null) {
+            if (row.Status != 0) {
+                $.messager.alert('提示', '该记录已审核', "info");
+                return;
+            } else {
+                $('#IframeCheck')[0].src = "NoTicketExpenseCheck?ID=" + row.ID;
+                $('#DivCheck').dialog('open');
+            }
+        }
+        else {
+            $.messager.alert('提示', '请选择一条记录', "info");
+        }
+    })
+    //删除
+    var flagDel = 0
+    var Del = function (ID, Status) {
+        if (Status != 0)
+        {
+            alert("只能删除未审核的")
+            return false;
+        }
+        if (flagDel == 0) {
+            flagDel = 1
+            $.messager.alert('提示', "确认删除该账号吗？", "info", function () {
+                $.ajax({
+                    url: "NoTicketExpenseListDel?ID=" + ID,
+                    type: "Post",
+                    data: $("#EditForm").serialize(),
+                    success: function (data) {
+                        flagDel = 0;
+                        $.messager.alert('提示', data.Message, "info", function () {
+                            $("#List").datagrid('reload');
+                            $('#List').datagrid("clearSelections");
+                        });
+                    },
+                    error: function (data) {
+                        flagDel = 0
+                        $.messager.alert('提示', data.Message, "info")
+                    }
+                })
+            })
+        }
+        
+    }
+</script>

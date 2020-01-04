@@ -1,0 +1,253 @@
+﻿@{
+    Layout = null;  
+ }
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+	<meta charset="utf-8">
+    <meta name="viewport"content=" width=device-width, initial-scale=1" /> 
+	<title>好护士EBMS系统</title>
+	<link rel="stylesheet" type="text/css" href="../Content/blue/js/themes/default/easyui.css">
+	<link rel="stylesheet" type="text/css" href="../Content/blue/js/themes/icon.css">
+	<link rel="stylesheet" type="text/css" href="../Content/blue/css/EBMS.css">
+</head>
+<body class="easyui-layout cofoe-erp-parent-body" id="cofoe-box">
+   <!--  <div id="OverTimeLogin"  class="easyui-dialog" data-options="closed:true,modal:true">
+        <iframe width="726px" scrolling="no" height="497px" frameborder="0"  id="iOverTimeLogin"></iframe>
+    </div> -->
+    <div data-options="region:'north',border:false,split:false"  >
+        <div class="new-head">
+           <div class="cofoe-top">
+    	 	    	<div class="logo">
+    	 	      	<a href="#">好护士EBMS系统</a>
+    	 	        </div>
+    	 	        <div class="tools">
+    	 	        	<a href="/Home/Logout" class="exit">退出</a>
+                        <a href="javascript:;" class="set"onclick="PwdEdit()">设置密码</a>
+                        <a href="#" class="user"> 
+                            @{if (Request.Cookies["Nickname"] != null) { Output.Write(Server.UrlDecode(Request.Cookies["Nickname"].Value)); } else { System.Web.HttpContext.Current.Response.Write("<script>top.location.href='/home/Login' </script>"); }}
+                        </a>
+    	 	        </div>
+    	 	    <!--cofoe-top-body end-->
+    	   </div><!--cofoe-top end-->
+          <div class="cofoe-top-nav">
+    	 	  <ul class="top-nav-list" id="j-top-nav">
+    	 	  	  <li class="cur"><a href="javascript:;"  class="work-btn" id="Work"><span class="icon-work"></span>桌面</a></li>
+    	 	  </ul>
+    	 </div><!-- cofoe-top-nav end -->
+        </div>
+    </div><!-- north end -->
+    <div  data-options="region:'west'" fit="false" style="width:240px; height:100%; border:0; overflow-x:hidden;overflow-y:auto;" id="LeftNav">
+       <div id="left-nav" class="left-nav">
+                <div data-id="Work" class="pannelDiv" id="pannel-Work" style="display:block">
+                     <div class="work-top">
+                         <div class="my-photo">
+                             <img src="" alt="" id="myPhoto"/>
+                         </div>
+                      </div>
+                      <div class="work-body" id="UserInfo">
+                      </div>
+                     @* <div class="work-foot">
+
+                      </div>*@
+                </div><!-- Work end  默认桌面左侧导航内容块-->
+       </div>
+    </div>
+    <div data-options="region:'south',border:false" style="height:24px; background-color: #3b3a38;">
+       <p class="Copy-right">好护士EBMS系统 Copyright©2016.</p>
+    </div>
+    <div data-options="region:'center',border:false">
+        <div id="mainTab" class="easyui-tabs" data-options="fit:true">
+            <div title="桌面" data-options="closable:true" style="overflow: hidden; background:#fff">
+                <iframe id="work-areas" scrolling="auto" frameborder="0" src="" style="width: 100%; height: 100%;">
+                </iframe> 
+            </div>
+        </div>
+    </div>
+<div id="addDiv" class="easyui-dialog" closed="true" modal="true" title="新增" style="width:920px; height: 520px;" resizable="true" closable="true">
+    <iframe scrolling="yes" id='openIframeAdd' frameborder="0" src="" style="width:100%;height:98%;"></iframe>
+</div>
+     <div id="tab_menu" class="easyui-menu" style="width: 150px;">
+        <div id="tab_menu-tabrefresh" data-options="iconCls:'icon-reload'">
+            刷新</div>
+        <div id="tab_menu-openFrame">
+           在新的窗体打开</div>
+        <div id="tab_menu-tabcloseall">
+            关闭所有</div>
+        <div id="tab_menu-tabcloseother">
+            关闭其他标签页</div>
+        <div class="menu-sep">
+        </div>
+        <div id="tab_menu-tabcloseright">
+           关闭右边</div>
+        <div id="tab_menu-tabcloseleft">
+           关闭左边</div>
+        <div id="tab_menu-tabclose" data-options="iconCls:'icon-remove'">
+          关闭</div>
+        <div id="menu" class="easyui-menu" style="width: 150px;">
+        </div>
+    </div>
+   <div id="pwdEdit" class="easyui-dialog" closed="true" modal="true" title="修改密码" style="width: 450px; height:240px;" resizable="true" closable="true">
+    <iframe scrolling="no" id='openIframeEdit' frameborder="0" src="" style="width: 100%;height: 98%;"></iframe>
+</div>
+</body>
+	<script type="text/javascript" src="../Content/blue/js/jquery.min.js"></script>
+	<script type="text/javascript" src="../Content/blue/js/jquery.easyui-min.js"></script>
+    <script type="text/javascript" src="../Scripts/home.js"></script>
+    <script type="text/javascript">
+        //function op(name, url) {
+        //    self.parent.addTab(name, url, '');
+        //    getContextmenu()
+        //}
+        function op(name, url, closeTab) {
+            var tab = $('#mainTab').tabs('exists', closeTab);
+            if (tab == true) {
+                var parentTab = $('#mainTab').tabs('select');
+                var curTab = $('#mainTab').tabs('getSelected');// 当前tab
+                var index = $('#mainTab').tabs('getTabIndex', curTab);
+                $('#mainTab').tabs('close', index);
+            }
+            self.parent.addTab(name, url, '');
+            getContextmenu()
+
+
+
+        }
+        function PwdEdit() {
+            $('#openIframeEdit')[0].src = "/Home/EditPwd";
+            $('#pwdEdit').dialog('open');
+        }
+
+        $(function () {
+            $("#LeftNav").closest(".layout-panel-west").css("box-shadow", "rgb(221, 221, 221) 2px 0px 23px");
+            
+          //  getLeftNav('Work')
+            $("#work-areas").attr("src", "../Home/WorkMap")                  
+            //构建顶级菜单DOM
+            $.ajax({
+                url: "../Home/getTopNav",
+                type: "Post",
+                contentType: "application/json",
+                dataType: "json",
+                success: function (data) {
+                    var str = "";
+                    var pannelStr = "";//生成左侧导航面板的字符串
+                    $.each(data, function (i, value) {
+                        for (var j in value) {
+                            if (value[j].IdName != "Work") {
+                              str += '<li><a href="#" onclick="ShowNav(\'' + value[j].IdName + '\')" id=' + value[j].ID + '>' + value[j].Name + '</a></li>'
+                         }
+                              pannelStr += "<div data-id=" + value[j].IdName + " id=\"pannel-" + value[j].IdName + "\" class=\"pannelDiv\"><ul></ul></div>";
+                        }
+                    })
+                    $("#j-top-nav").append(str);
+                    $('#left-nav').append(pannelStr);
+                    getPannel();
+                    //顶级菜单点击样式
+                    $("#j-top-nav li").click(function () {
+                        $("#j-top-nav li").not($(this)).removeClass("cur");
+                        $(this).addClass("cur");
+                    })
+                },
+                error: function (data) {
+                    //失败 
+                }
+               
+            });
+            //获取员工信息
+            $.ajax({
+                url: "../Home/GetWorkPannel",
+                type: "Post",
+                contentType: "application/json",
+                dataType: "json",
+                success: function (data) {
+                    var $data = eval(data.jsonString);
+                    if ($.trim(data) != "") {
+                        $("#myPhoto").attr("src", $data[0].Pic);
+                    }
+                    $("#myPhoto").error(function () {
+                        $(this).hide();
+                    });
+                    var htmlStr = '';
+                    if ($data[0].Sex == "女") {
+                        htmlStr += '<p class="NickName women">' + $data[0].NickName + '</p>'
+                    } else {
+                        htmlStr += '<p class="NickName man">' + $data[0].NickName + '</p>'
+                    }
+                    htmlStr += '<table style="border-collapse:separate; border-spacing:0px 10px;margin: 0 auto;"><tr><td class="l-td">真名：</td><td>' + $data[0].TrueName + '</td></tr><tr><td class="l-td">性别：</td><td>' + $data[0].Sex + '</td></tr><tr><td class="l-td">工位号：</td><td>' + $data[0].WorkNum + '</td></tr><tr><td class="l-td">工作组：</td><td>' + $data[0].Department + '</td></tr><tr><td class="l-td">岗位：</td><td>' + $data[0].Job + '</td></tr><tr><td class="l-td">系统角色：</td><td>' + data.userPower + '</td></tr><tr><td class="l-td">食堂碗柜号：</td><td>' + $data[0].CupboardNun + '</td></tr><tr><td class="l-td">宿舍号：</td><td>' + $data[0].DormitoryNum + '</td></tr><tr><td class="l-td">联系方式：</td><td class="man">' + $data[0].Tel + '</td></tr></table>'
+                    $("#UserInfo").html(htmlStr);
+                    $("#UserInfo td:Contains(null)").html("&lt;/&gt;")
+                }
+            })
+           
+        })
+        function getPannel() {
+
+            $("#left-nav .pannelDiv").each(function (i) {
+               
+                getLeftNav($(this).attr("data-id"))
+                
+            })
+        }
+        //显示div
+        function ShowNav(id) {
+            if (id != "OMS") {
+                var showPannel = $("#pannel-" + id);
+                $("#left-nav .pannelDiv").not(showPannel).hide();
+                showPannel.show()
+            } else {
+              
+                window.open("http://oms.hhs16.com/");
+
+            }
+    
+        }
+        $("#Work").click(function () {
+            ShowNav('Work')
+            op("桌面","../Home/WorkMap")
+        })
+        function getLeftNav(pId) {
+                //pId是顶级导航的英文名，左侧菜单的父级名
+                $.ajax({
+                    url: "../Home/getTreeData?pId=" + pId,
+                    type: "Post",
+                    contentType: "application/json",
+                    dataType: "json",
+                    success: function (dataTree) {
+                        var navTree = eval(dataTree);
+                        //树
+                        if (pId != "Work") {
+                            $("#pannel-" + pId).find("ul").tree({
+                                data: navTree,
+                                onClick: function (node) {
+                                    if (node.href != null && $.trim(node.href) != "") {
+                                        if (pId != "Work") {
+                                            op(node.text, node.href, node.iconCls)
+                                        } else {
+                                            op("桌面", node.href)
+                                            $("#work-areas").attr("src", node.href)
+                                            $("#work-areas").attr("data-title", node.text)
+                                        }
+                                    }
+                                    else {
+                                        $(this).tree('toggle', node.target)
+                                    }
+                                }
+                            })
+                        
+                        $("#pannel-" + pId).find(".tree").tree("collapseAll");
+                        var rootNode = $("#pannel-" + pId).find(".tree").tree('getRoot'); //调用expand方法 
+                        $("#pannel-" + pId).find(".tree").tree('expand', rootNode.target);
+                        }
+                    },
+                    error: function (data) {
+                        //失败 
+                    }
+                });
+            }
+      
+	</script>
+
+</html>
+
+<script type="text/javascript" src="https://s4.cnzz.com/z_stat.php?id=1278228176&web_id=1278228176"></script>

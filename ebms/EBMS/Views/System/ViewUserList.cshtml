@@ -1,0 +1,346 @@
+﻿@{
+    ViewBag.Title = "ViewUserList";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+<style>
+   /*  .searchForPower {float:left;margin:0 5px;position:relative;}
+   .Power {position:absolute;left:0;top:22px;background:#fff;width:175px;padding:5px;box-sizing:border-box;-webkit-box-sizing:border-box;box-shadow:0 0 10px #ccc;z-index:999;display:none}
+        .Power p {cursor:pointer;line-height:20px;}*/
+    #txtQuery2 {float:left;margin:2px 5px;position:relative;
+    }
+</style>
+<div class="Company-top-box">
+    <div class="search-box">
+          @*<span style="float: left; color: #808080; padding-right: 10px; font-size: 13px; margin-top: 3px">角色查询</span>*@
+         <input type="text" placeholder="输入花名/真实姓名.." id="txtQuery"  class="icon-search-txt">
+            @*<div class="searchForPower">
+                <input type="text" placeholder="输入角色名称" id="txtQuery2"/>
+                <div class="Power" id="Power">22</div>
+            </div>*@
+             <select id="txtQuery2"></select>
+         <input type="button" value="查询" id="btnQuery" class="icon-search">
+    </div>
+    <div class="btn-bar">
+         <a href="#" id="btnCreateDepartment" class="icon-add">添加部门</a>
+         <a href="#" id="btnEdit" class="icon-edit">编辑部门</a>
+        <a href="#" id="btnDelete" class="icon-remove">删除部门</a>
+        <a href="#" id="btnCreateEmployees" class="icon-add">增加新员工</a>
+    </div>
+</div>
+<input type="hidden" id="theId"  value="1">
+<input type="hidden" id="findListId" value="1">
+<div id="categoryChooseDiv">
+      <ul id="MyTree"></ul>
+</div>
+  <div class="UserTable" id="UserTable">
+   <table id="List"></table>
+  </div>
+<script>
+    enterSearch("#btnQuery");
+    function myTree() {
+        var treeData = @Html.Raw(ViewData["tree"])
+        $("#MyTree").tree({
+            // dnd:true,
+            animate: false,
+            data: treeData,
+            lines: true,
+            onClick: function (node) {
+                //  $(this).tree('toggle', node.target);
+                $("#theId").val(node.id)
+
+                //如果查询条件为空默认查询全部
+
+                queryStr = "";
+
+                getList(node.id, queryStr)
+
+            },
+            onDblClick: function (node) {
+                $(this).tree('toggle', node.target);
+            }
+
+        });
+        $("#MyTree").tree("collapseAll");
+        var rootNode = $("#MyTree").tree('getRoot'); //调用expand方法 
+        $("#MyTree").tree('expand', rootNode.target);
+        //function Open(id, text) {
+        //    $('#openIframeOrder')[0].src = "SysQueryUserRoleGrid?id=" + id;
+        //}
+    }
+    $(function () {
+        $("body").css("overflow", "hidden")
+        myTree()
+    })
+    function loadTreeAfterAddCom(id,name) {
+        var node = $('#MyTree').tree('getSelected');
+        if (node == null) {
+            var node =  $("#MyTree").tree('getRoot')
+        }
+        $('#MyTree').tree('append', {
+                parent: node.target,
+                data: [{
+                    id: id,
+                    text: name
+                }]
+            });
+    } 
+    function loadAddForEdit(id, Pid, name,json) {
+        var node = $('#MyTree').tree("find", Pid);
+        
+        if (node != null) {
+            var $ul = node.target
+            $($ul).next().html("")
+            var Json = eval('(' + json + ')')
+            $('#MyTree').tree('append', {
+                parent: node.target,
+                data: Json
+            });
+        } else {
+            location.reload()
+        }
+    }
+    function removeNode(id) {
+        var node = $('#MyTree').tree("find", id);
+        $("#MyTree").tree('pop', node.target)
+    }
+    //创建部门
+    $("#btnCreateDepartment").click(function () {
+        var Pid = $("#theId").val();
+       
+        if (Pid == null||Pid ==="undefined"|| Pid == "") { alert("请选择需要添加子部门的公司或部门") }
+        else {
+            $('#openIframeNew')[0].src = "ViewCompanyAdd?Pid=" + Pid;
+            $('#openDivNew').dialog('open');
+        }
+    })
+    $("#categoryChooseDiv").height($("body").height());
+    //删除部门
+    $("#btnDelete").click(function () {
+        var Pid = $("#theId").val();
+        if (Pid == "1") {
+            $.messager.alert('提示', '不能删除公司', "info", function () { });
+        } else {
+            if (Pid == null || Pid === "undefined" || Pid == "") { alert("请选择需要删除的部门") }
+            else {
+                loading(0);
+                $.ajax({
+                    url: "../System/findChildForDelete?Pid=" + Pid,
+                    type: "Post",
+                    dataType: "json",
+                    success: function (data) {
+                        loading(1);
+                        if (data == "1") {
+                            $.messager.alert('提示', '该部门底下有人员或者子部门，不能删除', "info", function () { });
+                    } else {
+                        $.ajax({
+                            url: "../System/departmentDelete?Pid=" + Pid,
+                            type: "Post",
+                            dataType: "json",
+                            success: function (data) {
+                                loading(1);
+                                $.messager.alert('提示', '删除成功', "info", function () {
+                                    removeNode(Pid)
+                                });
+                            },
+                            error: function () {
+                                loading(1);
+                            }
+                        });
+                        }
+                }
+            });
+            }
+        }
+    })
+    //添加人员
+    $("#btnCreateEmployees").click(function () {
+        var Pid = $("#theId").val();
+
+        if (Pid == null || Pid === "undefined" || Pid == "") { alert("请选择需要添加员工的公司或部门") }
+        else {
+            $('#openIframeCreat')[0].src = "ViewEmployeesAdd?Pid=" + Pid;
+            $('#creatEmployeesDiv').dialog('open');
+        }
+    })
+    //编辑部门
+    $("#btnEdit").click(function () {
+        var Pid = $("#theId").val();
+        if (Pid == null || Pid === "undefined" || Pid == "") { alert("请选择需要编辑部门") }
+        else {
+            $('#openIframeDepartmentEdit')[0].src = "ViewDepartmentEdit?Pid=" + Pid;
+            $('#creatDepartmentEditDiv').dialog('open');
+        }
+    })
+    //人员查询
+    $("#btnQuery").click(function () {
+        var queryStr = $("#txtQuery").val();
+        //如果查询条件为空默认查询全部
+        if (queryStr == null) {
+            queryStr = "%";
+        }
+        var dId = $("#theId").val();
+        getList(dId,queryStr)
+    })
+    //用户列表
+    function getList(dId, str) {
+        var str2 = $("#txtQuery2").val();
+        if (str2 == null) {
+            str2 = "";
+        }
+
+        var $width = $("#UserTable").width($(window).width() - 234)
+        $("#UserTable").height($("body").height())
+        var $height = $("#UserTable").height() - 50;
+        var url = "../System/ShowUserList?dId=" + dId + "&queryStr=" + str + "&queryStr2=" + str2;
+        $('#List').datagrid({
+            url: url,
+            width: $width,
+            method: 'post',
+            height: $height,
+            fitColumns: true,
+            sortName: 'id',
+            sortOrder: 'desc',
+            idField: 'id',
+            pageSize: 20,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            columns: [[
+                { field: 'Nickname', title: '花名', width: 120, align: 'center' },
+                { field: 'Name', title: '真实姓名', width: 120, align: 'center' },
+                { field: 'Power', title: '角色', width: 80, align: 'center' },
+                { field: 'Tel', title: '联系方式', width: 120, align: 'center' },
+                { field: 'DepartmentId', title: '部门', width: 120, align: 'center' },
+                {
+                    field: 'IsManagers', title: '是否部门负责人', width: 100, align: 'center', formatter: function (value, row, index) {
+                        if (row.IsManagers == 1) {
+                            return "是";
+                        }
+                        else {
+                            return "否";
+                        }
+                    }
+                },
+                {
+                    field: 'action', title: '操作', width: 100, align: 'center',
+                    formatter: function (value, row, index) {
+                        var e = '<a href="#" class="tools-btn icon-remove" onclick="eDelete(' + row.ID + ')">删除</a> <a href="#" class="tools-btn icon-edit" onclick="eEdit(' + row.ID + ')">编辑</a>';
+                        return e;
+                    }
+                }
+            ]],
+            onClickRow: function (rowIndex, rowData) {
+            },
+            onAfterEdit: function (index, rowData) {
+                //回调函数可以直接用于操作页面
+            }
+        });
+    }
+    $(function (){
+        var Id = $("#findListId").val();
+        var queryStr = $("#txtQuery").val();
+        //如果查询条件为空默认查询全部
+        if (queryStr == null) {
+            queryStr = "%";
+        }
+        getList(Id, queryStr)
+    });
+    $(window).resize(function () {
+        var $width = $("#UserTable").width($(window).width() - 234);
+        $("#UserTable").height($("body").height());
+        var $height = $("#UserTable").height() - 50;
+        $('#List').datagrid({ width: $width, height: $height })
+    });
+    //物理删除用户
+    function eDelete(id) {
+        $.messager.confirm('提示', '该人员所有信息将被删除,确定删除？', function (r) {
+            if (r) {
+                var flag = 0
+                loading(0);
+                if (flag == 0) {
+                    flag++
+                    $.ajax({
+                        url: "../System/employeesDelete?id=" + id,
+                        type: "Post",
+                        dataType: "json",
+                        success: function (data) {
+                            loading(1);
+                            $.messager.alert('提示', '删除成功', "info", function () {
+                            $('#List').datagrid('reload');
+                            flag = 0;
+                        });
+                    },
+                    error: function () {
+                        flag = 0;
+                        loading(1);
+                    }
+                });
+                }
+            }
+        })
+    }
+    //编辑用户
+    function eEdit(id) {
+        $('#openIframeEditEmployeesDiv')[0].src = "ViewEmployeesEdit?id=" + id;
+        $('#editEmployeesDiv').dialog('open');
+    }
+    //输入角色名称搜索人员的功能  
+    //$("#txtQuery2").focus(function (event) {
+     
+    //    $("#Power").show();
+       
+    //})
+   
+
+
+
+    $.ajax({
+        url: "../System/getPowerList",
+        type: "Post",
+        dataType: "json",
+        success: function (data) {
+            data = eval("(" + data + ")")
+            var strDom = "<option value=\"\">==请选择==</option>";
+            $.each(data, function (val, item) {
+                strDom += "<option  value=" + item.ID + ">" + item.Name + "</option>"
+            })
+            $("#txtQuery2").html(strDom)
+            //$("#Power").html(strDom);
+            //$("#Power p:gt(3)").hide();
+            //$("#Power p").bind('click', function () {
+            //    var name = $(this).attr("data-name");
+               
+            //    $("#txtQuery2").val(name)
+            //    $("#Power").hide();
+            //});
+            //$("#txtQuery2").bind("keyup", function () {
+            //    if (!$.trim($(this).val()) == "") {
+            //        var showP = $("#Power p:contains(" + $(this).val() + ")");
+            //        $("#Power p").not(showP).hide();
+            //        $("#Power").show()
+            //        showP.show();
+            //    } else {
+            //        $("#Power").hide();
+            //    }
+
+            //})
+
+        },
+        error: function () {
+
+        }
+    })
+   
+</script>
+<div id="openDivNew"  class="easyui-dialog" closed="true" modal="true" title="添加部门" style="width:340px; height:240px;" resizable="true" closable="true">
+    <iframe scrolling="no" id='openIframeNew' frameborder="0" src="" style="width: 100%; height:98%;"></iframe>
+</div>
+<div id="creatEmployeesDiv" class="easyui-dialog" closed="true" modal="true" title="添加员工" style="width:520px; height:320px;" resizable="true" closable="true">
+    <iframe scrolling="yes" id='openIframeCreat' frameborder="0" src="" style="width:100%;height:98%;"></iframe>
+</div>
+<div id="creatDepartmentEditDiv"  class="easyui-dialog" closed="true" modal="true" title="编辑部门" style="width:340px; height:380px;" resizable="true" closable="true">
+    <iframe scrolling="yes" id='openIframeDepartmentEdit' frameborder="0" src="" style="width: 100%; height:98%;"></iframe>
+</div>
+<div id="editEmployeesDiv" class="easyui-dialog" closed="true" modal="true" title="编辑员工" style="width:520px; height:340px;" resizable="true" closable="true">
+    <iframe scrolling="yes" id='openIframeEditEmployeesDiv' frameborder="0" src="" style="width:100%;height:98%;"></iframe>
+</div>

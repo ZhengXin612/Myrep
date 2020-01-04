@@ -1,0 +1,74 @@
+﻿@{
+    ViewBag.Title = "ViewWarehouseList";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+
+<div class="Company-top-box">
+    <div class="search-box">
+        <input type="text" id="txtQuery" style="width: 150px;" placeholder="商品编码/名称" />
+        <input type="button" value="查询" id="btnQuery" class="icon-search">
+    </div>
+</div>
+
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+<script type="text/javascript">
+    //回车触发查询
+    enterSearch("#btnQuery");
+    $(function () {
+        var url = "GetWarehouseList";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() * 0.92,
+            fitColumns: true,
+            sortName: 'ID',
+            sortOrder: 'desc',
+            idField: 'ID',
+            pageSize: 20,
+            pagination: true,
+            showFooter: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                { field: 'create_date', title: '创建时间', width: 100, align: 'center' },
+                { field: 'name', title: '仓库名称', width: 140, align: 'center' },
+                { field: 'code', title: '仓库代码', width: 80, align: 'center' },
+                { field: 'type_name', title: '仓库类型', width: 80, align: 'center' },
+                { field: 'contact_name', title: '联系人', width: 60, align: 'center' },
+                { field: 'contact_phone', title: '联系电话', width: 80, align: 'center' },
+                 { field: 'contact_mobile', title: '手机', width: 80, align: 'center' },
+                { field: 'area_name', title: '仓库区域', width: 80, align: 'center' },
+                 { field: 'address', title: '详细地址', width: 60, align: 'center' },
+                 { field: 'memo', title: '备注', width: 60, align: 'center' },
+               
+            ]]
+        });
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            });
+        });
+
+    });
+    
+
+
+
+    $("#btnQuery").click(function () {
+
+        var queryStr = $("#txtQuery").val().trim();
+        $('#List').datagrid({
+            url: 'GetWarehouseList?query=' + queryStr
+        });
+
+    });
+
+</script>

@@ -1,0 +1,155 @@
+﻿@{
+    ViewBag.Title = "ViewExchangeGoodsManager";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+<div class="Company-top-box">
+    <div class="search-box">
+        <select id="selStatus" name="selStatus" class="sel-box">
+            <option value="-2" selected>状态</option>
+            <option value="2">不同意</option>
+            <option value="1">已同意</option>
+            <option value="0">审核中</option>
+            <option value="-1">未审核</option>
+        </select>
+        <input type="text" id="txtQuery" style="width: 150px;" placeholder="会员名称/订单号/快递单号" />
+        <span style="color: #808080; padding-right: 10px; font-size: 13px; margin-top: 3px; margin-left: 10px;">开始时间</span>
+        <input name="statethisdate" style="float: left;" value="" id="statethisdate" class="easyui-datebox" data-options="sharedCalendar:'#statethisdate'">
+        <span style="color: #808080; padding-right: 10px; font-size: 13px; margin-top: 3px; margin-left: 10px;">结束时间</span>
+        <input name="Endthisdate" style="float: left;" value="" id="Endthisdate" class="easyui-datebox" data-options="sharedCalendar:'#Endthisdate'">
+        <input type="button" value="查询" id="btnQuery" class="icon-search">
+    </div>
+    <div class="btn-bar">
+        <a href="#" rel="external" ajax-data="false" class="icon-edit" onclick="getExcel(this)">导出Excel</a>
+        <p class="showBar">查看详情 : 请双击需要查看的数据</p>
+    </div>
+</div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+<script type="text/javascript">
+    //回车触发查询
+    enterSearch("#btnQuery");
+    $(function () {
+        var url = "GetExchangeGoodsManagerList";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() * 0.95,
+            sortName: 'ID',
+            sortOrder: 'desc',
+            idField: 'id',
+            pageSize: 20,
+            showFooter: true,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            frozenColumns: [[
+                { field: 'PostUser', title: '操作人', width: 80, align: 'center' },
+                { field: 'OrderCode', title: '原订单号', width: 140, align: 'center' },
+                            { field: 'VipName', title: '会员名称', width: 100, align: 'center' },
+                                  {
+                                      field: 'Status', title: '状态', width: 80, align: 'center', formatter: function (value, row, index) {
+                                          switch (value) {
+                                              case -1:
+                                                  return "<font color=blue>未审核</font>"
+                                                  break;
+                                              case 0:
+                                                  return "<font color=blue>审批中</font>"
+                                                  break;
+                                              case 1:
+                                                  return "<font color=green>已同意</font>"
+                                                  break;
+                                              case 2:
+                                                  return "<font color=red>不同意</font>"
+                                                  break;
+                                              default:
+                                                  return "<font color=red>NULL</font>"
+                                          }
+                                      }
+                                  },
+            ]],
+            columns: [[
+            { field: 'ReturnWarhouse', title: '退回仓库', width: 90, align: 'center' },
+                                                                  {
+                                                                      field: 'WarhouseStatus', title: '仓库收货', width: 80, align: 'center', formatter: function (value, row, index) {
+                                                                          switch (value) {
+                                                                              case 0:
+                                                                                  return "<font color=blue>未收货</font>"
+                                                                                  break;
+                                                                              case 1:
+                                                                                  return "<font color=green>已收货</font>"
+                                                                                  break;
+                                                                              default:
+                                                                                  return "<font color=red>NULL</font>"
+                                                                          }
+                                                                      }
+                                                                  },
+            { field: 'ReturnExpressName', title: '退回快递', width: 100, align: 'center' },
+            { field: 'ReturnExpressCode', title: '退回快递单号', width: 120, align: 'center' },
+                 { field: 'SystemRemark', title: '系统备注', width: 160, align: 'center' },
+                { field: 'StoreName', title: '店铺名称', width: 130, align: 'center' },
+                 { field: 'ReceivingName', title: '收货人', width: 70, align: 'center' },
+                 { field: 'ReceivingPhone', title: '收货人固定电话', width: 100, align: 'center' },
+                { field: 'ReceivingTelPhone', title: '收货人移动电话', width: 120, align: 'center' },
+                { field: 'ReceivingAddress', title: '收货人地址', width: 150, align: 'center' },
+                { field: 'CreateDate', title: '操作时间', width: 140, align: 'center' },
+                { field: 'ExchangeReson', title: '换货原因', width: 140, align: 'center' }
+            ]],
+            onDblClickRow: function (value, row, index) {
+                $('#openIframedetail')[0].src = "ViewExchangeGoodsDetail?exchangeId=" + row.ID;
+                $('#detailDiv').dialog('open');
+            }
+        });
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            });
+        });
+    });
+
+
+    $("#btnQuery").click(function () {
+
+        var queryStr = $("#txtQuery").val().trim();
+        var status = $("#selStatus").val();
+        var statedate = $('#statethisdate').datebox('getValue');
+        var EndDate = $('#Endthisdate').datebox('getValue');
+        //如果查询条件为空默认查询全部
+        if (queryStr == null) {
+            queryStr = "%";
+        }
+
+        $('#List').datagrid({
+            url: 'GetExchangeGoodsManagerList?code=' + encodeURI(queryStr) + "&status=" + status + "&startDate=" + statedate + "&endDate=" + EndDate
+        });
+
+    });
+    function getExcel(_this) {
+
+
+        var queryStr = $("#txtQuery").val();
+        var statedate = $('#statethisdate').datebox('getValue');
+        var EndDate = $('#Endthisdate').datebox('getValue');
+     
+        if (statedate == null || statedate == "") {
+            alert("请选择一个开始时间");
+            return
+        }
+        if (EndDate == null || EndDate == "") {
+            alert("请选择一个结束时间");
+            return
+        }
+        _this.href = '../ExchangeCenter/getExcelManager?queryStr=' + queryStr + '&statedate=' + statedate + '&EndDate=' + EndDate ;
+    }
+</script>
+<div id="detailDiv" class="easyui-dialog" closed="true" modal="true" title="详情" style="width: 800px; height: 450px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIframedetail' frameborder="0" src="" style="width: 98%; height: 98%;"></iframe>
+</div>

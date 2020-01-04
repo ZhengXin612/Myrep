@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="2.0" xmlns:edmx="http://schemas.microsoft.com/ado/2008/10/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2008/10/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="1ecd5ab02ba54a2cb83449f6fd7660b1" Name="Diagram1" ZoomLevel="40">
+        <EntityTypeShape EntityType="WDTSoOrderModel.dict_platform" Width="1.5" PointX="0.75" PointY="6.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="WDTSoOrderModel.ebms_refund_tonc" Width="1.5" PointX="5.75" PointY="8.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="WDTSoOrderModel.ebms_refundable" Width="1.5" PointX="7.75" PointY="8.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="WDTSoOrderModel.ebms_returnstorage" Width="1.5" PointX="9.75" PointY="8.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="WDTSoOrderModel.ebms_returnstorage_fictitious" Width="1.5" PointX="10.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="WDTSoOrderModel.fictitious" Width="1.5" PointX="11.75" PointY="6.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="WDTSoOrderModel.goods_brand" Width="1.5" PointX="5.75" PointY="2.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="WDTSoOrderModel.goods_class" Width="1.5" PointX="11.75" PointY="9.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="WDTSoOrderModel.goods_goods" Width="1.5" PointX="8" PointY="1.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="WDTSoOrderModel.goods_spec" Width="1.5" PointX="13.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="WDTSoOrderModel.log_Record" Width="1.5" PointX="11.75" PointY="13.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="WDTSoOrderModel.NC_close" Width="1.5" PointX="13.75" PointY="12.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="WDTSoOrderModel.NC_sales" Width="1.5" PointX="0.75" PointY="14.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="WDTSoOrderModel.NC_SoSale_Remark_Log" Width="1.5" PointX="2.75" PointY="14.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="WDTSoOrderModel.NC_Transfer_Remark_Log" Width="1.5" PointX="4.75" PointY="14.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="WDTSoOrderModel.NCGeneral_to_WDTOtherBill_Log" Width="1.5" PointX="13.75" PointY="14.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="WDTSoOrderModel.NCTranfer_To_WDTOther_Log" Width="1.5" PointX="15.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="WDTSoOrderModel.sale_ToNC_Log" Width="1.5" PointX="15.75" PointY="4.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="WDTSoOrderModel.sale_zoAmount_trade_order" Width="1.5" PointX="15.75" PointY="8.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="WDTSoOrderModel.sales_trade_close" Width="1.5" PointX="15.75" PointY="12.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="WDTSoOrderModel.sales_trade_order" Width="1.5" PointX="9.75" PointY="16.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="WDTSoOrderModel.sales_trade_orders" Width="1.5" PointX="17.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="WDTSoOrderModel.SettlementPriceList" Width="1.5" PointX="4.75" PointY="17.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="WDTSoOrderModel.sql_sostockout_detail" Width="1.5" PointX="17.75" PointY="11.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="WDTSoOrderModel.sql_sostockout_detail_fictitious" Width="1.5" PointX="0.75" PointY="18.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="WDTSoOrderModel.stock_transfer_details" Width="1.5" PointX="6.75" PointY="18.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="WDTSoOrderModel.stockin_order_details" Width="1.5" PointX="11.75" PointY="18.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="WDTSoOrderModel.stockout_order_details" Width="1.5" PointX="19.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="WDTSoOrderModel.StockOut_ToNC_Log" Width="1.5" PointX="19.75" PointY="9.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="WDTSoOrderModel.sys_warehouse" Width="1.5" PointX="19.75" PointY="12.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="WDTSoOrderModel.SysLog" Width="1.5" PointX="2.75" PointY="20.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="WDTSoOrderModel.temp_test" Width="1.5" PointX="21.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="WDTSoOrderModel.test" Width="1.5" PointX="21.75" PointY="3.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="WDTSoOrderModel.TressferBill_ToNC" Width="1.5" PointX="21.75" PointY="6.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="WDTSoOrderModel.WDTDiaoBo_to_NCTransfer_Log" Width="1.5" PointX="21.75" PointY="10.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="WDTSoOrderModel.WDTStockout_to_NCStockout_Log" Width="1.5" PointX="21.75" PointY="14.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="WDTSoOrderModel.sys_shop" Width="1.5" PointX="3" PointY="1.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="WDTSoOrderModel.Userid" Width="1.5" PointX="21.75" PointY="18.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="WDTSoOrderModel.WDTStockin_to_NCStockin_Log" Width="1.5" PointX="19.75" PointY="21.75" IsExpanded="true" />
+        <AssociationConnector Association="WDTSoOrderModel.sys_shop_fk_sys_shoplist_platform_id" ManuallyRouted="false" />
+        <AssociationConnector Association="WDTSoOrderModel.goods_goods_FK_goods_goods_brand_id" ManuallyRouted="false" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

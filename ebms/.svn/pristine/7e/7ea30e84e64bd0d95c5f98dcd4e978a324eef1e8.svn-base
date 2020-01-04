@@ -1,0 +1,200 @@
+﻿@model EBMS.Models.T_ExpressIndemnity
+@{
+    ViewBag.Title = "ViewExpressIndemnityCheck";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+<script type="text/javascript">
+    
+   $(function () {
+       
+        var flag = 0;
+        $('#btnSave').click(function () {
+            if ($('#Omoney').val() > $('#IndemnityMoney').val() && ($('#Memo').val() == "" || $('#Memo').val() == null) && $('input[name="State"]:checked').val() != "3")
+            {
+                $.messager.alert('提示', '赔付金额小于订单金额时请写备注', "info");
+                return false;
+            }
+           
+           
+            if ($('input[name="State"]:checked').val() == null || $('input[name="State"]:checked').val() == undefined || $('input[name="State"]:checked').val()=="")
+            {
+
+                $.messager.alert('提示', '请选择处理结果', "info");
+             
+                return false;
+            }
+                
+           
+            if ($("#EditForm").valid() && flag == 0) {
+                flag = 1;
+                loading(0);
+                $.ajax({
+                    url: "/ExpressIndemnity/ExpressIndemnityApproveSave",
+                    type: "Post",
+                    data: $("#EditForm").serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        if (data > 0) {
+                            $.messager.alert("提示", "@Lib.MessageRes.SaveOK", "info", function () {
+                                loading(1)
+                                parent.$('#CheckDiv').dialog('close')
+                                parent.$('#List').datagrid('reload');
+                            })
+                        }
+                        else {
+                            loading(1)
+                            $.messager.alert("提示", "保存失败", "info");
+                            flag = 0;
+
+                        }
+                        parent.$('#List').datagrid("clearSelections");
+                    },
+                    error: function (data) {
+                        loading(1);
+                        flag = 0;
+                        $.messager.alert('提示', data, "info");
+                    }
+                });
+
+            }
+
+        })
+       $('input[name="State"]').change(function () {
+           var checkValue = $('input[name="State"]:checked').val();
+         
+           if (checkValue == "1") {
+              
+               if ($('#ExpName').val().indexOf("韵达") >= 0) {
+                   $("#MoneyWhereAbout").val("赔付至指定费");
+               }
+               else {
+                   if ($('#Address').val() == "长沙") {
+                       $("#MoneyWhereAbout").val("赔付至长沙支付宝haohushi8888@163.com");
+                   }
+                   else { $("#MoneyWhereAbout").val("赔付至杭州支付宝yjkdyf888@163.com"); }
+               }
+           };
+           if (checkValue== "2") {
+
+               $("#MoneyWhereAbout").val("赔付至仲裁款");
+           };
+           if (checkValue== "3") {
+             
+               $("#MoneyWhereAbout").val("财务直接扣款");
+           };
+           if (checkValue == "4" || checkValue=="5") {
+
+               $("#MoneyWhereAbout").val("无钱款去向");
+           };
+       })
+       $('#Address').change(function () {
+           var checkValue = $('input[name="State"]:checked').val();
+
+           if (checkValue == "1") {
+
+               if ($('#ExpName').val().indexOf("韵达") >= 0) {
+                   $("#MoneyWhereAbout").val("赔付至指定费");
+               }
+               else {
+                   if ($('#Address').val() == "长沙") {
+                       $("#MoneyWhereAbout").val("赔付至长沙支付宝haohushi8888@163.com");
+                   }
+                   else { $("#MoneyWhereAbout").val("赔付至杭州支付宝yjkdyf888@163.com"); }
+               }
+           };
+         
+       })
+   })
+
+   
+</script>
+<div class="mvctool">
+    <a id="btnSave" href="javascript:;" class="modal-btn modal-btn-save">保存</a>
+    
+</div>
+
+<div>
+    @using (Html.BeginForm("EditForm", "Controllers", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+    <table class="fromEditTable setTextWidth300">
+       
+        <tbody>
+             <tr>
+               <td class="lab">
+                   @Html.LabelFor(model=>model.State):
+               </td>
+               <td>
+                  @Html.RadioButtonFor(model => model.State, "1")私了
+                    @Html.RadioButtonFor(model=>model.State,"2")仲裁
+                    @Html.RadioButtonFor(model=>model.State,"3")财务直接扣款
+                    @Html.RadioButtonFor(model=>model.State,"4")无法仲裁
+                @if (ViewData["second"].ToString() == "1")
+                { 
+                  @Html.RadioButtonFor(model=>model.State,"5")<span>货已追回</span>
+                } 
+               </td>
+               <td>
+                   @Html.ValidationMessageFor(model=>model.State)
+               </td>
+           </tr>
+             <tr>
+               <td class="lab">
+                   @Html.LabelFor(model=>model.Address):
+               </td>
+               <td>
+                   @Html.DropDownListFor(model=>model.Address, ViewData["addressList"] as List<SelectListItem>)
+                   
+                 </td>
+               <td>
+                   @Html.ValidationMessageFor(model=>model.Address)
+               </td>
+           </tr>
+           <tr>
+               <td class="lab">
+                   @Html.LabelFor(model=>model.IndemnityMoney):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model => model.IndemnityMoney, new { type="tel"})
+                   
+                 </td>
+               <td>
+                   @Html.ValidationMessageFor(model=>model.IndemnityMoney)
+               </td>
+           </tr>
+             <tr>
+               <td class="lab">
+                   @Html.LabelFor(model=>model.MoneyWhereAbout):
+               </td>
+               <td>
+                   @Html.DropDownListFor(model=>model.MoneyWhereAbout,ViewData["moneyWhere"] as List<SelectListItem>)
+                   
+                 </td>
+               <td>
+                   @Html.ValidationMessageFor(model=>model.MoneyWhereAbout)
+               </td>
+           </tr>
+            <tr>
+               <td class="lab">
+                   @Html.LabelFor(model=>model.Memo):
+               </td>
+               <td>
+                   @Html.TextAreaFor(model=>model.Memo)
+                   
+                 </td>
+               <td>
+                   @Html.ValidationMessageFor(model=>model.Memo)
+               </td>
+           </tr>
+        </tbody>
+    </table>
+           @Html.HiddenFor(model => model.ID)
+          @*@Html.HiddenFor(model => model.EID);
+        @Html.HiddenFor(model => model.Step);*@
+        @Html.Hidden("second");
+        @Html.Hidden("Omoney")
+  @Html.Hidden("ExpName")
+    }
+  
+</div>
+   

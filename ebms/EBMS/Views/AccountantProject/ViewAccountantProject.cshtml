@@ -1,0 +1,191 @@
+﻿@{
+    ViewBag.Title = "ViewAccountantProject";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+
+<div class="Company-top-box">
+    <div class="btn-bar">
+        <a href="#" id="btnCreateDepartment" class="icon-add">添加会计科目</a>
+        <a href="#" id="btnEdit" class="icon-edit">编辑会计科目</a>
+        <a href="#" id="btnDelete" class="icon-remove">删除会计科目</a>
+    </div>
+</div>
+<input type="hidden" id="theId">
+<input type="hidden" id="findListId" value="1">
+<div id="categoryChooseDiv">
+    <ul id="MyTree"></ul>
+</div>
+<div class="UserTable" id="UserTable">
+    <table id="List"></table>
+</div>
+<script>
+    function myTree() {
+        var treeData = @Html.Raw(ViewData["tree"])
+        $("#MyTree").tree({
+            animate: false,
+            data: treeData,
+            lines: true,
+            onClick: function (node) {
+                $("#theId").val(node.id);
+                getList(node.id)
+
+            },
+            onDblClick: function (node) {
+                $(this).tree('toggle', node.target);
+            }
+
+        });
+        $("#MyTree").tree("collapseAll");
+        var rootNode = $("#MyTree").tree('getRoot'); //调用expand方法 
+        $("#MyTree").tree('expand', rootNode.target);
+    }
+    $(function () {
+        $("body").css("overflow", "hidden")
+        myTree()
+    })
+    function loadTreeAfterAddCom(id, name) {
+        var node = $('#MyTree').tree('getSelected');
+        if (node == null) {
+            var node = $("#MyTree").tree('getRoot')
+        }
+        $('#MyTree').tree('append', {
+            parent: node.target,
+            data: [{
+                id: id,
+                text: name
+            }]
+        });
+    }
+
+    function loadAddForEdit(id, Pid, json) {
+        var node = $('#MyTree').tree("find", Pid);
+
+        if (node != null) {
+            var $ul = node.target
+            $($ul).next().html("")
+            var Json = eval('(' + json + ')')
+            $('#MyTree').tree('append', {
+                parent: node.target,
+                data: Json
+            });
+        } else {
+            location.reload()
+        }
+    }
+
+    function removeNode(id) {
+        var node = $('#MyTree').tree("find", id);
+        $("#MyTree").tree('pop', node.target)
+    }
+
+    //创建部门
+    $("#btnCreateDepartment").click(function () {
+        if ($("#theId").val() == "")
+            $("#theId").val("1");
+        $('#openIframeNew')[0].src = "ViewAccountantProjectAdd?Pid=" + $("#theId").val();
+        $('#openDivNew').dialog('open');
+    })
+
+    $("#categoryChooseDiv").height($("body").height());
+
+    //删除部门
+    $("#btnDelete").click(function () {
+        if ($("#theId").val() == "") {
+            $.messager.alert('提示', "请选中需要操作节点的数据", "info");
+            return false;
+        }
+        if ($("#theId").val() == "1") {
+            $.messager.alert('提示', "不能删除根目录", "info");
+            return false;
+        }
+        loading(0);
+        $.ajax({
+            url: "findChildForDelete?Pid=" + $("#theId").val(),
+            type: "Post",
+            dataType: "json",
+            success: function (data) {
+                loading(1);
+                if (data.State == "Faile") {
+                    $.messager.alert('提示', '该科目下有子科目，不能删除', "info", function () { });
+                } else {
+                    $.messager.confirm('提示', '是否删除该科目?请谨慎选择', function (r) {
+                        if (r) {
+                            $.ajax({
+                                url: "DeleteAccountProject?Pid=" + $("#theId").val(),
+                                type: "Post",
+                                dataType: "json",
+                                success: function (data) {
+                                    loading(1);
+                                    if (data.State == "Success") {
+                                        $.messager.alert('提示', '删除成功', "info", function () {
+                                            removeNode($("#theId").val())
+                                        });
+                                    } else
+                                        data.Message;
+                                },
+                                error: function () {
+                                    loading(1);
+                                }
+                            });
+                        }
+                    });
+                }
+            }
+        });
+    })
+
+    //编辑科目
+    $("#btnEdit").click(function () {
+        if ($("#theId").val() == "") {
+            $.messager.alert('提示', "请选中需要操作节点的数据", "info");
+            return false;
+        }
+        $('#openIframeDepartmentEdit')[0].src = "ViewAccountantProjectEdit?Pid=" + $("#theId").val();
+        $('#creatDepartmentEditDiv').dialog('open');
+    })
+
+    //查询所有子科目
+    function getList(dId) {
+        var $width = $("#UserTable").width($(window).width() - 234)
+        $("#UserTable").height($("body").height())
+        var $height = $("#UserTable").height() - 50;
+        var url = "GetAccountChildProject?id=" + dId;
+        $('#List').datagrid({
+            url: url,
+            width: $width,
+            method: 'post',
+            height: $height,
+            fitColumns: true,
+            sortName: 'ID',
+            sortOrder: 'desc',
+            idField: 'id',
+            pageSize: 20,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            columns: [[
+                { field: 'Code', title: '科目编码', width: 120, align: 'center' },
+                { field: 'Name', title: '科目名称', width: 120, align: 'center' }
+            ]]
+        });
+    }
+
+    $(function () {
+        var Id = $("#findListId").val();
+        getList(Id)
+    });
+
+    $(window).resize(function () {
+        var $width = $("#UserTable").width($(window).width() - 234);
+        $("#UserTable").height($("body").height());
+        var $height = $("#UserTable").height() - 50;
+        $('#List').datagrid({ width: $width, height: $height })
+    });
+</script>
+<div id="openDivNew" class="easyui-dialog" closed="true" modal="true" title="添加科目" style="width: 500px; height: 240px;" resizable="true" closable="true">
+    <iframe scrolling="no" id='openIframeNew' frameborder="0" src="" style="width: 100%; height: 98%;"></iframe>
+</div>
+<div id="creatDepartmentEditDiv" class="easyui-dialog" closed="true" modal="true" title="编辑科目" style="width: 500px; height: 300px;" resizable="true" closable="true">
+    <iframe scrolling="yes" id='openIframeDepartmentEdit' frameborder="0" src="" style="width: 100%; height: 98%;"></iframe>
+</div>
+

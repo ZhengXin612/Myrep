@@ -1,0 +1,262 @@
+﻿@model EBMS.Models.T_Quit
+@using Lib
+@{
+    ViewBag.Title = "QuitAdd";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<style>
+    .options-div {margin:10px 0 0 60px}
+#files-box {margin:10px 0}
+#files-box li{height:25px;line-height:25px;}
+.files-name{height:25px;overflow:hidden;  }
+.files-size{margin:0 10px;color:#999}
+#files-box li a {color:#333}
+#files-box li  .files-delete{color:#2299ee}
+    h2 {font-size:16px;color:#2299ee;text-indent:2em;margin:10px 0 }
+    #data-tr p{float:left;margin-right:15px}
+.setTextWidth600 input[type="text"] {width:600px;}
+#Sex{width:60px;text-align:center}
+.text-Area{width:600px;height:60px;margin:10px 0;resize:none}
+#data-tr p{float:left;margin-right:15px}
+#data-tr p input[type="checkbox"]{float:left;margin:1px 5px 0 0}
+.uploadBtn{color:#2299ee}
+.uploadBtn:hover {color:#1d51a5}
+.multiple-hidden {display:none}
+#files-btn{color: #333;margin-right: 15px;padding-left: 16px;margin-bottom:10px;display:table}
+ #files-btn:hover{color:#2299ee;}
+#files-box {margin:10px 0}
+#files-box li{height:25px;line-height:25px;}
+.files-name{height:25px;overflow:hidden;  }
+.files-size{margin:0 10px;color:#999}
+#files-box li a {color:#333}
+#files-box li  .files-delete{color:#2299ee}
+.quit-rule{margin:10px 0;width:600px}
+.quit-rule p {line-height:22px}
+.no-border {border:0}
+.assets-ul td,.borrow-ul td  {border:1px solid #ddd;text-align:center}
+.assets-ul {border-collapse: collapse;margin:10px 0;width:605px}
+.borrow-ul{border-collapse: collapse;margin:10px 0}
+</style>
+@*@using (Html.BeginForm("EditForm", "Controller", null, FormMethod.Post, new { enctype = "multipart/form-data",Id = "EditForm" })) *@
+@using (Html.BeginForm("QuitdAdd", "Quit", null, FormMethod.Post, new { enctype = "multipart/form-data", Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+ <h2>离职信息</h2>
+    <table class="fromEditTable setTextWidth600">
+          <tr>
+            <td style="width:120px; text-align: right;">
+                  <input type="hidden" id="jsonStr" />
+                  <input type="hidden" id="assetStr" value="@ViewData["Assets"]" />
+                 <input type="hidden" id="borrowStr" value="@ViewData["Borrow"]" />
+                <input type="hidden" id="AssetsCode" name="AssetsCode" value="" />
+                <input type="hidden" id="BorrowCode" name="BorrowCode" value="" />
+                  @Html.HiddenFor(model=>model.ID)
+                @Html.LabelFor(model => model.Code)：   
+            </td>
+            <td >
+               @Html.DisplayFor(model => model.Code)
+            </td>
+        </tr>
+        <tr>
+            <td style="width:120px; text-align: right;">
+                @Html.LabelFor(model => model.PostUser)：   
+            </td>
+            <td>
+               @Html.DisplayFor(model => model.PostUser)
+            </td>
+        </tr>
+         <tr>
+            <td style="width:120px; text-align: right;">
+                @Html.LabelFor(model => model.PostDepartment)：   
+            </td>
+            <td>
+               @Html.DisplayFor(model => model.PostDepartment)
+            </td>
+        </tr>
+          <tr>
+           <td style="width:120px; text-align: right;">
+                  @Html.LabelFor(model => model.Reason)：   
+           </td>
+           <td>
+                 @Html.DisplayFor(model => model.Reason)
+           </td>
+       </tr>
+          <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.QuitTime)：   
+            </td>
+              <td>
+                  @Html.DisplayFor(model => model.QuitTime)
+              </td>
+        </tr>
+        <tr>
+           <td style="width:120px; text-align: right;">
+              移交固定资产编码：
+           </td>
+           <td>
+               <table id="AssetsUl" class="assets-ul">
+                   <tr>
+                       <td>资产编码</td>
+                       <td>资产名称</td>
+                       <td>规格</td>
+                       <td>价格</td>
+                       <td>是否损毁</td>
+                   </tr>
+               </table>
+           </td>
+         </tr>
+        <tr>
+           <td style="width:120px; text-align: right;">
+               @Html.LabelFor(model => model.WorkAccount)：   
+           </td>
+           <td>
+               @Html.DisplayFor(model => model.WorkAccount)
+           </td>
+         </tr>
+           <tr>
+            <td style="width: 120px; text-align: right;">
+              借支：
+            </td>
+            <td>
+                <table id ="BorrowUl" class="borrow-ul">
+                    <tr>
+                        <td width="160">借支编码</td>
+                        <td width="160">借支申请日期</td>
+                        <td width="160">借支金额</td>
+                        <td width="260">借支理由</td>
+                        <td width="80">结算状态</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+          <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.WageAccount)：   
+            </td>
+            <td>
+              @Html.DisplayFor(model => model.WageAccount)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.WageAccountName)：   
+            </td>
+            <td>
+              @Html.DisplayFor(model => model.WageAccountName)
+            </td>
+        </tr>
+         <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.WageBank)：   
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.WageBank)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.Memo)：   
+            </td>
+            <td>
+                 @Html.DisplayFor(model => model.Memo)
+            </td>
+        </tr>
+         <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.FirstApprove)：   
+            </td>
+            <td>
+                 @Html.DisplayFor(model => model.FirstApprove)
+            </td>
+          
+        </tr>
+    </table>
+}
+<h2>附件列表</h2>
+<div class="options-div"><ul id="files-box"></ul></div>
+<h2>审核详情</h2>
+<div class="history-box">@Html.Raw( ViewData["history"])</div>
+<script type="text/javascript">
+    //加载数据
+    $(function () {
+       
+        $.ajax({
+            url: "../Quit/GetQuitOptin?ID=" + $("#ID").val(),
+            type: "Post",
+            data: $("#EditForm").serialize(),
+            success: function (data) {
+                var $Li = "";
+                if (data == "" || data == null) {
+                    $Li += "<li>没有附件...</li>"
+                    $("#files-box").html($Li);
+                    return;
+                }
+                var dataJson = JSON.parse(data)
+                $.each(dataJson, function (i, val) {
+                    $Li += "<li><a href=" + dataJson[i].Url + " target='_blank'><span class='files-name'>" + dataJson[i].Name + "</span><span class='files-size'>(" + dataJson[i].Size + "KB)</span></a></li>"
+                })
+                $("#files-box").html($Li);
+            },
+            error: function () {
+
+            }
+        });
+   
+        //用户固定资产
+            function getAssects() {
+                var $Tr = "";
+                var $AssetsCode = "";
+                var Assets = $("#assetStr").val();
+                if (Assets == "") {
+                    $("#AssetsUl").closest("td").html("未分配固定资产");
+                }
+                else {
+                    var jAssets = JSON.parse(Assets);
+                    $.each(jAssets, function (i, value) {
+                        $AssetsCode += value.Code + ",";
+                        var isScrap = "";
+                        switch (value.isScrap) {
+                            case "0": isScrap = "否";
+                                break;
+                            case "1": isScrap = "是";
+                                break;
+                        }
+                        var Cost = parseFloat(value.Cost).toFixed(2);
+                        $Tr += "<tr><td>" + value.Code + "</td><td>" + value.Name + "</td><td>" + value.Spec + "</td><td>" + Cost + "</td><td>" + isScrap + "</td></tr>"
+                    })
+                    $("#AssetsUl").append($Tr);
+                    $AssetsCode = $AssetsCode.substring(0, $AssetsCode.length - 1);
+                }
+                $("#AssetsCode").val($AssetsCode);
+            }
+            getAssects();
+        //用户借支
+            function getBorrow() {
+                var borrow = $("#borrowStr").val();
+                var $BorrowCode = "";
+                if (borrow == "") {
+                    $("#BorrowUl").closest("td").html("没有未结算订单借支");
+                }
+                else
+                {
+                    var Jborrow = JSON.parse(borrow);
+                    var $Tr = "";
+                    $.each(Jborrow, function (i, value) {
+                        $BorrowCode += value.Code + ",";
+                        var State = "";
+                        switch (value.State) {
+                            case "-1": State = "未结算";
+                                break;
+                            case "0": State = "部分结算";
+                                break;
+                        }
+                        $Tr += "<tr><td>" + value.Code + "</td><td>" + value.Date + "</td><td>" + value.Money + "</td><td>" + value.Reson + "</td><td>" + State + "</td></tr>"
+                    })
+                    $("#BorrowUl").append($Tr);
+                    $BorrowCode = $BorrowCode.substring(0, $BorrowCode.length - 1);
+                    $("#BorrowCode").val($BorrowCode);
+                }
+            }
+            getBorrow()
+    });
+</script>

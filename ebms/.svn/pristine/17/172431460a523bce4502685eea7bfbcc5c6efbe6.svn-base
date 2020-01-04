@@ -1,0 +1,145 @@
+﻿@model EBMS.Models.T_FundAllot
+@{
+    ViewBag.Title = "ViewFundAllotEdit";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<script type="text/javascript">
+    $(function () {
+        var sign = 0;
+        $("#comPanyIn").change(function () {
+            var comIn = $("#comPanyIn option:selected").val();
+            if (!isNaN(comIn))
+                $("#accountNumber option[value='" + comIn + "']").attr("selected", "selected");
+            else
+                $("#accountNumber option[value='" + "" + "']").attr("selected", "selected");
+        });
+        $("#btnSave").click(function () {
+            if ($("#EditForm").valid()) {
+                if (sign == 0) {
+                    sign++;
+                    loading(0);
+                    $.ajax({
+                        url: "ViewFundAllotEditSave",
+                        type: "Post",
+                        data: $("#EditForm").serialize(),
+                        dataType: "json",
+                        success: function (data) {
+                            loading(1);
+                            if (data.State == "Success") {
+                                $.messager.alert('提示', '操作成功', "info", function () {
+                                    parent.$('#editDiv').dialog('close');
+                                    parent.$("#List").datagrid("reload");
+                                    parent.$('#List').datagrid("clearSelections");
+                                    sign = 0;
+                                });
+                            }
+                            else {
+                                $.messager.alert('提示', data.Message, "info");
+                                sign = 0;
+                            }
+                            parent.$('#List').datagrid("clearSelections");
+                        },
+                        error: function () {
+                            loading(1);
+                            sign = 0;
+                        }
+                    });
+                }
+            }
+        });
+    });
+</script>
+<div class="mvctool">
+    <input id="btnSave" class="modal-btn modal-btn-save" type="button" value="保存">
+</div>
+<div>
+    @using (Html.BeginForm("EditForm", "Controllers", null, FormMethod.Post, new { Id = "EditForm" }))
+    {
+        @Html.ValidationSummary(true)
+        <table class="fromEditTable setTextWidth300">
+            <tbody>
+                <tr>
+                    <td style="text-align: right; width: 33.3%">
+                        @Html.HiddenFor(model => model.Step)
+                        @Html.HiddenFor(model=>model.ID)
+                        @Html.HiddenFor(model=>model.Status)
+                        @Html.LabelFor(model => model.PostUser)：    
+                    </td>
+                    <td style="width: 33.3%">
+                        @Html.TextBoxFor(model => model.PostUser, new { @readonly = "readonly", @style = "width:112px;" })
+                    </td>
+                    <td style="width: 33.3%">
+                        @Html.ValidationMessageFor(model => model.PostUser)
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: right;">
+                        @Html.LabelFor(model => model.Department)：    
+                    </td>
+                    <td>
+                        @Html.DropDownListFor(model => model.Department, ViewData["ReportDepartment"] as List<SelectListItem>)
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.Department)
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: right;">
+                        @Html.LabelFor(model => model.CompanyIn)：    
+                    </td>
+                    <td>
+                        @Html.DropDownListFor(model => model.CompanyIn, ViewData["comPanyIns"] as List<SelectListItem>, new { @style = "width:200px;", @id = "comPanyIn" })
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.CompanyIn)
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: right;">
+                        @Html.LabelFor(model => model.TheReceivingBank)：   
+                    </td>
+                    <td>
+                        @Html.DropDownListFor(model => model.TheReceivingBank, ViewData["theReceivingBanks"] as List<SelectListItem>, new { @style = "width:200px;" })
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.TheReceivingBank)
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: right;">
+                        @Html.LabelFor(model => model.AccountNumber)：   
+                    </td>
+                    <td>
+                        @Html.DropDownListFor(model => model.AccountNumber, ViewData["accountNumbers"] as List<SelectListItem>, new { @style = "width:200px;", @id = "accountNumber" })
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.AccountNumber)
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: right;">
+                        @Html.LabelFor(model => model.theMoney)：   
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.theMoney, new { @style = "width:112px;" })
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.theMoney)
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: right;">
+                        @Html.LabelFor(model => model.UseOfProceeds)：   
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.UseOfProceeds, new { @style = "width:195px;" })
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.UseOfProceeds)
+                    </td>
+                </tr>
+                @Html.HiddenFor(model => model.ID)
+        </table>
+    }
+</div>

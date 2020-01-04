@@ -1,0 +1,81 @@
+﻿@{
+    ViewBag.Title = "ViewExpenseCountList";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+<div class="Company-top-box">
+    <div class="search-box">
+        <input type="text" id="txtQuery" style="width: 150px;" placeholder="报销摘要/申请人" />
+         <span style="color: #808080; padding-right: 10px; font-size: 13px; margin-top: 3px; margin-left: 10px;">开始时间</span>
+        <input name="statethisdate" style="float: left;" value="" id="statethisdate" class="easyui-datebox" data-options="sharedCalendar:'#statethisdate'">
+        <span style="color: #808080; padding-right: 10px; font-size: 13px; margin-top: 3px; margin-left: 10px;">结束时间</span>
+        <input name="Endthisdate" style="float: left;" value="" id="Endthisdate" class="easyui-datebox" data-options="sharedCalendar:'#Endthisdate'">
+        <input type="button" value="查询" id="btnQuery" class="icon-search">
+    </div>
+</div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+<script type="text/javascript">
+    //回车触发查询
+    enterSearch("#btnQuery");
+    $(function () {
+        var url = "GetViewExpenseCountList";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() * 0.95,
+            fitColumns: true,
+            sortName: 'ID',
+            sortOrder: 'desc',
+            idField: 'id',
+            pageSize: 20,
+            pagination: true,
+            showFooter: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                { field: 'Abstract', title: '摘要', width: 60, align: 'center' },
+                { field: 'PostUser', title: '申请人', width: 100, align: 'center' },
+                { field: 'StoreName', title: '店铺名称', width: 80, align: 'center' },
+                { field: 'Type', title: '类型', width: 60, align: 'center' },
+                { field: 'CrateDate', title: '申请时间', width: 80, align: 'center', formatter: formatDatebox },
+                 { field: 'Price', title: '单价', width: 80, align: 'center' },
+                { field: 'Num', title: '数量', width: 80, align: 'center' },
+                 { field: 'Cost', title: '总价', width: 60, align: 'center' }
+            ]]
+        });
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            });
+        });
+    });
+
+
+
+    $("#btnQuery").click(function () {
+
+        var queryStr = $("#txtQuery").val().trim();
+        var statedate = $('#statethisdate').datebox('getValue');
+        var EndDate = $('#Endthisdate').datebox('getValue');
+        //如果查询条件为空默认查询全部
+        if (queryStr == null) {
+            queryStr = "%";
+        }
+
+        $('#List').datagrid({
+            url: 'GetViewExpenseCountList?name=' + encodeURI(queryStr) + "&startDate=" + statedate + "&endDate=" + EndDate
+        });
+
+    });
+
+</script>
+

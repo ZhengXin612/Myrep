@@ -1,0 +1,197 @@
+﻿@{
+    ViewBag.Title = "ViewInterceptForMy";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+
+
+<script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+<div class="Company-top-box">
+    <div class="search-box">
+        <select id="selStatus" name="selStatus" class="sel-box">
+            <option value="-2" selected>状态</option>
+            <option value="2">不同意</option>
+            <option value="1">已同意</option>
+            <option value="0">审核中</option>
+            <option value="-1">未审核</option>
+        </select>
+        <input type="text" id="txtQuery" style="width: 150px;" placeholder="订单号" />
+        <input type="button" value="查询" id="btnQuery" class="icon-search">
+    </div>
+    <div class="btn-bar">
+        <a href="#" onclick="Edit()" class="icon-edit">编辑</a>
+        <a href="#" onclick="Delete()" class="icon-remove">删除</a>
+        <p class="showBar">查看详情 : 请双击需要查看的数据</p>
+    </div>
+</div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+<script type="text/javascript">
+    function op(name, url) {
+        self.parent.addTab(name, url, '');
+        getContextmenu()
+    }
+    //回车触发查询
+    enterSearch("#btnQuery");
+    $(function () {
+        var url = "GetInterceptForMy";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() * 0.92,
+            sortName: 'ID',
+            sortOrder: 'desc',
+            idField: 'id',
+            pageSize: 20,
+            showFooter: true,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            frozenColumns: [[
+                 { field: 'PostUSer', title: '操作人', width: 80, align: 'center' },
+                  { field: 'OrderNumber', title: '原单号', width: 130, align: 'center' },
+                  { field: 'NewOrderNumber', title: '新单号', width: 150, align: 'center' },
+                                   { field: 'Reson', title: '原因', width: 100, align: 'center' },
+                  { field: 'Memo', title: '备注', width: 140, align: 'center' },
+                   {
+                       field: 'Status', title: '状态', width: 80, align: 'center', formatter: function (value, row, index) {
+                           switch (value) {
+                               case -1:
+                                   return "<font color=blue>未审核</font>"
+                                   break;
+                               case 0:
+                                   return "<font color=blue>审批中</font>"
+                                   break;
+                               case 1:
+                                   return "<font color=green>已同意</font>"
+                                   break;
+                               case 2:
+                                   return "<font color=red>不同意</font>"
+                                   break;
+                               default:
+                                   return "<font color=red>NULL</font>"
+                           }
+                       }
+                   },
+                 { field: 'Receiver', title: '收货人', width: 80, align: 'center' },
+                 { field: 'CreateDate', title: '操作时间', width: 130, align: 'center'},
+                 { field: 'ExpressName', title: '快递名称', width: 100, align: 'center' },
+                 { field: 'MailNo', title: '运单号', width: 120, align: 'center' },
+                 { field: 'Address', title: '收货地址', width: 150, align: 'center' },
+            ]],
+            columns: [[
+                                  { field: 'Postalcode', title: '邮编', width: 80, align: 'center' },
+                  { field: 'VipCode', title: '会员代码', width: 100, align: 'center' },
+                 { field: 'TelPhone', title: '移动电话', width: 100, align: 'center' },
+                 { field: 'Warhouse', title: '仓库', width: 120, align: 'center' },
+                    { field: 'SystemRemark', title: '系统备注', width: 80, align: 'center' }
+            ]],
+            onDblClickRow: function (value, row, index) {
+                $('#openIframedetail')[0].src = "ViewInterceptDetail?interceptId=" + row.ID;
+                //$("#detailDiv").dialog({
+                //    onClose: function () {
+                //        $("#List").datagrid("reload");//刷新列表 
+                //    }
+                //});
+                $('#detailDiv').dialog('open');
+            }
+        });
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            });
+        });
+    });
+
+
+    function Edit() {
+        var row = $('#List').datagrid('getSelected');
+        if (row == null) {
+            $.messager.alert('提示', '请选择所需要的数据', "info");
+            return false;
+        }
+        if (row.Status == -1 || row.Status == 2) {
+            op("拦截编辑" + row.ID + "", "../InterceptManger/ViewInterceptEdit?interceptId=" + row.ID)
+            closeCurTab("我的未发货拦截");//关闭当前页面
+        } else {
+            $.messager.alert('提示', "只有未审批/不同意才可编辑", "info");
+            $("#List").datagrid("reload");
+        }
+    }
+
+    //关闭当前页
+    function closeCurTab(tabName) {
+        var parentTab = parent.$('#mainTab').tabs('select', tabName);
+        var curTab = self.parent.$('#mainTab').tabs('getSelected');// 当前tab
+        var url = $(curTab.panel('options')).attr('title');
+        var index = self.parent.$('#mainTab').tabs('getTabIndex', curTab);
+        self.parent.$('#mainTab').tabs('close', index);
+    }
+
+    function Delete() {
+        var row = $('#List').datagrid("getSelected");
+        if (row == null) {
+            $.messager.alert('提示', "请选中需要操作的数据", "info");
+            return false;
+        }
+        if (row.Status == -1) {
+            $.messager.confirm('提示', '是否删除该记录?请谨慎选择', function (r) {
+                if (r) {
+                    loading(0);
+                    $.ajax({
+                        url: "IntercepotDelete?id=" + row.ID,
+                        type: "Post",
+                        contentType: "application/json",
+                        dataType: "json",
+                        success: function (data) {
+                            loading(1);
+                            if (data.State == "Success") {
+                                $.messager.alert('提示', '操作成功', "info", function () {
+                                    $('#List').datagrid('reload');
+                                });
+                            }
+                            else {
+                                $.messager.alert('提示', data.Message, "info", function () {
+                                    $('#List').datagrid('reload');
+                                });
+                            }
+                            $('#List').datagrid("clearSelections");
+                        },
+                        error: function () {
+                            loading(1);
+                        }
+                    });
+                }
+            });
+        } else {
+            $.messager.alert('提示', "只有未审批状态才可删除", "info");
+            $("#List").datagrid("reload");
+        }
+    }
+
+    $("#btnQuery").click(function () {
+
+        var queryStr = $("#txtQuery").val().trim();
+        var status = $("#selStatus").val();
+        //如果查询条件为空默认查询全部
+        if (queryStr == null) {
+            queryStr = "%";
+        }
+
+        $('#List').datagrid({
+            url: 'GetInterceptForMy?code=' + encodeURI(queryStr) + "&status=" + status
+        });
+
+    });
+
+</script>
+<div id="detailDiv" class="easyui-dialog" closed="true" modal="true" title="详情" style="width: 630px; height: 450px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIframedetail' frameborder="0" src="" style="width: 98%; height: 98%;"></iframe>
+</div>
+

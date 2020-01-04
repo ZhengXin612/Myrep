@@ -1,0 +1,55 @@
+﻿
+@model EBMS.Models.T_Assets
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>固定资产卡片</title>
+</head>
+<style>
+    body {font-size:14px;}
+    ul {padding:10px;margin:0;box-sizing:border-box}
+    li {list-style:none;color:#666;margin-bottom:2px}
+    li label {color:#313131;}
+</style>
+<body>
+    <div>
+    
+      <ul>
+          <li><label>@Html.LabelFor(model => model.Code)：</label>@Html.DisplayFor(model => model.Code)</li>
+          <li><label>@Html.LabelFor(model => model.Name)：</label>@Html.DisplayFor(model => model.Name)</li>
+          <li><label>@Html.LabelFor(model => model.Spec)：</label>@Html.DisplayFor(model => model.Spec)</li>
+          <li><label>@Html.LabelFor(model => model.Barcode)：</label>@Html.DisplayFor(model => model.Barcode)</li>
+          <li><label>@Html.LabelFor(model => model.Buyer)：</label>@Html.DisplayFor(model => model.Buyer)</li>
+          <li><label>@Html.LabelFor(model => model.Cost)：</label>@Html.DisplayFor(model => model.Cost)</li>
+          <li><label>@Html.LabelFor(model => model.BuyDate)：</label>@Html.DisplayFor(model => model.BuyDate)</li>
+          <li><label>@Html.LabelFor(model => model.BuyFrom)：</label>@Html.DisplayFor(model => model.BuyFrom)</li>
+          <li><label>@Html.LabelFor(model => model.Guarantee)：</label>@Html.DisplayFor(model => model.Guarantee)</li>
+          <li><label>@Html.LabelFor(model => model.Department)：</label>@Html.DisplayFor(model => model.Department)</li>
+          <li><label>@Html.LabelFor(model => model.Owner)：</label>@Html.DisplayFor(model => model.Owner)</li>
+          <li><label>@Html.LabelFor(model => model.Responsible)：</label>@Html.DisplayFor(model => model.Responsible)</li>
+          <li><label>@Html.LabelFor(model => model.Place)：</label>@Html.DisplayFor(model => model.Place)</li>
+          <li><label>@Html.LabelFor(model => model.Memo)：</label></li>
+          <li>@Html.DisplayFor(model => model.Memo)</li>
+      </ul>
+   @if(ViewData["list"]!=null)
+   {
+       <ul>变更记录</ul>
+       var list = ViewData["list"] as List<EBMS.Models.T_AssetsTransferRecord>;
+
+
+       foreach (var item in list)
+       {
+           Html.Display(item.TransferType).ToString();
+       }
+   }
+    </div>
+    <script>
+      
+    </script>
+</body>
+</html>

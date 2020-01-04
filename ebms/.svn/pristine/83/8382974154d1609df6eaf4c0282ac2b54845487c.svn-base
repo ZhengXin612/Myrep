@@ -1,0 +1,290 @@
+﻿@model EBMS.Models.T_AccountantProject
+@{
+    ViewBag.Title = "ViewAccountantProjectEdit";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+
+<style>
+    .mvctool {
+        display: table;
+        margin-bottom: 10px;
+    }
+
+    .mvcBox {
+        position: relative;
+    }
+
+    .pDiv {
+        margin-top: 10px;
+    }
+
+    .blue-span {
+        color: #000;
+        padding: 0 10px;
+    }
+
+    .a-trigger {
+        color: #369;
+    }
+
+    #MyTree .tree-node span:first-child {
+        width: 17px;
+        height: 18px;
+        display: block;
+        float: left;
+        margin: 0 3px;
+    }
+
+    #MyTree .tree-expanded, #MyTree .tree-indent, #MyTree .tree-collapsed {
+        width: 17px;
+        height: 18px;
+        display: block;
+        float: left;
+        margin: 0 3px;
+    }
+
+    #categoryChooseDiv {
+        width: 220px;
+        padding: 10px 0;
+        display: none;
+        border: 0;
+    }
+
+    .okNo {
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        padding: 2px 5px;
+        color: #666;
+        margin-left: 20px;
+    }
+
+        .okNo:hover {
+            color: #369;
+        }
+
+    #categoryChooseDiv #MyTree {
+        margin-bottom: 10px;
+    }
+
+    .people {
+        margin-top: 10px;
+    }
+
+    #errorMsg {
+        text-align: center;
+        width: 300px;
+        height: 100px;
+        left: 50%;
+        margin-left: -150px;
+        margin-top: -50px;
+        background: #fff;
+        top: 50%;
+        border: 1px solid #ccc;
+        position: absolute;
+        z-index: 666;
+        display: none;
+    }
+
+        #errorMsg span {
+            color: red;
+            display: block;
+            width: 100%;
+            text-align: center;
+            padding: 30px 0 10px 0;
+        }
+
+        #errorMsg a {
+            text-decoration: underline;
+            color: #666;
+            cursor: pointer;
+        }
+
+            #errorMsg a:hover {
+                color: #333;
+            }
+
+    #maskWhite {
+        background: rgba(255,255,255,0.8);
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 665;
+        display: none;
+    }
+
+    #pannel {
+        display: table;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+</style>
+<div class="mvcBox" id="fBox">
+    <div class="mvctool">
+        <a id="btnSave" href="javascript:;" class="modal-btn modal-btn-save">保存</a>
+    </div>
+    @using (Html.BeginForm("EditForm", "Controller", null, FormMethod.Post, new { Id = "EditForm" }))
+    {
+        @Html.ValidationSummary(true)
+        <table class="fromEditTable setTextWidth300">
+            <tr>
+                <td style="width: 80px;">
+                    @Html.HiddenFor(model => model.ID)
+                    @Html.LabelFor(model => model.Code):
+                </td>
+                <td style="width: 135px;">@Html.TextBoxFor(model => model.Code, new { @style = "width:130px;" })</td>
+                <td style="width: 80px;">@Html.ValidationMessageFor(model => model.Code)</td>
+            </tr>
+            <tr>
+                <td>
+                    @Html.LabelFor(model => model.Name):
+                </td>
+                <td>@Html.TextBoxFor(model => model.Name, new { @style = "width:130px;" })</td>
+                <td>@Html.ValidationMessageFor(model => model.Name)</td>
+            </tr>
+        </table>
+    }
+    <div class="pDiv">
+        <label>父科目名称：</label><span class="blue-span">@ViewData["parentDepartmentName"]</span>
+        <input type="hidden" id="parentDepartmentId" value="@ViewData["parentDepartmentId"]">
+        <input type="hidden" id="theId" value="@ViewData["parentDepartmentId"]">
+        <input type="hidden" id="theText" value="@ViewData["parentDepartmentName"]">
+        <input type="hidden" id="thisId" value="@ViewData["ThisId"]">
+        <a href="javascript:;" class="a-trigger" id="getTreeBox">选择</a>
+    </div>
+    <div id="pannel">
+        <div id="categoryChooseDiv">
+            <ul id="MyTree"></ul>
+            <a id="OK" class="okNo" href="javascript:;">确定</a>
+            <a id="NO" class="okNo" href="javascript:;">取消</a>
+        </div>
+    </div>
+    <div>
+        <p id="errorMsg"><span></span><a id="close">确定</a></p>
+        <div id="maskWhite"></div>
+
+    </div>
+</div>
+<script>
+    $(function () {
+
+        //遮罩设置大小
+        var tW = $("#fBox").width();
+        $("#maskWhite").width(tW);
+        $("#maskWhite").height(400);
+        //部门树加载
+        var treeData = @Html.Raw(ViewData["tree"])
+          $("#MyTree").tree({
+              // dnd:true,
+              animate: false,
+              data: treeData,
+              lines: true,
+              onClick: function (node) {
+                  $("#theId").val(node.id)
+                  $("#theText").val(node.text)
+              },
+              onDblClick: function (node) {
+                  $(this).tree('toggle', node.target);
+              }
+          });
+        $("#MyTree").tree("collapseAll");
+        var rootNode = $("#MyTree").tree('getRoot'); //调用expand方法 
+        $("#MyTree").tree('expand', rootNode.target);
+        $("#getTreeBox").toggle(function () {
+            $("#categoryChooseDiv").show();
+        }, function () {
+            $("#categoryChooseDiv").hide();
+        })
+        //关闭错误提示
+        $("#close").click(function () {
+            $("#errorMsg").hide();
+            $("#maskWhite").hide();
+        });
+        //编辑科目选择确认
+        $("#OK").click(function () {
+            var id = $("#theId").val()//目标Id
+            var txt = $("#theText").val()
+            var thisId = $("#thisId").val()//源Id
+            var flag = 0;
+            if (flag == 0) {
+                flag++;
+                $.ajax({
+                    url: "check?StarId=" + thisId + "&EndId=" + id,
+                    type: "Post",
+                    contentType: "application/json",
+                    dataType: "json",
+                    success: function (data) {
+
+                        if (data == 1) {
+                            if (id == thisId) {
+                                $("#errorMsg span").html("父级科目不能为自己");
+                                $("#errorMsg").show();
+                                $("#maskWhite").show();
+                            } else {
+                                $("#errorMsg span").html("");
+                                $("#errorMsg").hide();
+                                $(".blue-span").html(txt)
+                                $("#parentDepartmentId").val(id)
+                                $("#categoryChooseDiv").hide();
+
+                            }
+                        } else {
+                            $("#errorMsg span").html("不能将父级科目放入子部门，请重新选择");
+                            $("#errorMsg").show();
+                            $("#maskWhite").show();
+                        }
+                        flag = 0;
+
+                    },
+                    error: function (data) {
+                        //失败 
+                        flag = 0;
+                    }
+                });
+            }
+        })
+        //编辑科目选择取消
+        $("#NO").click(function () {
+            var id = "@ViewData["parentDepartmentId"]";
+            var name = "@ViewData["parentDepartmentName"]";
+            $(".blue-span").html(name)
+            $("#parentDepartmentId").val(id)
+            $("#categoryChooseDiv").hide();
+        })
+
+        var flag = 0
+        $("#btnSave").click(function () {
+            if ($("#EditForm").valid()) {
+                if (flag == 0) {
+                    flag++;
+                    loading(0);
+                    $.ajax({
+                        url: "EditAccountProjectSave?pid=" + $("#parentDepartmentId").val() + "&id=" + $("#thisId").val(),
+                        type: "Post",
+                        data: $("#EditForm").serialize(),
+                        success: function (data) {
+                            loading(1);
+                            if (data.State == "Success") {
+                                $.messager.alert('提示', '保存成功', "info", function () {
+                                    parent.$('#creatDepartmentEditDiv').dialog('close');
+                                    parent.removeNode($("#thisId").val());
+                                    parent.loadAddForEdit(data.ID, data.fId, data.theJson);
+                                    flag = 0;
+                                })
+                            } else
+                                $.messager.alert('提示', data.Message, "info")
+                        },
+                        error: function (data) {
+                            //失败 
+                            loading(1);
+                            flag = 0;
+                        }
+                    });
+                }
+            }
+        })
+    })
+</script>
+<div id="openDivTreeBox" class="easyui-dialog" closed="true" modal="true" title="选择父级科目" style="width: 600px; height: 180px;" resizable="true" closable="true">
+    <iframe scrolling="no" id='openIframeTreeBox' frameborder="0" src="" style="width: 100%; height: 98%;"></iframe>
+</div>

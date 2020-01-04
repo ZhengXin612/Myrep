@@ -1,0 +1,191 @@
+﻿@model EBMS.Models.T_FundAllot
+@{
+    ViewBag.Title = "ViewFundAllotDetail";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<script type="text/javascript">
+    $(function () {
+        $("#PaymentNumber").change(function () {
+            var comIn = $("#PaymentNumber option:selected").val();
+            $("#CompanyOut option[value='" + comIn + "']").prop("selected", true);
+        });
+        $("#btnAgree").click(function () {
+            var para = { "approveid": "@ViewData["approID"]", "status": 1, "memo": $("#Memo").val(), step: "@Model.Step" };
+            if ($("[name=hiddenUser]").val() == "殷治云") {
+                var companyOut = $("#CompanyOut option:selected");
+                var thePaymentBank = $("#ThePaymentBank option:selected");
+                var thePayNumber = $("#PaymentNumber option:selected");
+                if (companyOut.val() == "") {
+                    $.messager.alert('提示', "请选中调出单位", "info");
+                    return false;
+                } else if (thePaymentBank.val() == "") {
+                    $.messager.alert('提示', "请选中付款银行", "info");
+                    return false;
+                } else if (thePayNumber.val() == "") {
+                    $.messager.alert('提示', "请选中付款账号", "info");
+                    return false;
+                }
+                para = { "approveid": "@ViewData["approID"]", "status": 1, "memo": $("#Memo").val(), step: "@Model.Step", "companyOut": companyOut.text(), "paymentBank": thePaymentBank.val(), "paymentNumber": thePayNumber.text() };
+            }
+            $.messager.confirm("操作提示", "您确定要执行操作吗？", function (data) {
+                if (data) {
+                    post(para);
+                }
+            });
+        });
+
+        $("#btnUnAgree").click(function () {
+            $.messager.confirm("操作提示", "您确定要执行操作吗？", function (data) {
+                if (data) {
+                    var para = { "approveid": "@ViewData["approID"]", "status": 2, "memo": $("#Memo").val(), step: "@Model.Step" };
+                    post(para);
+                }
+            });
+        });
+
+        var sign = 0;
+        function post(para) {
+            if (sign == 0) {
+                loading(0);
+                sign++;
+                $.ajax({
+                    url: "FundCheck",
+                    type: "post",
+                    data: para,
+                    dataType: "json",
+                    success: function (data) {
+                        loading(1);
+                        if (data.State == "Success") {
+                            $.messager.alert('提示', "操作成功", "info", function () {
+                                parent.$('#approveDiv').dialog('close');
+                                parent.$('#List').datagrid('reload');
+                                parent.$('#List').datagrid("clearSelections");
+                                sign = 0;
+                            });
+                        }
+                        else {
+                            $.messager.alert('提示', data.Message, "info");
+                            sign = 0;
+                        }
+                    },
+                    error: function () {
+                        loading(1);
+                        sign = 0;
+                    }
+                });
+            }
+        }
+    });
+</script>
+<div>
+    <table class="fromEditTable setTextWidth300">
+        <tr>
+            <td>
+                <div class="approve-btn-box">
+                    <div class="btn-bar">
+                        <a href="#" id="btnAgree" class="icon-agree">同意</a>
+                        <a href="#" id="btnUnAgree" class="icon-disagree">不同意</a>
+                    </div>
+                </div>
+            </td>
+            <td style="text-align: right">审核备注：
+            </td>
+            <td>
+                <input type="text" id="Memo" /></td>
+        </tr>
+    </table>
+    <table class="fromEditTable setTextWidth300">
+        <tbody>
+            <tr>
+                <td style="text-align: right;">
+                    <input type="hidden" name="hiddenUser" value="@ViewData["approveName"]" />
+                    @Html.LabelFor(model => model.PostUser)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.PostUser)
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right;">
+                    @Html.LabelFor(model => model.Department)：    
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.Department)
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right;">
+                    @Html.LabelFor(model => model.CompanyIn)：    
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.CompanyIn)
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right;">
+                    @Html.LabelFor(model => model.TheReceivingBank)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.TheReceivingBank)
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right;">
+                    @Html.LabelFor(model => model.AccountNumber)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.AccountNumber)
+                </td>
+            </tr>
+            @if (ViewData["approveName"].ToString() == "殷治云")
+            {
+                <tr>
+                    <td style="text-align: right;">
+                        @Html.LabelFor(model => model.PaymentNumber)：   
+                    </td>
+                    <td>
+                        @Html.DropDownListFor(model => model.PaymentNumber, ViewData["payNumber"] as List<SelectListItem>)
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: right; width: 110px">
+                        @Html.LabelFor(model => model.CompanyOut)：   
+                    </td>
+                    <td>
+                        @Html.DropDownListFor(model => model.CompanyOut, ViewData["companyOut"] as List<SelectListItem>)
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: right;">
+                        @Html.LabelFor(model => model.ThePaymentBank)：   
+                    </td>
+                    <td>
+                        @Html.DropDownListFor(model => model.ThePaymentBank, ViewData["payBank"] as List<SelectListItem>)
+                    </td>
+                </tr>
+            }
+            <tr>
+                <td style="text-align: right;">
+                    @Html.LabelFor(model => model.theMoney)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.theMoney)
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right;">
+                    @Html.LabelFor(model => model.UseOfProceeds)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.UseOfProceeds)
+                </td>
+            </tr>
+            <tr>
+                @Html.HiddenFor(model => model.ID)
+            </tr>
+        </tbody>
+    </table>
+</div>
+<hr style="height: 3px; color: blue" />
+@Html.Raw(ViewData["history"])
+

@@ -1,0 +1,82 @@
+﻿@{
+    ViewBag.Title = "ViewSendProduct";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+
+<div class="Company-top-box">
+    <div class="search-box">
+        <input type="text" placeholder="商品编码/名称" id="txtQuery" class="icon-search-txt">
+        <input type="button" value="查询" id="btnQuery" class="icon-search">
+        <a href="#" class="easyui-linkbutton" plain="true" iconcls="icon-add" id="btnOk">添加</a>
+    </div>
+</div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+<script type="text/javascript">
+    $(function () {
+        //回车触发查询
+        enterSearch("#btnQuery");
+        var url = "";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() - 50,
+            fitColumns: true,
+            sortName: 'ID',
+            sortOrder: 'desc',
+            pageSize: 10,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                  { field: 'goods_no', title: '商品编码', width: 80, align: 'center' },
+                 { field: 'goods_name', title: '商品名称', width: 80, align: 'center' },
+                    { field: 'spec_name', title: '产品简称', width: 80, align: 'center' },
+                 { field: 'retail_price', title: '商品单价', width: 80, align: 'center' },
+
+            ]],
+            onDblClickRow: function () {
+                myfunction();
+            }
+        });
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            });
+        });
+
+        function myfunction() {
+            var row = $('#List').datagrid('getSelected');
+
+            parent.addSendproduct(row, "@ViewData["index"]");
+        }
+        $("#btnOk").click(function () {
+            myfunction();
+        });
+
+        $("#btnQuery").click(function () {
+
+            var queryStr = $("#txtQuery").val().trim();
+            if (queryStr == "") {
+                $.messager.alert('提示', '请输入商品编码或名称', "info");
+                return false;
+            }
+
+            $('#List').datagrid({
+                url: 'GetViewProductList?code=' + queryStr
+            });
+
+        });
+
+    });
+
+</script>
+

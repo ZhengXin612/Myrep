@@ -1,0 +1,309 @@
+﻿@model  EBMS.Models.T_User
+@using Lib;
+@{
+    ViewBag.Title = "编辑员工";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";    
+}
+<script src="/Scripts/jquery.validate.min.js" type="text/javascript"></script>
+<style>
+    /*编辑人员*/
+.departmentName {padding:0 10px;color:#EEB422}
+.setDepartment-top {margin-top:10px;padding-left:10px}
+.setDepartment-top a {color:#666}
+.setDepartment-top a:hover {color:#4faffb}
+#MyTree .tree-node span:first-child{width: 17px;height:18px;display: block;float: left;margin:0  3px}
+#MyTree .tree-expanded,#MyTree .tree-indent,#MyTree .tree-collapsed{width: 17px;height:18px;display: block;float: left;margin:0  3px}
+#categoryChooseDiv{width:220px;padding:10px 0;display:none;border-top:0}
+.okNo {border:1px solid #ccc;border-radius:3px;padding:2px 5px;color:#666;margin-left:20px}
+.okNo:hover {color:#369}
+.tools-box {margin-top:10px}
+</style>
+<div class="mvctool">
+  <a id="btnSave" href="javascript:;" class="modal-btn modal-btn-save">保存</a>
+</div>
+@using (Html.BeginForm("EditForm", "Controllers", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+    
+          <input type="hidden" id="isBoss" name="type" value="@ViewData["isBoss"]" />
+       <input type="hidden" id="Pid" name="type" value="@ViewData["Pid"]" />
+    <table class="fromEditTable setTextWidth300">
+        <tbody>
+            <tr>
+                <td style="width: 100px; text-align: right;">
+                    @Html.LabelFor(model => model.Name)：
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.Name)
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.Name)
+                </td>
+            </tr>
+              <tr>
+                <td style="width: 100px; text-align: right;">
+                    @Html.LabelFor(model => model.Nickname)：
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.Nickname)
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.Nickname)
+                </td>
+            </tr>
+             <tr>
+                <td style="width: 100px; text-align: right;">
+                    @Html.LabelFor(model => model.Tel)：
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.Tel)
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.Tel)
+                </td>
+            </tr>
+              <tr>
+                <td style="width: 100px; text-align: right;">
+                    @Html.LabelFor(model => model.PassWord)：
+                </td>
+
+                <td>
+                    @Html.TextBoxFor(model => model.PassWord)
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.PassWord)
+                </td>
+            </tr>
+              <tr>
+                 <td style="width: 100px; text-align: right;">
+                    @Html.LabelFor(model => model.Power)：
+                </td>
+
+                <td>
+      @*              @Html.TextBoxFor(model => model.UserPower)*@
+                      @Html.DropDownList("Power")
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.Power)
+                </td>
+            </tr>
+            <tr>
+                <td style="width: 100px; text-align: right;">
+                    @Html.LabelFor(model => model.IsManagers)：
+                </td>
+                <td>
+                     @Html.DropDownListFor(model => model.IsManagers, ViewData["options"] as List<SelectListItem>)
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.IsManagers)
+                </td>
+            </tr>
+             
+            @Html.HiddenFor(model => model.ID)
+        </tbody>
+    </table>
+}
+<div class="setDepartment">
+    <p class="setDepartment-top">请选择部门<span class="departmentName" id="dNameTxt">@ViewData["sDepartmenID"]</span><a href="javascript:;" id="getTreeBox">选择</a><input type="hidden" value="@ViewData["DepartmenID"]" id="thisDepartmentId" /></p>
+</div>
+<input id="postId" value="@ViewData["DepartmenID"]" type="hidden">
+<input id="postName" value="@ViewData["sDepartmenID"]" type="hidden">
+<input id="oid" value="@ViewData["oId"]" type="hidden">
+<input id="changeId"  type="hidden">
+<input id="changeName" type="hidden">
+<input id="starId" value="@ViewData["DepartmenID"]" type="hidden">
+<div id="pannel">
+    <div id="categoryChooseDiv">
+      <ul id="MyTree"></ul>
+    <div class="tools-box"> 
+        <a id="OK" class="okNo" href="javascript:;">确定</a>
+        <a id="NO" class="okNo" href="javascript:;">取消</a></div>
+</div>
+    </div>
+<script>
+    $(function () {
+   
+        //部门树加载
+        var treeData = @Html.Raw(ViewData["tree"])
+          $("#MyTree").tree({
+              // dnd:true,
+              animate: false,
+              data: treeData,
+              lines: true,
+              onClick: function (node) {
+                  $("#changeId").val(node.id)
+                  $("#changeName").val(node.text)
+              },
+              onDblClick: function (node) {
+                  $(this).tree('toggle', node.target);
+              }
+          });
+        $("#MyTree").tree("collapseAll");
+        var rootNode = $("#MyTree").tree('getRoot'); //调用expand方法 
+        $("#MyTree").tree('expand', rootNode.target);
+        //树的打开与关闭
+        $("#getTreeBox").click(function () {
+            if ($("#categoryChooseDiv").is(":hidden")) {
+                pannelShow();
+            } else {
+                pannelHide();
+            }
+        })
+        //编辑部门选择取消
+        $("#NO").click(function () {
+            pannelHide();
+        })
+        //编辑部门选择确认
+        $("#OK").click(function () {
+            var id = $("#changeId").val();
+            var name = $("#changeName").val();
+                $("#postId").val(id);
+                $("#postName").val(name);
+                $("#dNameTxt").html(name);
+                pannelHide();
+         
+        })
+        //收起部门选择div的函数
+        function pannelHide() {
+            $("#categoryChooseDiv").hide();
+            var t = $(window).scrollTop();
+            $('body,html').animate({ 'scrollTop': t - 240 }, 100)
+        }
+        //打开部门选择div的函数
+        function pannelShow() {
+            $("#categoryChooseDiv").show();
+            var t = $(window).scrollTop();
+            $('body,html').animate({ 'scrollTop': t + 240 }, 100)
+        }
+        //保存提交
+        var flag = 0;
+        $("#btnSave").click(function () {
+            if (flag == 0) {
+                loading(0);
+                flag++;
+                var id = $("#postId").val();
+                var starId = $("#starId").val();
+                var oid = $("#oid").val();
+                var isBoss = $("#isBoss").val()
+                //编辑判断帐号是否存在
+                $.ajax({
+                    url: "../System/checkUserNameForEdit?oid=" + oid,
+                    type: "Post",
+                    data: $("#EditForm").serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        if (data == "1") {
+                            $.messager.alert('提示', '帐号已存在', "info", function () {
+                                flag = 0;
+                                loading(1);
+                            });
+                        }
+                        else {
+                            //花名不存在
+                            function postEidt() {
+                                $.ajax({
+                                    url: "../System/editEmployeesDepartment?model" + $("#EditForm").serialize() + "&departmentName=" + id + "&id=" + oid,
+                                    type: "Post",
+                                    // data:$("#EditForm").serialize(),
+                                    contentType: "application/json",
+                                    dataType: "json",
+                                    success: function (data) {
+                                        loading(1);
+                                        if (data > 0) {
+                                            $.messager.alert('提示', '保存成功', "info", function () {
+                                    parent.$('#editEmployeesDiv').dialog('close');
+                                    parent.$('#List').datagrid('reload');
+                                    flag = 0;
+                                })
+                            } else {
+                               alert("保存失败")
+                               loading(1);
+                                flag = 0;
+                            }
+                        },
+                        error: function (data) {
+                            //失败 
+                            loading(1);
+                            flag = 0;
+                        }
+                    });
+
+                }
+
+                            if (starId == id) {
+                               
+                                var isSupervisor = $("#IsManagers").find("option:selected").val()
+                              
+                    if (isSupervisor == 1 && isBoss==0) {
+                        //是否主管：是  判断是否主管是否已经设置
+                        $.ajax({
+                            url: "../System/checkSupervisor?Pid=" + starId,
+                            type: "Post",
+                            data: $("#EditForm").serialize(),
+                            dataType: "json",
+                            success: function (data) {
+                                if (data == "1") {
+                                    if ($("#EditForm").valid()) {
+                                        postEidt();
+                                    } else {
+                                        flag = 0;
+                                        loading(1);
+                                    }
+
+                                } else {
+                                    $.messager.alert('提示', '已有主管', "info", function () {
+                                        flag = 0;
+                                        loading(1);
+                                    });
+                                }
+
+                            },
+                            Error: function (data) {
+                                flag = 0;
+                                loading(1);
+                            }
+                        });
+                    } else {
+                        //是否主管：否 
+                        postEidt();
+                    }
+                    //如果修改人员没有改变部门;
+
+                } else {
+                    //修改人原换了部门  直接把原部门主管清空 这个人员是否为主管设置为否;
+                    $.ajax({
+                        url: "../System/editEmployeesDepartmentChange?model" + $("#EditForm").serialize() + "&departmentName=" + id + "&id=" + oid + "&starId=" + starId,
+                        type: "Post",
+                        contentType: "application/json",
+                        dataType: "json",
+                        success: function (data) {
+                            if (data >0) {
+                                $.messager.alert('提示', '保存成功', "info", function () {
+                                    parent.$('#editEmployeesDiv').dialog('close');
+                                    parent.$('#List').datagrid('reload');
+                                    flag = 0;
+                                    loading(1);
+                                })
+                            }
+                            else {
+                                alert("保存失败")
+                                flag = 0;
+                                loading(1);
+                            }
+                        },
+                      error: function (data) {
+                          //失败 
+                          flag = 0;
+                          loading(1);
+                      }
+                  });
+                }
+                        }
+                    }
+                });
+
+            }
+        })
+    })
+
+</script>

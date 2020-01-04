@@ -1,0 +1,335 @@
+﻿@model EBMS.Models.T_FundAllot
+@{
+    ViewBag.Title = "ViewFundAllotPrint";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+<script type="text/javascript">
+    function ChinaCost(numberValue) {
+        var numberValue = new String(Math.round(numberValue * 100)); // 数字金额
+        var chineseValue = ""; // 转换后的汉字金额
+        var String1 = "零壹贰叁肆伍陆柒捌玖"; // 汉字数字
+        var String2 = "万仟佰拾亿仟佰拾万仟佰拾元角分"; // 对应单位
+        var len = numberValue.length; // numberValue 的字符串长度
+        var Ch1; // 数字的汉语读法
+        var Ch2; // 数字位的汉字读法
+        var nZero = 0; // 用来计算连续的零值的个数
+        var String3; // 指定位置的数值
+        if (len > 15) {
+            alert("超出计算范围");
+            return "";
+        }
+        if (numberValue == 0) {
+            chineseValue = "零元整";
+            return chineseValue;
+        }
+        String2 = String2.substr(String2.length - len, len); // 取出对应位数的STRING2的值
+        for (var i = 0; i < len; i++) {
+            String3 = parseInt(numberValue.substr(i, 1), 10); // 取出需转换的某一位的值
+            if (i != (len - 3) && i != (len - 7) && i != (len - 11) && i != (len - 15)) {
+                if (String3 == 0) {
+                    Ch1 = "";
+                    Ch2 = "";
+                    nZero = nZero + 1;
+                }
+                else if (String3 != 0 && nZero != 0) {
+                    Ch1 = "零" + String1.substr(String3, 1);
+                    Ch2 = String2.substr(i, 1);
+                    nZero = 0;
+                }
+                else {
+                    Ch1 = String1.substr(String3, 1);
+                    Ch2 = String2.substr(i, 1);
+                    nZero = 0;
+                }
+            }
+            else { // 该位是万亿，亿，万，元位等关键位
+                if (String3 != 0 && nZero != 0) {
+                    Ch1 = "零" + String1.substr(String3, 1);
+                    Ch2 = String2.substr(i, 1);
+                    nZero = 0;
+                }
+                else if (String3 != 0 && nZero == 0) {
+                    Ch1 = String1.substr(String3, 1);
+                    Ch2 = String2.substr(i, 1);
+                    nZero = 0;
+                }
+                else if (String3 == 0 && nZero >= 3) {
+                    Ch1 = "";
+                    Ch2 = "";
+                    nZero = nZero + 1;
+                }
+                else {
+                    Ch1 = "";
+                    Ch2 = String2.substr(i, 1);
+                    nZero = nZero + 1;
+                }
+                if (i == (len - 11) || i == (len - 3)) { // 如果该位是亿位或元位，则必须写上
+                    Ch2 = String2.substr(i, 1);
+                }
+            }
+            chineseValue = chineseValue + Ch1 + Ch2;
+        }
+        if (String3 == 0) { // 最后一位（分）为0时，加上“整”
+            chineseValue = chineseValue + "整";
+        }
+        return chineseValue;
+    }
+</script>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>费用报销单</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <style type="text/css">
+        * {
+            margin: 0;
+            padding: 0;
+            border: 0;
+            outline: none;
+        }
+
+        body {
+            font-size: 14px;
+        }
+
+        .Fund-table-box {
+            position: relative;
+        }
+
+            .Fund-table-box h2 {
+                text-align: center;
+                font-size: 18px;
+                font-weight: normal;
+            }
+
+        .h2-double-line {
+            border: 1px solid #000;
+            width: 30%;
+            height: 3px;
+            margin: 0 auto;
+            border-left: 0;
+            border-right: 0;
+            margin-top: 2px;
+        }
+
+        .table-info {
+            height: 26px;
+            width: 100%;
+            line-height: 26px;
+        }
+
+        .table tr {
+            font-size: 14px;
+        }
+
+        .table-info p {
+            text-align: right;
+            height: 20px;
+            float: left;
+            line-height: 20px;
+        }
+
+        .table-time {
+            margin: 0 10px;
+        }
+
+        .b-h {
+            min-width: 120px;
+        }
+
+            .b-h span {
+                float: right;
+                min-width: 120px;
+                text-align: left;
+            }
+
+        .Fund-table-box .table {
+            border: 1px solid #000;
+            border-collapse: collapse;
+            border-spacing: 0;
+            width: 100%;
+            text-align: center;
+        }
+
+        tr {
+            font-size: 12px;
+            width: 100%;
+            border-bottom: 1px solid #000;
+        }
+
+        .tr-15 {
+            width: 15%;
+        }
+
+        .tr-30 {
+            width: 30%;
+        }
+
+        .tr-50 {
+            width: 50%;
+        }
+
+        .r-border {
+            border-right: 1px solid #000;
+        }
+
+        .t-label {
+            width: 25px;
+            text-align: center;
+        }
+
+        .t-93 {
+            width: 93px;
+        }
+
+        .tr-85 {
+            width: 85%;
+        }
+
+        .tr-50 {
+            width: 50%;
+        }
+
+        #theDate {
+            font-size: 12px;
+        }
+
+        .bian-hao {
+            position: absolute;
+            right: 0px;
+            z-index: 2;
+            top: -15px;
+        }
+
+        @@media print {
+            .noprint {
+                display: none;
+                color: green;
+            }
+        }
+
+        .Batch-number {
+            float: left;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="noprint">
+        <a class="job-btn job-btn-6" href="javascript:window.print(); ">打印</a>
+    </div>
+    <div style="width: 800px; height: 400px; margin: 0 auto">
+        <div class="Fund-table-box">
+            <div class="bian-hao">
+                <img src="~/Content/barCode.ashx?code=@Model.FundAllotCode"   width="169" height="60">
+            </div>
+            <h2>资金内部调拨单</h2>
+            <div class="h2-double-line"></div>
+            <div class="table-info">
+                <p class="table-time">日期：<span id="theDate"></span></p>
+
+            </div>
+
+            @using (Html.BeginForm("EditForm", "Controllers", null, FormMethod.Post, new { Id = "EditForm" }))
+            {
+                @Html.ValidationSummary(true)
+                <table class="table">
+                    <tr style="height: 30px;">
+                        <td class="tr-15 r-border">申请人</td>
+                        <td class="tr-35 r-border">@Html.DisplayFor(model => model.PostUser)</td>
+                        <td class="tr-15 r-border">部门</td>
+                        <td class="tr-35 r-border">@Html.DisplayFor(model => model.Department)</td>
+                    </tr>
+                    <tr style="height: 80px">
+                        <td class="tr-50 r-border" colspan="2">
+                            <table border="0" cellpadding="0" cellspacing="0" class="table" style="border: 0">
+                                <tr style="height: 60px">
+                                    <td rowspan="3" class="t-label r-border">调入单位</td>
+                                    <td class="t-93 r-border">单位名称</td>
+                                    <td>@Html.DisplayFor(model => model.CompanyIn)</td>
+                                </tr>
+                                <tr style="height: 30px">
+                                    <td class="t-93 r-border">收款银行</td>
+                                    <td>@Html.DisplayFor(model => model.TheReceivingBank)</td>
+                                </tr>
+                                <tr style="height: 30px; border-bottom: 0">
+                                    <td class="t-93 r-border">收款帐号</td>
+                                    <td>@Html.DisplayFor(model => model.AccountNumber)</td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td class="tr-50" colspan="2">
+                            <table border="0" cellpadding="0" cellspacing="0" class="table" style="border: 0">
+                                <tr style="height: 60px">
+                                    <td rowspan="3" class="t-label r-border">调出单位</td>
+                                    <td class="t-93 r-border">单位名称</td>
+                                    <td>@Html.DisplayFor(model => model.CompanyOut)</td>
+                                </tr>
+                                <tr style="height: 30px">
+                                    <td class="t-93 r-border">付款银行</td>
+                                    <td>@Html.DisplayFor(model => model.ThePaymentBank)</td>
+                                </tr>
+                                <tr style="height: 30px; border-bottom: 0">
+                                    <td class="t-93 r-border">付款帐号</td>
+                                    <td>@Html.DisplayFor(model => model.PaymentNumber)</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr style="height: 40px;">
+                        <td class="tr-15 r-border">申请资金</td>
+                        <td class="tr-50 r-border" colspan="2">
+                            <table class="table" style="border: 0; height: 40px">
+                                <tr>
+                                    <td class="r-border" style="width: 90px">人民币</td>
+                                    <td rowspan="2" style="text-align: left; text-indent: 1em" id="ChineseNum">@Html.DisplayFor(model => model.theMoney)</td>
+                                </tr>
+                                <tr style="border: 0;">
+                                    <td class="r-border">（大写）</td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td class="tr-35 r-border" style="text-align: left; text-indent: 1em">￥<span id="moneyC">@Html.DisplayFor(model => model.theMoney)</span></td>
+                    </tr>
+                    <tr style="height: 40px">
+                        <td class="tr-15 r-border">资金用途</td>
+                        <td colspan="3" class="tr-85" style="text-align: left; text-indent: 1em">@Html.DisplayFor(model => model.UseOfProceeds)</td>
+                    </tr>
+                    <tr style="height: 60px">
+                        <td colspan="4">
+                            <table class="table" style="border: 0; height: 60px">
+                                <tr style="border: 0">
+                                    <td class="r-border" style="width: 25px">会计</td>
+                                    <td class="r-border"><span style="color: #fff; opacity: 0"></span></td>
+                                    <td class="r-border" style="width: 25px">出纳</td>
+                                    <td class="r-border"><span style="color: #fff; opacity: 0"></span></td>
+                                    <td class="r-border" style="width: 25px">经办人</td>
+                                    <td class=""><span style="color: #fff; opacity: 0"></span></td>
+
+                                    <input type="hidden"  value="@Html.DisplayFor(model => model.PostTime) " id="time"/>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            }
+        </div>
+    </div>
+    <script>
+        $(function () {
+            //大写金额
+            var oNum = $("#moneyC").html();
+            var t = ChinaCost(oNum)
+            $("#ChineseNum").html(t);
+            //日期格式
+            var oTime = $("#time").val();
+            var d = formatDateBoxFullnianyueri(oTime);
+            $("#theDate").html(d)
+        })
+    </script>
+</body>
+</html>

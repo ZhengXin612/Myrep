@@ -1,0 +1,326 @@
+﻿@model EBMS.Models.T_MajorInvoice
+@{
+    ViewBag.Title = "专票";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<style>
+    .btn-bar {
+        margin: 10px;
+    }
+
+    .note-box {
+        margin: 10px 0 0 10px;
+    }
+
+        .note-box p {
+            margin-bottom: 10px;
+        }
+
+            #files-box {
+ margin:10px  }
+    #files-box li img {
+        width:120px;height:120px;margin-right:10px
+    }
+
+    #files-box li .files-delete {
+        color: #2299ee;
+    }
+  #files-box {
+        margin-left:10px;
+        float: left;
+    }
+
+        #files-box li {
+            height: 25px;
+            line-height: 25px;
+            float: left;
+            margin-right: 10px;
+        }
+</style>
+<div class="btn-bar">
+    <a href="javascript:;" id="btnAgree" class="icon-agree">同意</a>
+    <a href="javascript:;" id="btnDisAgree" class="icon-disagree">不同意</a>
+</div>
+<div class="note-box">
+    <p>审核备注：</p>
+    <textarea cols="20" id="Memo" name="Memo" rows="3" style="height: 60px; width: 380px; resize: none; overflow-y: scroll;"></textarea>
+</div>
+@using (Html.BeginForm("EditForm", "Controller", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+    <table class="fromEditTable setTextWidth300" id="cashback">
+          @Html.HiddenFor(model => model.ID)  
+        <tr>
+            <td style="text-align: right;">
+                @Html.LabelFor(model => model.ShopName)：   
+            </td>
+            <td style="position: relative;max-width:200px">
+                @Html.DisplayFor(model => model.ShopName)
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.ShopName)
+            </td>
+       
+            <td style="text-align: right;">
+                @Html.LabelFor(model => model.OrderNumber)：   
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.OrderNumber)
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.OrderNumber)
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align: right;">
+                @Html.LabelFor(model => model.TheInvoiceAmount)：   
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.TheInvoiceAmount)
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.TheInvoiceAmount)
+            </td>
+      
+            <td style="text-align: right;">
+                @Html.LabelFor(model => model.InvoiceContent)：   
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.InvoiceContent)
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.InvoiceContent)
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align: right;">
+                @Html.LabelFor(model => model.Number)：   
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.Number)
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.Number)
+            </td>
+      
+            <td style="text-align: right;">
+                @Html.LabelFor(model => model.UnitPrice)：   
+            </td>
+            <td style="position: relative">
+                @Html.DisplayFor(model => model.UnitPrice)
+             
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.UnitPrice)
+            </td>
+        </tr>
+     
+        <tr>
+            <td style="text-align: right;">
+                @Html.LabelFor(model => model.Address)：   
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.Address)
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.Address)
+            </td>
+     
+            <td style="text-align: right;">
+                @Html.LabelFor(model => model.CorporateName)：   
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.CorporateName)
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.CorporateName)
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align: right;">
+                @Html.LabelFor(model => model.TaxNumber)：   
+            </td>
+            <td style="position: relative">
+                @Html.DisplayFor(model => model.TaxNumber)
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.TaxNumber)
+            </td>
+      
+            <td style="text-align: right;">
+                @Html.LabelFor(model => model.InvoiceAddress)：   
+            </td>
+            <td style="max-width:200px">
+                @Html.DisplayFor(model => model.InvoiceAddress)
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.InvoiceAddress)
+            </td>
+        </tr>
+         <tr>
+            <td style="text-align: right;">
+                @Html.LabelFor(model => model.Telephone)：   
+            </td>
+            <td style="max-width:200px">
+                @Html.DisplayFor(model => model.Telephone)
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.Telephone)
+            </td>
+      
+            <td style="text-align: right;">
+                @Html.LabelFor(model => model.BankAccount)：   
+            </td>
+            <td style="max-width:200px">
+                @Html.DisplayFor(model => model.BankAccount)
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.BankAccount)
+            </td>
+        </tr>
+          <tr>
+            <td style="text-align: right;">
+                @Html.LabelFor(model => model.BankAddress)：   
+            </td>
+            <td style="max-width:200px">
+                @Html.DisplayFor(model => model.BankAddress)
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.BankAddress)
+            </td>
+        </tr>
+       <tr>
+            <td style="text-align: right;">
+             备注：   
+            </td>
+            <td style="max-width:200px">
+                @Html.DisplayFor(model => model.Remarks)
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.Remarks)
+            </td>
+            <td style="text-align: right;">
+                       发票类型：
+               </td>
+               <td style="max-width:200px">
+                        @Html.DisplayFor(model => model.Invoicetype)
+               </td>
+                <td>
+                @Html.ValidationMessageFor(model => model.Invoicetype)
+            </td>
+        </tr>
+    </table>
+}
+<div class="detail-list">
+    <table id="List"></table>
+</div>
+<div class="history-box">@Html.Raw(ViewData["history"])</div>
+
+<script src="@Url.Content("~/Scripts/jquery.zclip.min.js")" type="text/javascript"></script>
+  <ul id="files-box"></ul>
+
+<script type="text/javascript">
+    $(function () {
+
+        $.ajax({
+            url: "/MajorInvoice/GetExpenseEnclosure?ID=" + "@ViewData["ID"]",
+             type: "Post",
+             success: function (data) {
+                 console.log(data);
+                 var $Li = "";
+                 if (data == "" || data == null) {
+                     $("#files-box").html($Li);
+                     return;
+                 }
+                 var dataJson = JSON.parse(data)
+                 $.each(dataJson, function (i, val) {
+                     $Li += "<li><a href=" + dataJson[i].Url + " target=\"_blank\"><img src=" + dataJson[i].Url + " /></a></li>"
+                 })
+                 $("#files-box").html($Li);
+             },
+             error: function () {
+
+             }
+        });
+        var url = "/MajorInvoice/GetMajorInvoiceDetail?ID=" + "@ViewData["ID"]";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() * 0.45,
+            fitColumns: true,
+            sortName: 'ID',
+            sortOrder: 'desc',
+            idField: 'ID',
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+               { field: 'Code', title: '产品编码', width: 120, align: 'center' },
+                { field: 'Name', title: '产品名称', width: 100, align: 'center' },
+                { field: 'qty', title: '数量', width: 100, align: 'center' },
+                { field: 'UnitPrice', title: '单价', width: 100, align: 'center' },
+            ]]
+        });
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            });
+        });
+  
+        var cashier = "@ViewData["Cashier"]";
+        $("#btnAgree").click(function () {
+       
+            var status=1
+            post(status);
+        });
+        $("#btnDisAgree").click(function () {
+          @*  var backfrom = $("#BackFrom option:selected").val();
+            var checkMan = $("#checkSelect").val();
+            var para = { "id": "@ViewData["ID"]", "status": 2, "memo": $("#Memo").val(), "method": "@ViewData["Method"]", "cashier": cashier, "backfrom": backfrom };
+           *@
+            var status = 2;
+            post(status);
+        });
+    });
+    var sign = 0;
+    function post(status) {
+        var Memo = $("#Memo").val()
+   
+        if (sign == 0) {
+            sign = 1;
+            loading(0)
+            $.ajax({
+                url: "/MajorInvoice/MajorInvoiceCheck?status=" + status + "&Memo=" + Memo,
+                type: "post",
+                data: $("#EditForm").serialize(),
+                dataType: "json",
+                success: function (data) {
+                    loading(1)
+                    $.messager.alert('提示', data, "info", function () {
+                        parent.$('#checkDiv').dialog('close');
+                        parent.$('#List').datagrid('reload');
+                        parent.$('#List').datagrid("clearSelections");
+                        parent.Query();
+                        sign = 0;
+                    });
+                    parent.$('#List').datagrid("clearSelections");
+                },
+                error: function () {
+                    loading(1);
+                    parent.$('#checkDiv').dialog('close');
+                    parent.$('#List').datagrid('reload');
+                    parent.$('#List').datagrid("clearSelections");
+                    parent.Query();
+                    sign = 0;
+                }
+            });
+        }
+    }
+   
+</script>

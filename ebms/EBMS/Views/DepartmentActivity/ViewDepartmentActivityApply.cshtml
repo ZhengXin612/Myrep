@@ -1,0 +1,218 @@
+﻿@model EBMS.Models.T_DepartmentActivity
+
+@{
+    ViewBag.Title = "ViewDepartmentActivityApply";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<script type="text/javascript">
+    $(function () {
+        var date = "@DateTime.Now";
+
+        for (var i = 0; i < $(".easyui-datetimebox").length ; i++) {
+
+            $(".easyui-datetimebox").eq(i).datetimebox("setValue", date);
+        }
+
+        var flag = 0;
+        $('#btnSave').click(function () {
+           
+            if ($("#EditForm").valid() && flag == 0) {
+                loading(0)
+                flag += 1;
+                $.ajax({
+                    url: "/DepartmentActivity/DepartmentActivityApplySave",
+                    type: "Post",
+                    data: $("#EditForm").serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        loading(1);
+                        if (data.State == "Success") {
+                          
+                            $.messager.alert("提示", "@Lib.MessageRes.SaveOK", "info", function () {
+                                window.location.reload();
+                            })
+                        }
+                        else {
+                            $.messager.alert("提示", data.Message, "info");
+                            flag = 0;
+                           
+                        }
+                    },
+                    error: function (data)
+                    {
+                        flag = 0;
+                        $.messager.alert("提示", data, "info");
+                    }
+                });
+            }
+            return false;
+
+        });
+
+    })
+   
+
+
+</script>
+<style>
+    .lab {
+  width: 110px; 
+  text-align: right;}
+</style>
+<div class="mvctool">
+    <a id="btnSave" href="javascript:;" class="modal-btn modal-btn-save">保存</a>
+    
+</div>
+
+<div>
+    @using (Html.BeginForm("EditForm", "Controllers", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+    <table class="fromEditTable setTextWidth300">
+       
+        <tbody>
+            <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.PostUser):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model => model.PostUser, new { @readonly=true})
+               </td>
+                  <td>
+                   @Html.ValidationMessageFor(model => model.PostUser)
+               </td>
+          </tr> 
+             <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.Dept):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model => model.Dept)
+               </td>
+                  <td>
+                   @Html.ValidationMessageFor(model => model.Dept)
+               </td>
+          </tr> 
+             <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.Reason):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model => model.Reason, new { placeholder="比如庆祝业绩增长目标达成,例行活动等"})
+               </td>
+                   <td>
+                   @Html.ValidationMessageFor(model => model.Reason)
+               </td>
+          </tr> 
+            <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.ChargePerson):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model => model.ChargePerson, new { placeholder="谁负责活动全程情况,包括安全问题"})
+               </td>
+               <td>
+                   @Html.ValidationMessageFor(model => model.ChargePerson)
+               </td>
+          </tr> 
+             <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.Tel):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model => model.Tel)
+               </td>
+               <td>
+                   @Html.ValidationMessageFor(model => model.Tel)
+               </td>
+          </tr> 
+            <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.Persons):
+               </td>
+               <td>
+                   @Html.TextAreaFor(model => model.Persons, new { placeholder="比如:姜尚,苏瑞 姓名之间用逗号隔开"})
+               </td>
+               <td>
+                   @Html.ValidationMessageFor(model => model.Persons)
+               </td>
+          </tr> 
+             <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.PeopleNum):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model => model.PeopleNum, new { placeholder="输入实际人数"})
+               </td>
+               <td>
+                   @Html.ValidationMessageFor(model => model.PeopleNum)
+               </td>
+          </tr> 
+            <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.Address):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model => model.Address, new { placeholder="比如某某饭店,某某别墅"})
+               </td>
+                  <td>
+                   @Html.ValidationMessageFor(model => model.Address)
+               </td>
+          </tr> 
+            
+          
+              <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.Contents):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model => model.Contents, new { placeholder="比如吃饭,唱歌,旅游"})
+               </td>
+               <td>
+                   @Html.ValidationMessageFor(model => model.Contents)
+               </td>
+          </tr> 
+             <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.StartTime):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model => model.StartTime, new { @class="easyui-datetimebox"})
+               —— @Html.TextBoxFor(model => model.EndTime, new { @class="easyui-datetimebox" })
+               </td>
+
+             </tr> 
+            <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.Expense):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model => model.Expense, new { placeholder="这里填了预计费用,实际以批准费用为准"})
+               </td>
+               <td>
+                   @Html.ValidationMessageFor(model => model.Expense)
+               </td>
+          </tr> 
+              <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.CurrentApprove):
+               </td>
+               <td>
+                   @Html.DropDownListFor(model => model.CurrentApprove, ViewData["approveList"] as List<SelectListItem>)
+               </td>
+               <td>
+                   @Html.ValidationMessageFor(model => model.CurrentApprove)
+               </td>
+          </tr> 
+
+        </tbody>
+    </table>
+           @Html.HiddenFor(model => model.ID)
+      
+       
+        
+}
+
+</div>
+

@@ -1,0 +1,60 @@
+﻿@{
+    ViewBag.Title = "ViewExpressCostCountBydate";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+
+<script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+
+<div class="Company-top-box">
+    <div class="search-box">
+        <span style="color: #808080; padding-right: 10px; font-size: 13px; margin-top: 3px; margin-left: 10px;">日期</span>
+        <input name="settlementStartDate" style="float: left;" value="" id="settlementStartDate" class="easyui-datebox" data-options="sharedCalendar:'#statethisdate'">
+        <input type="button" value="查询" id="btnQuery" class="icon-search">
+    </div>
+</div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+<script type="text/javascript">
+    enterSearch("#btnQuery");
+    $(function () {
+        var s;
+        var url = "";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 10,
+            method: 'post',
+            height: $(window).height() * 0.95,
+            fitColumns: true,
+            striped: true,
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号 
+            columns: [[
+               { field: 'Total', title: '费用总计', width: 60, align: 'center' }
+            ]]
+        });
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 10,
+                height: $(window).height() - 40
+            }).datagrid('resize', {
+                width: $(window).width() - 10,
+                height: $(window).height() - 40
+            });
+        });
+    });
+    $("#btnQuery").click(function () {
+        var start = $('#settlementStartDate').datebox('getValue');
+        if (start == "") {
+            $.messager.alert('提示', "请选择日期")
+            return false;
+        }
+        $('#List').datagrid({
+            url: 'GetExpressCostCountByDate?startDate=' + start 
+        });
+        $("#txtQuery").focus().select();
+    });
+</script>
+
+

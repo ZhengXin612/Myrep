@@ -1,0 +1,45 @@
+﻿@{
+    ViewBag.Title = "ViewInterceptDetail";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<script type="text/javascript">
+    $(function () {
+        var url = "GetInterceptDetail?interceptId=" + "@ViewData["interceptId"]";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() * 0.45,
+            fitColumns: true,
+            sortName: 'ID',
+            sortOrder: 'desc',
+            idField: 'ID',
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                            { field: 'Code', title: '需发产品编码', width: 90, align: 'center' },
+                { field: 'Name', title: '需发产品名称', width: 90, align: 'center' },
+                { field: 'Num', title: '需发产品数量', width: 80, align: 'center' },
+                 { field: 'LoadCode', title: '原产品编码', width: 90, align: 'center' },
+                { field: 'LoadName', title: '原产品名称', width: 90, align: 'center' },
+                { field: 'LoadNum', title: '原产品数量', width: 80, align: 'center' },
+            ]]
+        });
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            });
+        });
+    });
+</script>
+<table id="List"></table>
+<hr style="height: 1px; border: none; border-top: 1px dashed #0066CC;" />
+@Html.Raw(ViewData["history"])
+

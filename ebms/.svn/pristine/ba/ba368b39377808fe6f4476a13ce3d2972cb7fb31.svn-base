@@ -1,0 +1,84 @@
+﻿@{
+    //商品列表
+    ViewBag.Title = "返现列表";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+<style>
+    #methodQuery {margin-left:5px}
+</style>
+<div class="Company-top-box">
+    <div class="search-box">
+         <input type="text" placeholder="审核人.." id="txtQuery"  class="icon-search-txt">
+           <input type="text" placeholder="流程.." id="methodQuery"  class="icon-search-txt">
+         <input type="button" value="查询" id="btnQuery" class="icon-search">
+    </div>
+    <div class="btn-bar">
+         <a href="#" id="btnAdd" class="icon-add">新增</a>
+    </div>
+</div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+<script type="text/javascript">
+    enterSearch("#btnQuery");
+    function op(name, url) {
+        self.parent.addTab(name, url, '');
+        getContextmenu()
+    }    var statusVal = $("#selStatus").val();
+    $(function () {
+        $("body").css({ "padding": "5px 0 0 7px", "overflow": "hidden" });
+        $(".search-box .combo-arrow").css("margin-top","4px")
+        var url = "../CashBackConfig/GetMethodList";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() - 50,
+            fitColumns: true,
+            sortName: 'id',
+            sortOrder: 'desc',
+            idField: 'id',
+            pageSize: 20,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            columns: [[
+                 { field: 'Method', title: '流程', width: 40, align: 'center' },
+                 { field: 'Name', title: '审核人', width: 600, align: 'center' },
+            ]],
+            onClickRow: function (rowIndex, rowData) {
+            },
+            onDblClickRow: function (rowIndex, rowData) {
+            },            onAfterEdit: function (index, rowData) {//回调函数可以直接用于操作页面
+            }
+        });
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            });
+        });
+    });
+    $("#btnQuery").click(function () {
+        var queryStr = $("#txtQuery").val();
+        var method = $("#methodQuery").val();;
+        //如果查询条件为空默认查询全部
+        if (queryStr == null) {
+            queryStr = "%";
+        }
+            var val = $("#selStatus").val();            $('#List').datagrid({
+                url: '../CashBackConfig/GetMethodList?queryStr=' + encodeURI(queryStr) + "&method=" + encodeURI(method)
+            });
+    });
+    $("#btnAdd").click(function () {
+        $('#openIframeAdd')[0].src = "/CashBackConfig/MethodAdd";
+        $('#addDiv').dialog('open');
+    });
+</script>
+<div id="addDiv" class="easyui-dialog" closed="true" modal="true" title="新增流程" style="width:420px; height:420px;" resizable="true" closable="true">
+    <iframe scrolling="yes" id='openIframeAdd' frameborder="0" src="" style="width:100%;height:98%;"></iframe>
+</div>

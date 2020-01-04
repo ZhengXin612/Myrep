@@ -1,0 +1,78 @@
+﻿@model  EBMS.Models.T_HandwrittenExpress
+@using Lib;
+@{
+  
+    ViewBag.Title = "Materiel_Info";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+<script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+    <input id="ID" value="@ViewData["ID"]" type="hidden">
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table class="fromEditTable setTextWidth300">
+    <tr>
+        <td style="width: 100px; text-align: right">
+            @Html.HiddenFor(model => model.ID)
+            @Html.HiddenFor(model => model.Status)
+            @Html.LabelFor(model => model.ApplyPurpose)：   
+        </td>
+        <td>
+            @Html.DisplayFor(model => model.ApplyPurpose)
+        </td>
+        <td style="width: 100px; text-align: right">
+            @Html.LabelFor(model => model.ApplyNumber)：   
+        </td>
+        <td>
+            @Html.DisplayFor(model => model.ApplyNumber)
+        </td>
+    </tr>
+    <tr>
+        <td style="width: 100px; text-align: right">
+            @Html.LabelFor(model => model.Address)：   
+        </td>
+        <td>
+            @Html.DisplayFor(model => model.Address)
+        </td>
+
+        <td style="width: 100px; text-align: right">
+            @Html.LabelFor(model => model.Telephone)：   
+        </td>
+        <td>
+            @Html.DisplayFor(model => model.Telephone)
+        </td>
+    </tr>
+
+    <tr>
+        <td style="width: 100px; text-align: right">
+            @Html.LabelFor(model => model.AddressName)：   
+        </td>
+        <td>
+            @Html.DisplayFor(model => model.AddressName)
+        </td>
+
+        <td style="width: 100px; text-align: right">
+            @Html.LabelFor(model => model.Zip)：    
+        </td>
+        <td>
+            @Html.DisplayFor(model => model.Zip)
+        </td>
+    </tr>
+    
+    <tr>
+        <td style="width: 100px; text-align: right">
+            @Html.LabelFor(model => model.Warehouse)：   
+        </td>
+        <td>
+            @Html.DisplayFor(model => model.Warehouse)
+        </td>
+
+        <td style="width: 100px; text-align: right">
+        
+        </td>
+        <td>
+         
+        </td>
+    </tr>
+</table>
+<table id="List"></table>
+<div class="history-box">@Html.Raw(ViewData["history"])</div>
+

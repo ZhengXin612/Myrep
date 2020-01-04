@@ -1,0 +1,95 @@
+﻿@model EBMS.Models.T_ExpressIndemnityConfig
+@{
+    ViewBag.Title = "ViewExpressIndemnityConfigEdit";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+<script type="text/javascript">
+    
+    $(function () {
+        var flag = 0;
+        $('#btnSave').click(function () {
+            if ($('#Name').val() == null || $('#Name').val().trim() == "" || $('#Type').val() == null || $('#Type').val().trim() == "") {
+                $.messager.alert("提示", "请填写名称和类型", "info")
+                return false;
+            }
+            if ($("#EditForm").valid() && flag == 0) {
+                flag = 1;
+                loading(0);
+                $.ajax({
+                    url: "/ExpressIndemnity/ExpressIndemnityConfigEditSave",
+                    type: "Post",
+                    data: $("#EditForm").serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        if (data > 0) {
+                            $.messager.alert("提示", "@Lib.MessageRes.SaveOK", "info", function () {
+                                loading(1)
+                                parent.$('#editDiv').dialog('close')
+                                parent.$('#List').datagrid('reload');
+                            })
+                        }
+                        else {
+                            loading(1)
+                            $.messager.alert("提示", "保存失败", "info");
+                            flag = 0;
+
+                        }
+                        parent.$('#List').datagrid("clearSelections");
+                    },
+                    error: function (data) {
+                        loading(1);
+                        flag = 0;
+                        $.messager.alert('提示', data, "info");
+                    }
+                });
+            }
+        })
+   })
+
+   
+</script>
+<div class="mvctool">
+    <a id="btnSave" href="javascript:;" class="modal-btn modal-btn-save">保存</a>
+    
+</div>
+
+<div>
+    @using (Html.BeginForm("EditForm", "Controllers", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+    <table class="fromEditTable setTextWidth300">
+       
+        <tbody>
+            <tr>
+               <td class="lab">
+                   @Html.LabelFor(model=>model.Type):
+               </td>
+               <td>
+                  @Html.DropDownListFor(model=>model.Type,ViewData["typeList"] as List<SelectListItem>)
+                   
+                 </td>
+               <td>
+                   @Html.ValidationMessageFor(model=>model.Type)
+               </td>
+           </tr>
+             <tr>
+               <td class="lab">
+                   @Html.LabelFor(model=>model.Name):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model => model.Name)
+                   
+                 </td>
+               <td>
+                   @Html.ValidationMessageFor(model=>model.Name)
+               </td>
+           </tr>
+            
+            
+        </tbody>
+    </table>
+           @Html.HiddenFor(model => model.ID)
+    }
+  
+</div>
+   

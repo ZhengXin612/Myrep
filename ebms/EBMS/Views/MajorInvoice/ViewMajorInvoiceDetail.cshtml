@@ -1,0 +1,256 @@
+﻿@model  EBMS.Models.T_MajorInvoice
+@{
+    ViewBag.Title = "ViewMajorInvoiceDetail";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<style>
+    .setTextWidth600 input[type="text"] {
+        width: 600px;
+    }
+
+    #Sex {
+        width: 60px;
+        text-align: center;
+    }
+
+    #Memo {
+        width: 600px;
+        height: 60px;
+        margin: 10px 0;
+        resize: none;
+    }
+
+    #data-tr p {
+        float: left;
+        margin-right: 15px;
+    }
+
+        #data-tr p input[type="checkbox"] {
+            float: left;
+            margin: 1px 5px 0 0;
+        }
+
+    .uploadBtn {
+        color: #2299ee;
+    }
+
+        .uploadBtn:hover {
+            color: #1d51a5;
+        }
+
+    .multiple-hidden {
+        display: none;
+    }
+
+    #files-btn {
+        color: #333;
+        margin-right: 15px;
+        padding-left: 16px;
+        margin-bottom: 10px;
+        display: table;
+        margin-top: 15px;
+    }
+
+        #files-btn:hover {
+            color: #2299ee;
+        }
+
+    #files-box {
+        margin-left:10px;
+        float: left;
+    }
+
+        #files-box li {
+            height: 25px;
+            line-height: 25px;
+            float: left;
+            margin-right: 10px;
+        }
+
+    .files-name {
+        height: 25px;
+        overflow: hidden;
+    }
+
+    .files-size {
+        margin: 0 10px;
+        color: #999;
+    }
+    #files-box {
+ margin:10px  }
+    #files-box li img {
+        width:120px;height:120px;margin-right:10px
+    }
+
+    #files-box li .files-delete {
+        color: #2299ee;
+    }
+
+    .no-border {
+        border: 0;
+    }
+</style>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+
+          <table class="fromEditTable setTextWidth300">
+        <tbody>
+            <tr>
+                  <td class="lab">
+                  @Html.LabelFor(model => model.OrderNumber):
+               </td>
+               <td>
+                   @Html.DisplayFor(model => model.OrderNumber)
+               </td>
+              <td class="lab">
+                  @Html.LabelFor(model => model.ShopName):
+               </td>
+               <td>
+          @*     @Html.DropDownListFor(model => model.ShopName, ViewData["ShopNameList"] as List<SelectListItem>)*@
+                     @Html.DisplayFor(model => model.ShopName)
+               </td>
+          </tr> 
+             <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.TheInvoiceAmount):
+               </td>
+               <td>
+                   @Html.DisplayFor(model => model.TheInvoiceAmount)
+               </td>
+           
+                  <td class="lab">
+                  @Html.LabelFor(model => model.InvoiceContent):
+               </td>
+               <td>
+                   @Html.DisplayFor(model => model.InvoiceContent)
+               </td>
+          </tr> 
+             <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.Address):
+               </td>
+               <td>
+                   @Html.DisplayFor(model => model.Address)
+               </td>
+                  <td class="lab">
+                       发票类型：
+               </td>
+               <td>
+                        @Html.DisplayFor(model => model.Invoicetype)
+               </td>
+          </tr> 
+             <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.CorporateName):
+               </td>
+               <td>
+                   @Html.DisplayFor(model => model.CorporateName)
+               </td>
+                  <td class="lab">
+                  @Html.LabelFor(model => model.TaxNumber):
+               </td>
+               <td>
+                   @Html.DisplayFor(model => model.TaxNumber)
+               </td>
+          </tr> 
+             <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.InvoiceAddress):
+               </td>
+               <td>
+                   @Html.DisplayFor(model => model.InvoiceAddress)
+               </td>
+                  <td class="lab">
+                  @Html.LabelFor(model => model.Telephone):
+               </td>
+               <td>
+                   @Html.DisplayFor(model => model.Telephone)
+               </td>
+          </tr>
+             <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.BankAccount):
+               </td>
+               <td>
+                   @Html.DisplayFor(model => model.BankAccount)
+               </td>
+                  <td class="lab">
+                  @Html.LabelFor(model => model.BankAddress):
+               </td>
+               <td>
+                   @Html.DisplayFor(model => model.BankAddress)
+               </td>
+          </tr> 
+			<tr>
+
+				<td class="lab">
+					备注:
+				</td>
+				<td>
+					@Html.DisplayFor(model => model.Remarks)
+				</td>
+
+			</tr>
+        </tbody>
+           <input type="hidden" id="jsonStr" name="jsonStr" />
+    </table>
+
+<table id="List"></table>
+<script type="text/javascript">
+    $(function () {
+
+        $.ajax({
+            url: "/MajorInvoice/GetExpenseEnclosure?ID=" + "@ViewData["ID"]",
+            type: "Post",
+            success: function (data) {
+                console.log(data);
+                var $Li = "";
+                if (data == "" || data == null) {
+                    $("#files-box").html($Li);
+                    return;
+                }
+                var dataJson = JSON.parse(data)
+                $.each(dataJson, function (i, val) {
+                    $Li += "<li><a href=" + dataJson[i].Url + " target=\"_blank\"><img src=" + dataJson[i].Url + " /></a></li>"
+                })
+                $("#files-box").html($Li);
+            },
+            error: function () {
+
+            }
+        });
+
+        var url = "/MajorInvoice/GetMajorInvoiceDetail?ID=" + "@ViewData["ID"]";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() * 0.45,
+            fitColumns: true,
+            sortName: 'ID',
+            sortOrder: 'desc',
+            idField: 'ID',
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+               { field: 'Code', title: '产品编码', width: 120, align: 'center' },
+                { field: 'Name', title: '产品名称', width: 100, align: 'center' },
+                { field: 'qty', title: '数量', width: 100, align: 'center' },
+                { field: 'UnitPrice', title: '单价', width: 100, align: 'center' },
+            ]]
+        });
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            });
+        });
+    });
+</script>
+<hr style="height: 1px; border: none; border-top: 1px dashed #0066CC;" />
+@Html.Raw(ViewData["history"])
+    <ul id="files-box"></ul>

@@ -1,0 +1,481 @@
+﻿@model EBMS.Models.T_Joined
+@using Lib
+@{
+    ViewBag.Title = "ViewLossReportAdd";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<style>
+.setTextWidth600 input[type="text"] {width:600px;}
+#Sex{width:60px;text-align:center}
+#Memo{width:600px;height:60px;margin:10px 0;resize:none}
+#data-tr p{float:left;margin-right:15px}
+#data-tr p input[type="checkbox"]{float:left;margin:1px 5px 0 0}
+.uploadBtn{color:#2299ee}
+.uploadBtn:hover {color:#1d51a5}
+.multiple-hidden {display:none}
+#files-btn{color: #333;margin-right: 15px;padding-left: 16px;margin-bottom:10px;display:table}
+ #files-btn:hover{color:#2299ee;}
+#files-box {margin:10px 0}
+#files-box li{height:25px;line-height:25px;}
+.files-name{height:25px;overflow:hidden;  }
+.files-size{margin:0 10px;color:#999}
+#files-box li a {color:#333}
+#files-box li  .files-delete{color:#2299ee}
+.no-border {border:0}
+</style>
+@*@using (Html.BeginForm("EditForm", "Controller", null, FormMethod.Post, new { enctype = "multipart/form-data",Id = "EditForm" })) *@
+@using (Html.BeginForm("ViewJoinedAdd", "Joined", null, FormMethod.Post, new { enctype = "multipart/form-data", Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+<div class="mvctool">
+    <a id="btnSave" class="modal-btn modal-btn-save" >保存</a>
+</div>
+    <table class="fromEditTable setTextWidth600">
+        @Html.HiddenFor(model=>model.ID)
+        @Html.HiddenFor(model=>model.Status)
+          <tr>
+            <td style="width:120px; text-align: right;">
+                @Html.Hidden("jsonStr")
+                @Html.LabelFor(model => model.Code)：   
+            </td>
+            <td >
+                <input value="@ViewData["Code"]" id="Code" name="Code" readonly="true" class="no-border">
+               
+            </td>
+        </tr>
+        <tr>
+            <td style="width:120px; text-align: right;">
+                @Html.LabelFor(model => model.PostUser)：   
+            </td>
+            <td>
+                 <input value="@ViewData["Nickname"]" id="PostUser" name="PostUser"  readonly="true" class="no-border">
+            </td>
+        </tr>
+         <tr>
+            <td style="width:120px; text-align: right;">
+                @Html.LabelFor(model => model.PostDepartment)：   
+            </td>
+            <td>
+                <input value="@ViewData["PostDepartment"]" id="PostDepartment" name="PostDepartment"  readonly="true" class="no-border">
+                
+            </td>
+        </tr>
+       <tr>
+           <td style="width:120px; text-align: right;">
+                  @Html.LabelFor(model => model.Nickname)：   
+           </td>
+           <td>
+                 @Html.TextBoxFor(model => model.Nickname, new { @placeholder = "不能现在有的人重复不能违背国家法律，不健康不道德的花名" })
+           </td>
+       </tr>
+          <tr>
+           <td style="width:120px; text-align: right;">
+                  @Html.LabelFor(model => model.Name)：   
+           </td>
+           <td>
+                 @Html.TextBoxFor(model => model.Name)
+           </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.Name)
+            </td>
+       </tr>
+          <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.Sex)：   
+            </td>
+            <td>
+                @Html.DropDownList("Sex", ViewData["Sex"] as List<SelectListItem>)
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.Sex)
+            </td>
+        </tr>
+        <tr>
+           <td style="width:120px; text-align: right;">
+               @Html.LabelFor(model => model.Tel)：   
+           </td>
+           <td>
+                @Html.TextBoxFor(model => model.Tel)
+           </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.Tel)
+            </td>
+         </tr>
+           <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.Department)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.Department)
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.Department)
+            </td>
+        </tr>
+          <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.SetGroup)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.SetGroup,new { @placeholder = "必须选择已有组织架构分组，如果新增分组和人事沟通后，新建分组分配到哪组后期有调动和人事沟通" })
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.SetGroup) 
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.Job)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.Job,new { @placeholder = "必须选择已有岗位，如果需要新增岗位先和人事沟通方可新增岗位" })
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.Job) 
+            </td>
+        </tr>
+         <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.IdcardAddress)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.IdcardAddress)
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.IdcardAddress)
+            </td>
+        </tr>
+         <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.Address)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.Address)
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.Address)
+            </td>
+        </tr>
+         <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.EmergencyContact)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.EmergencyContact,new { @placeholder = "这个必须填写，必须填写家庭成员，怕出现特殊事情无法联系家人" })
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.EmergencyContact)
+            </td>
+        </tr>
+         <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.EmergencyTel)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.EmergencyTel,new { @placeholder = "填写家庭成员电话最好填2个" })
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.EmergencyTel)
+            </td>
+        </tr>
+         <tr>
+            <td style="width: 120px; text-align: right;">
+               纸质资料是否齐全：
+            </td>
+            <td id="data-tr">
+               <p>
+                    @Html.CheckBox("DataUserRegister")
+                    @Html.LabelFor(model => model.DataUserRegister)  
+               </p>
+                <p>
+                    @Html.CheckBox("DataPost")
+                    @Html.LabelFor(model => model.DataPost)  
+               </p>
+                 <p>
+                    @Html.CheckBox("DataResult")
+                    @Html.LabelFor(model => model.DataResult)  
+               </p>
+                <p>
+                    @Html.CheckBox("DataIdcard")
+                    @Html.LabelFor(model => model.DataIdcard)  
+               </p>
+                 <p>
+                    @Html.CheckBox("DataQualifications")
+                    @Html.LabelFor(model => model.DataQualifications)  
+               </p>
+                  <p>
+                    @Html.CheckBox("DataPhoto")
+                    @Html.LabelFor(model => model.DataPhoto)  
+               </p>
+                  <p>
+                    @Html.CheckBox("DataDrivingLicense")
+                    @Html.LabelFor(model => model.DataDrivingLicense)  
+               </p>
+                  <p>
+                    @Html.CheckBox("DataExaminationReport")
+                    @Html.LabelFor(model => model.DataExaminationReport)  
+               </p>
+            </td>
+            <td>
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.Information)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.Information,new { @placeholder = "如果有上面类型资料直接勾选，其他资料直接备注" })
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.Information)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.Memo)：   
+            </td>
+            <td>
+                @Html.TextArea("Memo")
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.Memo)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px; text-align: right;">
+               <font color="#2299ee">附件小于10M：</font>
+               @*<input href="#" class="icon-add" name="file" type="file" id="file" value="上传附件">*@
+            </td>
+            <td>
+                   <ul id="files-box"></ul>
+                        <a href="#" class="icon-add" id="files-btn">上传附件</a>  
+                <div class="multiple-hidden"> 
+                      <input type="file" name="file" id="file"  />
+                </div>
+            </td>
+            <td></td>
+        </tr>
+         <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.FirstApprove)：   
+            </td>
+            <td>
+                 @Html.DropDownList("FirstApprove", ViewData["FirstApprove"] as List<SelectListItem>)
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.FirstApprove)
+            </td>
+        </tr>
+    </table>
+}
+<div id="openDivNew" class="easyui-dialog" closed="true" modal="true" title="添加详情" style="width: 800px; height: 500px;" resizable="true" closable="true">
+    <iframe scrolling="no" id='openIframeNew' frameborder="0" src="" style="width: 100%; height: 98%;"></iframe>
+</div>
+<div id="openComapny" class="easyui-dialog" closed="true" modal="true" title="往来单位" style="width: 800px; height: 500px;" resizable="true" closable="true">
+    <iframe scrolling="no" id='openIframeComapny' frameborder="0" src="" style="width: 100%; height: 98%;"></iframe>
+</div>
+<script type="text/javascript">
+    //加载数据
+    function saveJson() {
+        JsonText = "[";
+        var rows = $('#files-box li');
+        if (rows.length == 0) {
+            $("#jsonStr").val("");
+            return
+        }
+        for (var i = 0; i < rows.length; i++) {
+            var row = $(rows[i]);
+            JsonText += '{';
+            JsonText += '"Name":' + '"' + row.attr("data-name") + '",';
+            JsonText += '"Url":' + '"' + row.attr("data-url") + '",';
+            JsonText += '"Size":' + '"' + row.attr("data-size") + '",';
+            JsonText += '"Path":' + '"' + row.attr("data-path") + '"},';
+        }
+        JsonText = JsonText.substring(0, JsonText.length - 1);
+        JsonText += "]";
+        $("#jsonStr").val(JsonText);
+    }
+    function DeleteFile(_this, path) {
+        $(_this).closest("li").remove();
+        $.ajax({
+            type: "POST",
+            url: "../Joined/DeleteFile?path=" + path,
+            contentType: false,
+            processData: false,
+        }).success(function (data) {
+            saveJson()
+        }).error(function (data) {
+            alert(data);
+        });
+    }
+    function DeleteModelFile(_this, path) {
+        $(_this).closest("li").remove();
+        var $id = $("#ID").val();
+        $.ajax({
+            type: "POST",
+            url: "../Joined/DeleteModelFile?path=" + path + "&ID=" + $id,
+            contentType: false,
+            processData: false,
+        }).success(function (data) {
+            saveJson()
+        }).error(function (data) {
+            alert(data);
+        });
+    }
+    
+    $(function () {
+        //加载附件
+        $.ajax({
+            url: "../Joined/GetJoinedOptin?ID=" + $("#ID").val(),
+            type: "Post",
+            data: $("#EditForm").serialize(),
+            success: function (data) {
+                var $Li = "";
+                if (data == "" || data == null) {
+                    $("#files-box").html($Li);
+                    return;
+                }
+                var dataJson = JSON.parse(data)
+                $.each(dataJson, function (i, val) {
+                    $Li += "<li data-name=" + dataJson[i].Name + " data-url=" + dataJson[i].Url + " data-size = " + dataJson[i].Size + " data-path=" + dataJson[i].Path + "><a href=" + dataJson[i].Url + " target='_blank'><span class='files-name'>" + dataJson[i].Name + "</span><span class='files-size'>(" + dataJson[i].Size + "KB)</span></a><a href='#' onclick='DeleteModelFile(this,\"" + dataJson[i].Path + "\")' title=" + dataJson[i].Path + " class='files-delete'>删除</a></li>"
+                })
+                $("#files-box").html($Li);
+                saveJson()
+            },
+            error: function () {
+
+            }
+        });
+        var modelSex = "@ViewData["modelSex"]";
+        if (modelSex != null && modelSex != "") {
+            $("#Sex").val(modelSex);
+        }
+        var adminID = "@ViewData["modelFirstApprove"]";
+        if (adminID != null && adminID != "")
+        {
+            $("#FirstApprove").val(adminID);
+        }
+      
+        $("#files-btn").click(function () {
+            $("#file").click();
+        })
+
+        $("#file").change(function () {
+            var files = $("#file")[0].files
+            var $li = "";
+            var $size = 0;
+            // 10485760b ===10M
+            var postSize = files[0].size;
+            if (postSize > 10485760) {
+                $.messager.alert('提示', "单个文件不能大于10M", "info")
+                return;
+            }
+            var formData = new FormData($("#EditForm")[0]);
+            $.ajax({
+                type: "POST",
+                data: formData,
+                url: "../Joined/Upload",
+                contentType: false,
+                processData: false,
+            }).success(function (data) {
+                if (data.status) {
+                    $size = files[0].size / 1024;
+                    $li += "<li data-name=" + files[0].name + " data-url=" + data.link + " data-size = " + $size.toFixed(2) + " data-path=" + data.title + "><a href='" + data.link + "' target='_blank'><span class='files-name'>" + files[0].name + "</span><span  class='files-size'>(" + $size.toFixed(2) + "KB)</span></a><a href='#' onclick='DeleteFile(this,\"" + data.title + "\")' title=" + data.title + " class='files-delete'>删除</a></li>";
+                    $("#files-box").append($li);
+                    saveJson()
+                } else {
+                    console.log(data.msg);
+                }
+
+            }).error(function (data) {
+                alert(data);
+            });
+        })
+    
+        var sign = 0;
+        $("#btnSave").click(function ()
+        {
+            var value = "";
+            value =  $("#Nickname").val();
+           if ($.trim(value) == "")
+           {
+               $.messager.alert('提示', "花名不能为空", "info", function () { $("#Nickname").focus(); })
+               return;
+           }
+           value = $("#Name").val();
+           if ($.trim(value) == "") {
+               $.messager.alert('提示', "入职真实姓名不能为空", "info", function () { $("#Name").focus(); })
+               return;
+           }
+           value = $("#Tel").val();
+           if ($.trim(value) == "") {
+               $.messager.alert('提示', "电话号码不能为空", "info", function () { $("#Tel").focus(); })
+               return;
+           } 
+           value = $("#Department").val();
+           if ($.trim(value) == "") {
+               $.messager.alert('提示', "入职部门不能为空", "info", function () { $("#Department").focus(); })
+               return;
+           }
+           value = $("#SetGroup").val();
+           if ($.trim(value) == "") {
+               $.messager.alert('提示', "入职分组不能为空", "info", function () { $("#SetGroup").focus(); })
+               return;
+           }
+           value = $("#Job").val();
+           if ($.trim(value) == "") {
+               $.messager.alert('提示', "岗位不能为空", "info", function () { $("#Job").focus(); })
+               return;
+           }
+           value = $("#IdcardAddress").val();
+           if ($.trim(value) == "") {
+               $.messager.alert('提示', "身份证地址不能为空", "info", function () { $("#IdcardAddress").focus(); })
+               return;
+           }
+           value = $("#Address").val();
+           if ($.trim(value) == "") {
+               $.messager.alert('提示', "现在地址不能为空", "info", function () { $("#Address").focus(); })
+               return;
+           }
+           value = $("#EmergencyContact").val();
+           if ($.trim(value) == "") {
+               $.messager.alert('提示', "紧急联系人不能为空", "info", function () { $("#EmergencyContact").focus(); })
+               return;
+           }
+           value = $("#EmergencyTel").val();
+           if ($.trim(value) == "") {
+               $.messager.alert('提示', "紧急联系人电话不能为空", "info", function () { $("#EmergencyTel").focus(); })
+               return;
+           }
+           value = $("#Memo").val();
+           if ($.trim(value) == "") {
+               $.messager.alert('提示', "申请内容不能为空", "info", function () { $("#Memo").focus(); })
+               return;
+           }
+           loading(0);
+           if (sign == 0) {
+               sign = 1;
+               $.ajax({
+                   url: "../Joined/JoinedEditSave?ID="+$("#id").val(),
+                   type: "Post",
+                   data: $("#EditForm").serialize(),
+                   success: function (data) {
+                       if (data.State == "Success") {
+                           loading(1);
+                           $.messager.alert('提示', '保存成功', "info", function () {
+                               sign = 0
+                               closeReshefTab("入职审批管理")
+                           });
+                       } else {
+                           loading(1);
+                           $.messager.alert('提示', data.Message, "info", function () {
+                               sign = 0
+                           });
+                       }
+                   }
+               });
+           }
+        });
+    });
+</script>

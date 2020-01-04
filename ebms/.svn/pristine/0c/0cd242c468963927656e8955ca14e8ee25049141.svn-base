@@ -1,0 +1,58 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>title</title>
+<link href="~/Areas/App/AppContent/css/api.css" rel="stylesheet" type="text/css" />
+<style>
+.h2-tilte {font-size:0.16rem;font-weight:normal;line-height:0.4rem;padding:0 0.1rem;height:0.4rem}
+.h2-tilte .icon { margin-right:0.05rem}
+table{width:100%;color:#666}
+td{border:1px solid #eee;text-align:center}
+.td-pic{margin:0.1rem 0 }
+.td-pic img{width:0.26rem;}
+.td-name{margin-bottom:0.05rem;font-size:0.12rem}
+ .login-out {float:right;color:#666}                                                                                                                                                                                                                                                                                                                         .td-txt{margin-bottom:0.1rem;color:#999;font-size:0.10rem}
+</style>
+</head>
+<body>
+<h2 class="h2-tilte"><i class="icon iconfont icon-training"></i>工作任务<a href="/App/AppHome/Login" class="login-out"><i class="icon iconfont icon-skip"></i>登出</a></h2>
+<table id="MapItem"></table>
+<input value="@ViewData["mapDom"]" type="hidden" id="mapDom">
+<script src="~/Areas/App/AppContent/js/jquery-2.2.1.min.js"></script>
+<script>
+    function funOpenArticle(_this)
+    {
+        var _url = $(_this).attr("data-url")
+        window.location.href = "/App" + _url + "/Index"
+    }
+    function getImg(_url) {
+        var strUrl = _url.replace("..","/Areas/App/AppContent")
+        return strUrl
+    }
+    $(function () {
+        var domJson = JSON.parse($("#mapDom").val());
+        var data = domJson.Data;
+        var col = 4;//表格列数
+        var td = data.length % col == 0 ? data.length : Math.ceil(data.length / col) * col;
+        var _i = 0;
+        var html = "<tr>";
+        for (var i = 0; i < td; i++) {
+            if (data[i]) {
+                html += "<td data-url=" + data[i].AppUrl + " data-panelName = " + data[i].Name + " onclick=\"funOpenArticle( this );\" width=\"25%\"><p class=\"td-pic\"><img src=" + getImg(data[i].AppIcon) + "></p><p class=\"td-name\">" + data[i].Name + "</p></p><p class=\"td-txt\">" + data[i].Qty + "&nbsp;&nbsp;条未审核</p></td>";
+            } else {
+                html += '<td></td>';
+            }
+            if ((i + 1) % col == 0 && i > 0) {
+                html += "</tr><tr>";
+            }
+        }
+        html += "</tr>"
+        $("#MapItem").html(html);
+    
+    })
+</script>
+ </body>
+</html>

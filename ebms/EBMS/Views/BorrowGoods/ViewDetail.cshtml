@@ -1,0 +1,91 @@
+﻿@{
+    ViewBag.Title = "ViewDetail";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+
+<div class="Company-top-box">
+    <div class="search-box">
+         <input type="text" placeholder="产品代码或名称.." id="txtQuery"  class="icon-search-txt">
+         <input type="button" value="查询" id="btnQuery" class="icon-search">
+
+     </div>
+     <div class="btn-bar">
+       
+        
+    </div>
+</div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+
+<script type="text/javascript">
+    enterSearch("#btnQuery");
+    var PID = "@ViewData["PID"]";
+
+    $(function () {
+        document.title = "详情";
+        var url = "GetDetailList?PID=" + PID;
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width()-15,
+            method: 'post',
+            height: $(window).height() - 45,
+            fitColumns: true,
+           // sortName: 'Code',
+            sortOrder: 'desc',
+            idField: 'ID',
+            pageSize: 10,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            nowrap: false,
+            columns: [[
+                
+                {
+                    field: 'GoodsCode', title: '产品编码', width: 40, align: "center"
+                },
+                {
+                    field: 'GoodsName', title: '产品名称', width: 40, align: "center"
+                },
+                {
+                    field: 'qty', title: '型号规格', width: 60, align: "center"
+                },
+                
+               
+            ]],
+        })
+
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 40
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 40
+            });
+        });
+
+       
+    })
+
+ function Query()
+    {
+        var queryStr = $("#txtQuery").val();
+       
+        $('#List').datagrid({
+            url: 'GetDetailList?queryStr=' + encodeURI(queryStr) + "&PID=" + PID   //+ '&statedate=' + statedate + '&EndDate=' + EndDate + '&dianming=' + dianming
+
+        });
+        $("#txtQuery").focus().select();
+    }
+    $('#btnQuery').click(function () {
+
+        Query();
+
+    });
+  
+   
+    </script>
+
+

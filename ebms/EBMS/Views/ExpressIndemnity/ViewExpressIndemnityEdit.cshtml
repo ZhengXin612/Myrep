@@ -1,0 +1,277 @@
+﻿@model EBMS.Models.T_ExpressIndemnity
+@{
+    ViewBag.Title = "ViewExpressIndemnityEdit";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+<link rel="stylesheet" href="~/Scripts/editor/themes/default/default.css" />
+<script charset="utf-8" src="~/Scripts/editor/kindeditor.js"></script>
+<script charset="utf-8" src="~/Scripts/editor/lang/zh_CN.js"></script>
+<script charset="utf-8" src="~/Scripts/editor/plugins/code/prettify.js"></script>
+<script src="/Scripts/jquery.validate.min.js" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/jquery.validate.unobtrusive.min.js")" type="text/javascript"></script>
+<script type="text/javascript">
+    var urls = new Array();
+    var p = 0;
+    var i = 1;
+    KindEditor.ready(function (K) {
+
+        prettyPrint();
+
+        var editor = K.editor({
+            allowFileManager: true,
+            uploadJson: '/scripts/editor/upload_posun.ashx',
+        });
+        //批量上传 
+        var div = K('#J_imageView');
+        div.html('');
+        K('#uploadimg').click(function () {
+            editor.loadPlugin('multiimage', function () {
+                editor.plugin.multiImageDialog({
+                    clickFn: function (urlList) {
+                        K.each(urlList, function (i, data) {
+
+                            var z = p + i;
+                            urls.push(data.url);
+                            div.append('<img id=I' + z + ' width=150 height=130 src="' + data.url + '">');
+                            div.append('<a id=A' + z + '  href=javascript:ImgRemove(' + z + ',"")>[删除]</a>');
+
+                        });
+                        alert("上传成功！");
+                        //var tupurl = "";
+                        //for (var a = 0; a < urls.length; a++) {
+                        //    tupurl += urls[a] + '^^';
+                        //}
+                        $('#picUrls').val(urls);
+                        console.log($('#picUrls').val())
+                        editor.hideDialog();
+                    }
+                });
+            });
+        });
+
+    });
+    function ImgRemove(i, pid) {
+
+        $("#I" + i).remove();
+        $("#A" + i).remove();
+        $("#R" + i).remove();
+        $("#l" + i).remove();
+
+
+        urls.baoremove(i);
+        var v = document.getElementsByName('F');
+        var Fvalue = "";
+        for (var i = 0; i < v.length; i++) {
+            v.item(i).checked = false;
+        }
+        $("#J_imageView").html('');
+
+        for (var q = 0; q < urls.length; q++) {
+            $("#J_imageView").append('<img id=I' + q + ' width=150 height=130 src="' + urls[q] + '">');
+            $("#J_imageView").append('<a id=A' + q + '  href=javascript:ImgRemove(' + q + ',"")>[删除]</a>');
+        }
+    }
+
+    $(function () {
+        $('#OrderNum').keydown(function (e) {
+            enterSearch("#btnSearch");
+        })//在订单号输入框按enter键的时候去查询订单信息,其他时候enter键不做这件事
+        $('#RetreatExpressNum').keydown(function (e) {
+            enterSearch("#btnSearch2");
+        })//在订单号输入框按enter键的时候去查询订单信息,其他时候enter键不做这件事
+        var flag = 0;
+        $('#btnSave').click(function () {
+            if ($("#EditForm").valid() && flag == 0) {
+                flag = 1;
+                loading(0);
+                $.ajax({
+                    url: "/ExpressIndemnity/ExpressIndemnityEditSave",
+                    type: "Post",
+                    data: $("#EditForm").serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        if (data > 0) {
+                            $.messager.alert("提示", "@Lib.MessageRes.SaveOK", "info", function () {
+                            loading(1)
+                           // window.location.reload();
+                            parent.$('#editDiv').dialog("close");
+                        })
+                    }
+                    else {
+                        loading(1)
+                        $.messager.alert("提示", "保存失败", "info");
+                        flag = 0;
+
+                    }
+                    },
+                    error: function (data) {
+                        loading(1);
+                        flag = 0;
+                        $.messager.alert('提示', data, "info");
+                    }
+                });
+
+        }
+
+        })
+   })
+function search(NumType) {
+    var Num = "";
+    if (NumType == 1) {
+        Num = $('#OrderNum').val();
+    }
+    else {
+        Num = $('#RetreatExpressNum').val();
+    }
+    $.post("/ExpressIndemnity/GetInfoByOrder", { "Num": Num, "NumType": NumType }, function (data) {
+        if (data != 0) {
+            $('#OrderNum').val(data.platform_code)
+            $('#ShopName').val(data.shop_name);
+            $('#OrderMoney').val(data.payment_amount);
+            $('#wangwang').val(data.vip_name);
+            $('#RetreatExpressNum').val(data.mail_no);
+            $('#ExpressName').val(data.express_name)
+        }
+        else {
+
+            alert('没有该单号相关信息,请自己填写')
+        }
+    }, "json")
+}
+
+</script>
+<div class="mvctool">
+    <a id="btnSave" href="javascript:;" class="modal-btn modal-btn-save">保存</a>
+    
+</div>
+
+<div>
+    @using (Html.BeginForm("EditForm", "Controllers", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+    <table class="fromEditTable setTextWidth300">
+       
+        <tbody>
+             <tr>
+               <td class="lab">
+                   @Html.LabelFor(model=>model.Type):
+               </td>
+               <td>
+                  @Html.RadioButtonFor(model => model.Type, "丢件")丢件
+                    @Html.RadioButtonFor(model=>model.Type,"破损")破损
+                    @Html.RadioButtonFor(model=>model.Type,"弃件")弃件
+               </td>
+               <td>
+                   @Html.ValidationMessageFor(model=>model.Type)
+               </td>
+           </tr>
+           <tr>
+               <td class="lab">
+                   @Html.LabelFor(model=>model.OrderNum):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model=>model.OrderNum)
+                    <input type="hidden" value="查询" id="btnSearch" class="icon-search" onclick="search(1)">
+                 </td>
+               <td>
+                   @Html.ValidationMessageFor(model=>model.OrderNum)
+               </td>
+           </tr>
+             <tr>
+               <td class="lab">
+                   @Html.LabelFor(model=>model.RetreatExpressNum):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model => model.RetreatExpressNum)
+                    <input type="hidden" value="查询" id="btnSearch2" class="icon-search" onclick="search(2)">
+               </td>
+               <td>
+                   @Html.ValidationMessageFor(model=>model.RetreatExpressNum)
+               </td>
+           </tr>
+            
+             <tr>
+               <td class="lab">
+                   @Html.LabelFor(model=>model.ShopName):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model => model.ShopName, new { onclick=""})
+                  
+               </td>
+               <td>
+                   @Html.ValidationMessageFor(model=>model.ShopName)
+               </td>
+           </tr>
+           @* <tr>
+               <td class="lab">
+                   @Html.LabelFor(model=>model.RetreatReason):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model=>model.RetreatReason)
+               </td>
+               <td>
+                   @Html.ValidationMessageFor(model=>model.RetreatReason)
+               </td>
+           </tr>*@
+            <tr>
+               <td class="lab">
+                   @Html.LabelFor(model=>model.OrderMoney):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model=>model.OrderMoney)
+               </td>
+               <td>
+                   @Html.ValidationMessageFor(model=>model.OrderMoney)
+               </td>
+           </tr>
+             <tr>
+               <td class="lab">
+                   @Html.LabelFor(model=>model.ExpressName):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model=>model.ExpressName)
+               </td>
+               <td>
+                   @Html.ValidationMessageFor(model=>model.ExpressName)
+               </td>
+           </tr>
+            <tr>
+               <td class="lab">
+                   @Html.LabelFor(model=>model.wangwang):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model=>model.wangwang)
+               </td>
+               <td>
+                   @Html.ValidationMessageFor(model=>model.wangwang)
+               </td>
+           </tr>
+            <tr>
+               <td class="lab">
+                   @Html.LabelFor(model=>model.Memo):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model=>model.Memo)
+               </td>
+               <td>
+                   @Html.ValidationMessageFor(model=>model.Memo)
+               </td>
+           </tr>
+        </tbody>
+    </table>
+           @Html.HiddenFor(model => model.ID)
+        @Html.Hidden("picUrls")
+}
+
+</div>
+<table>
+    <tr>
+        <td>
+             <div style="width:600px;margin-left:8%;margin-bottom:20px;font-size: large;">
+                 <a  id="uploadimg" href="#">点击上传破损物品图片</a><br />(破损件请务必上传图片)
+                   <div id="J_imageView"></div>
+
+             </div> 
+        </td>
+    </tr>
+</table>

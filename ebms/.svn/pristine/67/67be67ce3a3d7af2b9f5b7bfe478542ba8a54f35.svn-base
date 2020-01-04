@@ -1,0 +1,130 @@
+﻿@{
+    ViewBag.Title = "ViewProductPurchasePzApprove";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table class="fromEditTable setTextWidth300">
+    <tr>
+
+
+        <td>审核备注：
+       
+            <input type="text" id="Memo" /></td>
+        <td>
+            <div class="approve-btn-box">
+                <div class="btn-bar">
+                    <a href="#" id="btnAgree" class="icon-agree">同意</a>
+                    <a href="#" id="btnUnAgree" class="icon-disagree">不同意</a>
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+<table id="List"></table>
+<script type="text/javascript">
+    $(function () {
+        var url = "../Purchase/GetPurchaseFinanceListDetail?ID=" + "@ViewData["ID"]";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() * 0.85,
+            fitColumns: true,
+            sortName: 'ID',
+            sortOrder: 'desc',
+            idField: 'id',
+            pageSize: 20,
+            pagination: true,
+            showFooter: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+               { field: 'ProductName', title: '产品名称', width: 80, align: 'center' },
+                { field: 'PlanNum', title: '采购数量', width: 80, align: 'center' },
+                { field: 'UnitPrice', title: '产品单价', width: 80, align: 'center' },
+                { field: 'Supplier', title: '供应商', width: 80, align: 'center' },
+                { field: 'ActualNum', title: '实际到货数量', width: 80, align: 'center' },
+                { field: 'Company', title: '单位', width: 80, align: 'center' },
+                    { field: 'PZ_Department', title: '部门', width: 80, align: 'center' },
+                     { field: 'PZ_Subject', title: '科目', width: 80, align: 'center' },
+                     {
+                         field: 'PZ_Direction', title: '借贷方向', width: 60, align: 'center', formatter: function (value, row, index) {
+                             switch (value) {
+                                 case 0:
+                                     return "<font color=green>借</font>"
+                                     break;
+                                 case 1:
+                                     return "<font color=blue>贷</font>"
+                                     break;
+                                 default:
+                                     return ""
+                             }
+                         }
+                     }
+            ]]
+        });
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            });
+        });
+
+        $("#btnAgree").click(function () {
+            $.messager.confirm("操作提示", "您确定要执行操作吗？", function (data) {
+                if (data) {
+                    post(1);
+                }
+            });
+        });
+        $("#btnUnAgree").click(function () {
+            $.messager.confirm("操作提示", "您确定要执行操作吗？", function (data) {
+                if (data) {
+                    post(2);
+                }
+            });
+        });
+
+    });
+
+    var sign = 0;
+    function post(status) {
+        var memo = $("#Memo").val();
+        var para = { id: "@ViewData["finaceID"]", "status": status, "memo": memo };
+        if (sign == 0) {
+            sign++;
+            loading(0);
+            $.ajax({
+                url: "ProductPzCheck",
+                type: "Post",
+                data: para,
+                success: function (data) {
+                    loading(1);
+                    if (data.State == "Success") {
+                        $.messager.alert('提示', '操作成功', "info", function () {
+                            parent.$('#approveDiv').dialog('close');
+                            parent.$("#List").datagrid("reload");
+                            sign = 0
+                        });
+                    } else {
+                        $.messager.alert('提示', data.Message, "info", function () {
+                            parent.$("#List").datagrid("reload");
+                            sign = 0
+                        });
+                    }
+                    parent.$('#List').datagrid("clearSelections");
+                },
+                error: function () {
+                    loading(1);
+                    sign = 0;
+                }
+            });
+        }
+    }
+</script>

@@ -1,0 +1,262 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>title</title>
+    <link href="~/Areas/App/AppContent/css/api.css" rel="stylesheet" type="text/css" />
+<style>
+.Dom-box{display:none;}
+.main-box,.detail-item,.approve-box{border-bottom:1px solid #eeeeee;padding:0.08rem;}
+.main-box p{font-size:0.14rem;line-height:0.22rem;}
+.detail-box p{font-size:0.12rem;color:#666666;margin-bottom:0.02rem}
+.span-r{margin-right:0.15rem}
+.detail-item{border-left:2px solid #07A0EE;}
+#approveItem{font-size: 0.12rem;padding:0.20rem;}
+.title{font-size:0.12rem;color:#07A0EE;margin-bottom:0.1rem}
+dl{width:100%;display:table;padding-bottom:0.1rem;}
+dt,dd{float:left;}
+dt{width:20%;}
+dd{width:80%;color:#666666;position:relative}
+.r{float:right;margin-right:0.08rem}
+.line{width:1px;background:#dddddd;height:100%;position:absolute;top:0.12rem;left:-0.2rem}
+.line:after{content:"";width:0.05rem;height:0.05rem;background:#dddddd;display:block;border-radius:50%;margin:-0.08rem 0 0 -0.02rem}
+.note{margin-top:0.05rem}      
+.select{background:#fff;width:1rem;margin:0;padding:0}
+.checkBox{padding:0.15rem 0.08rem;margin:0;font-size:0.14rem}
+.txt-area{width:100%;height:0.8rem;border:1px solid #dddddd;outline:0;resize:none;margin-top:0.08rem;padding:0.05rem;box-sizing:border-box;-webkit-box-sizing:border-box}
+.btn-bar{margin-top:0.2rem;display: table;width:100%}
+.btn-bar a{width:45%;height:0.4rem;border-radius:5px;text-align:center;line-height:0.4rem}
+.l-btn{float:left;background:#07A0EE;color:#FFFFFF}
+.r-btn{float:right;background:#FC9D9D;color:#FFFFFF}
+#checkBox select{max-width:1.6rem;overflow:hidden}
+ .p-s{margin-bottom:0.08rem}
+.in-txt{margin-left:0.05rem;border:1px solid #ddd;height:0.24rem}
+.xp-text {height:23px;border:1px solid #ddd;margin:10px 0;display:none}
+</style>
+</head>
+    <body>
+<h2 class="header-bar">
+    <a href="/App/AppExpense/Index" class="back-btn" ><i class="icon iconfont icon-back"></i></a>
+</h2>
+    <div>
+	  <!--主表内容块-->
+	    <div class="main-box Dom-box" id="mainItem"></div>
+	  <!--详情表内容块-->
+	    <div class="detail-box Dom-box" id="detailItem"></div>
+	 <!--审核记录内容块-->
+	    <div class="approve-box Dom-box"  id="approveItem"></div>
+	     <!--审核-->
+	     <div class="checkBox Dom-box" id="checkBox"></div>
+	</div>
+<script src="~/Areas/App/AppContent/js/jquery-2.2.1.min.js"></script>
+<script>
+    //审核方法全局变量 ；
+    var Check = null;
+    var approveId = 0;
+    var s = 0;
+    $(function () {
+    var $ID = "@ViewData["ID"]";
+        var $CurUser = localStorage.getItem("CurUser");
+        //判断重复提交的变量      
+        var flag = 0;
+        var next = $("#ExpenseNextApprove").find("option:selected").text().trim();
+        var ExpStatus = $("#ExpStatus").find("option:selected").text().trim();
+      
+        var company = "";
+        var number = "";
+        Check = function (checkType) {
+            nextapprove = $("#ExpenseNextApprove").val();
+            ExpStatus = $("#ExpStatus").val();
+            if (nextapprove == null || nextapprove == "" || nextapprove === "undefined") {
+                nextapprove = ""
+            }
+            if (flag == 0) {
+                flag++;
+                var r = confirm("确定吗审核吗？");
+             
+                if (r == true) {
+                    //确定
+                    var para = { "UserName": $CurUser, "approveID": approveId, "status": checkType, "memo": $("#note").val(), "nextapprove": nextapprove, "company": company, "number": number, "ExpStatus": ExpStatus };
+                    $.ajax({
+                        url: "/AppExpense/Check",
+                        type: "post",
+                        data: para,
+                        dataType: "json",
+                        success: function (data) {
+                            if (data.State == "Success") {
+                                alert("审核成功");
+                            } else {
+                                alert(data.Message);
+                            }
+
+                            window.location.href = "/App/AppExpense/Index"
+                            flag = 0;
+                        },
+                        error: function () {
+                            flag = 0;
+                        }
+                    });
+                }
+                else {
+                    //取消
+                    flag = 0
+                }
+            }
+        }
+        //页面内容加载
+        $.ajax({
+            type: 'POST',
+            url: "/AppExpense/GetDetail?ID=" + $ID + "&UserName=" + $CurUser,
+            dataType: 'json',
+            success: function (data) {
+                data = eval("(" + data + ")");
+                //method = data.Main[0].Method;
+                //cashier = data.Cashier;
+                approveId = data.approveId;
+                //主表DOM
+                var Status = "";
+                switch (data.Main[0].Status) {
+                    case -1:
+                        Status = "<font color=#d02e2e>未审核</font>";
+                        break;
+                    case 0:
+                        Status = "<font color=#2967c9>审核中</font>";
+                        break;
+                    case 1:
+                        Status = "<font color=#1fc73a>已同意</font>";
+                        break;
+                    case 2:
+                        Status = "<font color=#d02e2e>不同意</font>";
+                        break;
+                    case 3:
+                        Status = "<font color=#d02e2e>已作废</font>";
+                        break;
+
+                }
+                if (data.Main[0].MatchBorrowNumber == null) {
+                    data.Main[0].MatchBorrowNumber = "";
+                }
+                var mDom = "<p>操作人：" + data.Main[0].PostUser + "</p><p>报销单号:" + data.Main[0].Reun_Code + "</p><p>所属部门：" + data.Main[0].Department + "</p><p>账号类型：" + data.Main[0].AccountType + "</p><p>账户名称：" + data.Main[0].Reun_Name + "</p><p>开户行：" + data.Main[0].Reun_Bank + "</p><p>账号：" + data.Main[0].Car_Number + "</p><p>报销金额：" + data.Main[0].Reun_Cost + "</p><p>报销原因：" + data.Main[0].Reun_Reason + "</p><p>申请日期：" + data.Main[0].CrateDate + "</p><p>冲抵借支批号：" + data.Main[0].MatchBorrowNumber + "</p><p>状态：" + Status + "</p>";
+                $("#mainItem").html(mDom).show();
+                //主表DOM end
+                //详情DOM
+                var dDom = "";
+
+                $.each(data.Detail, function (i, val) {
+                    if (val.Note == null) {
+                        val.Note = "";
+                    }
+                    dDom += " <div class=\"detail-item\"><p><span class=\"span-r\">店铺名称：" + val.StoreName + "</span><span class=\"span-r\">数量：" + val.Num + "</span></p><p><span class=\"span-r\">单价：" + val.Price + "</span><span class=\"span-r\">类型：" + val.Type + "</span></p><p><span class=\"span-r\">摘要：" + val.Abstract + "</span></p></div>";
+                })
+                $("#detailItem").html(dDom).show();
+                //详情DOM end
+                //审核记录DOM                       
+                var approveStatus = "";
+                var aDom = "<p class=\"title\">审批记录</p>";
+                $.each(data.Approve, function (i, val) {
+                    switch (val.ApproveStatus) {
+                        case -1:
+                            approveStatus = "<font color=#d02e2e>未审核</font>";
+                            break;
+                        case 0:
+                            approveStatus = "<font color=#2967c9>审核中</font>";
+                            break;
+                        case 1:
+                            approveStatus = "<font color=#1fc73a>已同意</font>";
+                            break;
+                        case 2:
+                            approveStatus = "<font color=#d02e2e>不同意</font>";
+                            break;
+                        case 3:
+                            approveStatus = "<font color=#d02e2e>已作废</font>";
+                            break;
+                        default:
+                            approveStatus = "";
+                            break;
+                    }
+                    if (val.ApproveDate == null) {
+                        val.ApproveDate = "";
+                    }
+                    if (val.Memo == null) { val.Memo = "" }
+                    if ($.trim(val.Memo) != "") {
+                        val.Note = "备注：" + val.Memo;
+                    }
+                    aDom += "<dl><dt>" + val.ApproveName + "</dt><dd><div class=\"line\"></div><p><span>" + approveStatus + "</span><span class=\"r\">" + val.ApproveDate + "</span></p><p class=\"note\">" + val.Memo + "</p></dd></dl>";
+                })
+                $("#approveItem").html(aDom).show();
+                //审核记录 end
+                //审核操作的DOM          
+                if (data.myCheck == 1) {
+                    //是我审核的生成审核的div
+                    var cDom = "";
+                    //判断是不是财务主管审核  Cashier => 1:true,0:false    
+                    if (data.Step == 1) {
+                        cDom += "<p class='p-s'><label>标签:</label><select class=\"in-txt\" id=\"ExpStatus\" name=\"ExpStatus\">"
+                        $.each(data.ExpStatus, function (i, val) {
+                            cDom += "<option value=" + val.Text + ">" + val.Text + "</option>"
+                        });
+                        cDom += "<select></p>";
+                    }
+                    if (data.Step ==2) {
+                        cDom += "<p class='p-s'><label>下级审核人:</label><select class=\"in-txt\" id=\"ExpenseNextApprove\" name=\"ExpenseNextApprove\">"
+                        $.each(data.CheckList, function (i, val) {
+                            cDom += "<option value=" + val.Text + ">" + val.Text + "</option>"
+                        });
+                        cDom += "<select></p>";
+                    }
+                    if (data.Step == 4) {
+                        //cDom += "<p class='p-s'><label>公司:</label><select class=\"in-txt\" id=\"SpendingCompany\" name=\"SpendingCompany\" >"
+                        //$.each(data.Company, function (i, val) {
+                        //    cDom += "<option value=" + val.Value + ">" + val.Text + "</option>"
+                        //});
+                        //cDom += "</select></p><p><input type=\"text\" value=\"\" id=\"comPany\" class=\"xp-text\"  placeholder=\"输入公司\"></p>";
+                        //cDom += "<p class='p-s'><label>账号:</label><select class=\"in-txt\" id=\"SpendingNumber\" name=\"SpendingNumber\"></select></p><p><input type=\"text\" value=\"\" class=\"xp-text\" id=\"number\" placeholder=\"输入账号\"></p>";
+                        cDom +="<p><font color=\"red\">财务出纳电脑端审核！</font></p>"
+                        $("#checkBox").html(cDom).show();
+                        return
+                   }
+                    cDom += '<p>备注：</p><textarea class="txt-area" id="note"></textarea><p class="btn-bar"><a href="javascript:;" class="l-btn" onclick="Check(1)">同意</a><a href="javascript:;" onclick="Check(2)" class="r-btn">不同意</a></p>';
+                    $("#checkBox").html(cDom).show();
+                    //改变公司
+                
+                    //$("#SpendingCompany").bind("change", function () {
+                    //    var comIn = $(this).val();
+                    //    console.log(comIn)
+                    //    if (comIn == "请输入") {
+                    //        $("#comPany,#number").show();
+                    //        s = 1;
+                    //    } else {
+                    //        s = 0;
+                    //        $("#comPany,#number").hide();
+                    //        $.ajax({
+                    //            url: 'GetExpenseAcount',
+                    //            type: 'POST',
+                    //            data: JSON.stringify({ type: comIn }),
+                    //            dataType: 'json',
+                    //            contentType: 'application/json',
+                    //            success: function (data) {
+                    //                $('select#SpendingNumber').empty();
+                    //                $.each(data, function (key, value) {
+                    //                    $('select#SpendingNumber').append(
+                    //                        '<option value="' + value.Key + '">'
+                    //                        + value.Value +
+                    //                        '</option>');
+                    //                });
+                    //            }
+                    //        });
+                    //    }
+                    //});
+                }
+                //审核操作的DOM END
+            },
+            error: function (xhr, type) {
+            }
+        });
+     
+    });
+  
+</script>
+    </body>
+</html>

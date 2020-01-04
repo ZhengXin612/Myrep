@@ -1,0 +1,141 @@
+﻿@model EBMS.Models.T_goodsGY
+@{
+    ViewBag.Title = "ViewSupplierAdd";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+
+<script src="/Scripts/jquery.validate.min.js" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/jquery.validate.unobtrusive.min.js")" type="text/javascript"></script>
+<script type="text/javascript">
+    $(function () {
+   
+       
+        $('#btnSave').click(function () {
+            var flag = 0;
+            if ($('#name').val() == "" || $('#name').val() == null) {
+                $.messager.alert("提示", "配件名称必须填写", "info")
+                return;
+            }
+            if ($('#simple_name').val() == "" || $('#simple_name').val() == null) {
+                $.messager.alert("提示", "配件简称必须填写", "info")
+                return;
+            }
+            if ($('#classify').val() == "" || $('#classify').val() == null) {
+                $.messager.alert("提示", "请选择分类", "info")
+                return;
+            }
+            if ($('#Manufactor').val() == "" || $('#Manufactor').val() == null) {
+                $.messager.alert("提示", "请选择厂家", "info")
+                return;
+            }
+            if ($('#Specifications').val() == "" || $('#Specifications').val() == null) {
+                $.messager.alert("提示", "请填写规格", "info")
+                return;
+            }
+            if ($("#EditForm").valid() && flag == 0) {
+                flag = 1;
+                loading(0);
+                $.ajax({
+                    url: "/DataStatistics/ViewSingleProductPartsAddSave",
+                    type: "Post",
+                    data: $("#EditForm").serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.State == "Success") {
+                            loading(1)
+                            parent.$('#List').datagrid('reload');
+                            $.messager.alert("提示", "@Lib.MessageRes.SaveOK", "info", function () {
+                                parent.$('#AddDiv').dialog('close');
+                            })
+                        }
+                        else {
+                            loading(1)
+                            $.messager.alert("提示", data.Message, "info");
+                            flag = 0;
+                        }
+                        parent.$('#List').datagrid("clearSelections");
+                    },
+                    error: function (data) {
+                        loading(1);
+                        flag = 0;
+                        $.messager.alert('提示', "保存失败", "info");
+                    }
+                });
+
+            }
+        })
+    })
+</script>
+<div class="mvctool">
+    <a id="btnSave" href="javascript:;" class="modal-btn modal-btn-save">保存</a>
+</div>
+
+<div>
+    @using (Html.BeginForm("EditForm", "Controllers", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+    <table class="fromEditTable setTextWidth300">
+       
+        <tbody>
+            <tr>
+                 <td style="width: 80px; text-align: right;">
+                     配件名称：
+                 </td>
+                  <td>
+                        @Html.TextBoxFor(model=>model.name)
+                 </td>
+                  <td>
+                     @Html.ValidationMessageFor(model=>model.name)
+                 </td>
+             </tr>
+              <tr>
+                 <td style="width: 80px; text-align: right;">
+                     配件简称：
+                 </td>
+                  <td>
+                        @Html.TextBoxFor(model=>model.simple_name)
+                 </td>
+                  <td>
+                     @Html.ValidationMessageFor(model=>model.simple_name)
+                 </td>
+             </tr>
+             <tr>
+                 <td style="width: 80px; text-align: right;">
+                     分类：
+                 </td>
+                  <td>
+                        @Html.DropDownListFor(model => model.classify, ViewData["classifyList"] as List<SelectListItem>)
+                 </td>
+                  <td>
+                     @Html.ValidationMessageFor(model=>model.classify)
+                 </td>
+             </tr>
+                <tr>
+                 <td style="width: 80px; text-align: right;">
+                  厂家：
+                 </td>
+                  <td>
+                     
+                        @Html.DropDownListFor(model => model.Manufactor, ViewData["SpecificationsList"] as List<SelectListItem>)
+                 </td>
+                  <td>
+                     @Html.ValidationMessageFor(model=>model.Manufactor)
+                 </td>
+             </tr>
+            <tr>
+                 <td style="width: 80px; text-align: right;">
+                  规格：
+                 </td>
+                  <td>
+                     @Html.TextBoxFor(model=>model.Specifications)
+                 </td>
+                  <td>
+                     @Html.ValidationMessageFor(model=>model.Specifications)
+                 </td>
+             </tr>
+        </tbody>
+    </table>
+           @Html.HiddenFor(model => model.ID)
+}
+
+</div>

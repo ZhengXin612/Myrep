@@ -1,0 +1,89 @@
+﻿@model EBMS.Models.T_ReturnToStorageBlending
+@using Lib
+@{
+    ViewBag.Title = "ViewRetreatAdd";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+@*
+2016-11-25 刘明*@
+<script type="text/javascript">
+    var grid; //定义全局变量datagrid
+    var editRow = -1;
+    //加载数据
+    $(function () {
+        //提交后台方法
+        var sign = 0;
+        $("#btnSave").click(function () {
+            loading(0);
+            if ($("#AccountsTypenumber").val() == "") {
+                $.messager.alert('提示', "请填写单号！", "info")
+                loading(1);
+                return
+            }
+            if ($("#Accounts").val() == "") {
+                $.messager.alert('提示', "金额必须填写！", "info")
+                loading(1);
+                return
+            }
+           
+            var ID = "@ViewData["ID"]";
+            if ($("#EditForm").valid()) {
+                if (sign == 0) {
+                    sign = 1;
+                    $.ajax({
+                        url: "ViewBlendingAddSave?ID=" + ID,
+                        type: "Post",
+                        data: $("#EditForm").serialize(),
+                        success: function (data) {
+                            if (data.State == "Success") {
+                                loading(1);
+                                $.messager.alert('提示', '保存成功', "info", function () {
+                                    closeReshefTab("问题件售后处理");
+                                    sign = 0
+                                });
+                            } else {
+                                loading(1);
+                                $.messager.alert('提示', "保存失败", "info", function () {
+                                    sign = 0
+                                });
+                            }
+                        }
+                    });
+                }
+            }
+        });
+    });
+</script>
+<div class="mvctool">
+    <input id="btnSave" class="modal-btn modal-btn-save" type="submit" value="保存">
+</div>
+@using (Html.BeginForm("EditForm", "Controller", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+    <table class="fromEditTable setTextWidth300">
+          <tr>
+            <td style="width: 120px;">
+               支付类型：    
+            </td>
+            <td>
+               @Html.DropDownListFor(model => model.AccountType, ViewData["AccountTypeList"] as List<SelectListItem>)
+           </td>
+             <td style="width: 120px;">
+              单号（订单号/流水号等）：    
+            </td>
+            <td> @Html.TextBoxFor(model => model.AccountsTypenumber) </td>
+          </tr>
+          <tr>
+            <td style="width: 120px;">
+               金额：    
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.Accounts)
+           </td>
+        </tr>
+             <input type="hidden" id="jsonStr"  />
+    </table>
+}
+
+
+

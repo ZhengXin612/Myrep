@@ -1,0 +1,210 @@
+﻿@model EBMS.Models.T_AliExpressOrder
+@{
+    ViewBag.Title = "ViewAliExpressDetail";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+<script type="text/javascript">
+  
+    $(function () {
+        window.title = "订单详情";
+    })
+</script>
+<div>
+    @using (Html.BeginForm("EditForm", "Controllers", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+    <table class="fromEditTable ">
+       
+        <tbody>
+             <tr>
+                <td style="width: 80px; text-align: right;">
+                    @Html.LabelFor(model => model.orderNumber)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.orderNumber)
+                </td>
+                  <td style="width: 80px; text-align: right;">
+                    @Html.LabelFor(model => model.dispatchID)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.dispatchID)
+                </td>
+                
+
+             </tr>
+            <tr>
+                  <td style="width: 80px; text-align: right;">
+                    @Html.LabelFor(model => model.orderMoney)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.orderMoney)
+                </td>
+                   <td style="width: 80px; text-align: right;">
+                    @Html.LabelFor(model => model.purchasePriceProduct)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.purchasePriceProduct)
+                </td>
+                 </tr>
+           
+             <tr>
+                 <td style="width: 80px; text-align: right;">
+                    @Html.LabelFor(model => model.homeFreight)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.homeFreight)
+                </td>
+                  <td style="width: 80px; text-align: right;">
+                    @Html.LabelFor(model => model.foreignFreight)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.foreignFreight)
+                </td>
+            </tr>  
+                
+            <tr>
+                <td style="width: 80px; text-align: right;">
+                    @Html.LabelFor(model => model.platformCommission)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.platformCommission)
+                </td>
+                 <td style="width: 80px; text-align: right;">
+                    @Html.LabelFor(model => model.refund)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.refund)
+                </td>
+                  
+            </tr>      
+             <tr>
+                 <td style="width: 80px; text-align: right;">
+                    @Html.LabelFor(model => model.postcode)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.postcode)
+                </td>
+                 <td style="width: 80px; text-align: right;">
+                    @Html.LabelFor(model => model.refundReason)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.refundReason)
+                </td>
+                   
+            </tr>      
+             <tr>
+                 <td style="width: 80px; text-align: right;">
+                    @Html.LabelFor(model => model.address)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.address)
+                </td>
+                 <td style="width: 80px; text-align: right;">
+                    @Html.LabelFor(model => model.buyer)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.buyer)
+                </td>
+            </tr> 
+            <tr>
+                 <td style="width: 80px; text-align: right;">
+                    @Html.LabelFor(model => model.buyerChooseLogistics)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.buyerChooseLogistics)
+                </td>
+                 <td style="width: 80px; text-align: right;">
+                    @Html.LabelFor(model => model.buyerMail)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.buyerMail)
+                </td>
+            </tr>    
+             <tr>
+                 <td style="width: 80px; text-align: right;">
+                    @Html.LabelFor(model => model.canton)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.canton)
+                </td>
+                 <td style="width: 80px; text-align: right;">
+                    @Html.LabelFor(model => model.city)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.city)
+                </td>
+            </tr>     
+             <tr>
+                  <td style="width: 80px; text-align: right;">
+                    @Html.LabelFor(model => model.state)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.state)
+                </td>
+                 <td style="width: 80px; text-align: right;">
+                    @Html.LabelFor(model => model.confirmReceiveTime)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.confirmReceiveTime)
+                </td>
+                
+            </tr>       
+            <tr>
+                 <td style="width: 80px; text-align: right;">
+                    @Html.LabelFor(model => model.dispatchTime)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.dispatchTime)
+                </td>
+                 <td style="width: 80px; text-align: right;">
+                    @Html.LabelFor(model => model.mobile)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.mobile)
+                </td>
+            </tr>       
+             <tr>
+                 <td style="width: 80px; text-align: right;">
+                    @Html.LabelFor(model => model.orderRemark)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.orderRemark)
+                </td>
+                 <td style="width: 80px; text-align: right;">
+                    @Html.LabelFor(model => model.periodDispatch)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.periodDispatch)
+                </td>
+            </tr>     
+             <tr>
+                 <td style="width: 80px; text-align: right;">
+                    @Html.LabelFor(model => model.profit)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.profit)
+                </td>
+                 <td style="width: 80px; text-align: right;">
+                    @Html.LabelFor(model => model.receiver)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.receiver)
+                </td>
+            </tr>           
+              <tr>
+                 <td style="width: 80px; text-align: right;">
+                    @Html.LabelFor(model => model.productInformation)：   
+                </td>
+                <td colspan="5" style="font-size:1em;line-height:20px">
+                    @Html.DisplayTextFor(model => model.productInformation)
+                </td>
+                 
+            </tr>       
+
+        </tbody>
+    </table>
+           @Html.HiddenFor(model => model.ID)
+}
+
+</div>
+

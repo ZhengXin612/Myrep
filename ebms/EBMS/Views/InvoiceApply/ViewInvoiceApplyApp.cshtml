@@ -1,0 +1,98 @@
+﻿@model  EBMS.Models.T_InvoiceApply
+@using Lib;
+@{
+    ViewBag.Title = "新增";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+    
+}
+
+<script type="text/javascript">
+    $(function () {
+        $("#btnSave").click(function () {
+            if ($("#EditForm").valid()) {
+                if ($('#ShopName').val() == null || $('#ShopName').val() == "") {
+                    $.messager.alert("提示", "店铺名称必须填写", "info")
+                    return false;
+                }
+                $.ajax({
+                    url: "../InvoiceApply/InvoiceApplyApp",
+                    type: "Post",
+                    data: $("#EditForm").serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        if (data == "1") {
+                            $.messager.alert("提示", "保存成功", "info", function () {
+                                window.location.reload();
+                            })
+                        }
+                        else {
+                            $.messager.alert("提示", "保存失败", "info");
+                        }
+
+                    }
+                });
+            }
+
+        });
+    });
+
+</script>
+<div class="mvctool">
+  <input id="btnSave" class="modal-btn modal-btn-save" type="submit" value="保存">
+</div>
+<div>
+    @using (Html.BeginForm("EditForm", "Controllers", null, FormMethod.Post, new { Id = "EditForm" }))
+    {
+    @Html.ValidationSummary(true)
+    <table class="fromEditTable setTextWidth300">
+        <tbody>
+            <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.ShopName):
+               </td>
+               <td>
+                 @Html.DropDownListFor(model => model.ShopName, ViewData["ShopNameList"] as List<SelectListItem>)
+               </td>
+               <td>
+                   @Html.ValidationMessageFor(model => model.ShopName)
+               </td>
+                  <td class="lab">
+                  @Html.LabelFor(model => model.InvoiceMoney):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model => model.InvoiceMoney)
+               </td>
+               <td>
+                   @Html.ValidationMessageFor(model => model.InvoiceMoney)
+               </td>
+          </tr> 
+               <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.majorMoney):
+               </td>
+               <td>
+                 @Html.TextBoxFor(model => model.majorMoney)
+               </td>
+               <td>
+                   @Html.ValidationMessageFor(model => model.majorMoney)
+               </td>
+                  <td class="lab">
+                  @Html.LabelFor(model => model.Reason):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model => model.Reason)
+               </td>
+               <td>
+                   @Html.ValidationMessageFor(model => model.Reason)
+               </td>
+          </tr> 
+         
+        </tbody>
+    </table>
+           @Html.HiddenFor(model => model.ID)
+       
+    }
+</div>
+
+
+

@@ -1,0 +1,110 @@
+﻿
+@{
+    ViewBag.Title = "专票审核";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+
+<div class="Company-top-box">
+    <div class="search-box">
+         <input type="text" placeholder="电话.." id="txtQuery"  class="icon-search-txt">
+         <input type="button" value="查询" id="btnQuery" class="icon-search">
+           </div>
+     <div class="btn-bar">
+           <a href="#" onclick="btnCheck()" class="icon-check">审核</a>
+    </div>
+</div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+
+<script type="text/javascript">
+    enterSearch("#btnQuery");
+
+    $(function () {
+        var url = "/HandwrittenExpress/GetHandwrittenExpressCheck/";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() - 45,
+            fitColumns: true,
+            // sortName: 'Code',
+            sortOrder: 'desc',
+            idField: 'ID',
+            pageSize: 20,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                { field: 'ApplyPurpose', title: '申请用途', width: 120, align: 'center' },
+                   { field: 'ApplyNumber', title: '申请数量', width: 100, align: 'center' },
+                { field: 'Address', title: '地址', width: 100, align: 'center' },
+                { field: 'Telephone', title: '电话', width: 100, align: 'center' },
+                { field: 'AddressName', title: '收件人姓名', width: 100, align: 'center' },
+                { field: 'Zip', title: '邮编', width: 100, align: 'center' },
+                    { field: 'ApplyName', title: '申请人', width: 100, align: 'center' },
+                       { field: 'Warehouse', title: '仓库', width: 100, align: 'center' },
+            ]],
+            onDblClickRow: function (value, row, index) {
+
+                $('#openIframedetail')[0].src = "/HandwrittenExpress/ViewHandwrittenExpressDetail?ID=" + row.ID;
+                $("#detailDiv").dialog({
+                    onClose: function () {
+                        $("#List").datagrid("reload");//刷新列表 
+                    }
+                });
+                $('#detailDiv').dialog('open');
+            },
+
+
+        })
+
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 40
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 40
+            });
+        });
+
+
+    })
+
+    function Query() {
+        var queryStr = $("#txtQuery").val();
+        $('#List').datagrid({
+            url: '/HandwrittenExpress/GetHandwrittenExpressCheck?queryStr=' + encodeURI(queryStr)   //+ '&statedate=' + statedate + '&EndDate=' + EndDate + '&dianming=' + dianming
+        });
+        $("#txtQuery").focus().select();
+    }
+
+    $('#btnQuery').click(function () {
+        Query();
+    });
+    function btnCheck() {
+        var row = $('#List').datagrid('getSelected');
+
+
+        if (row == null) {
+            $.messager.alert('提示', '请选择一条记录', "info");
+        }
+        else {
+            $('#openIframeCheck')[0].src = "../HandwrittenExpress/ViewHandwrittenExpressReportCheck?ID=" + row.ID;
+            $('#checkDiv').dialog('open');
+        }
+
+    }
+
+
+
+</script>
+<div id="checkDiv" class="easyui-dialog" closed="true" modal="true" title="审核" style="width:950px; height:580px;" resizable="true" closable="true">
+    <iframe scrolling="yes"  id='openIframeCheck' frameborder="0" src="" style="width:100%;height:98%;"></iframe>
+</div>
+<div id="detailDiv" class="easyui-dialog" closed="true" modal="true" title="详情" style="width: 800px; height: 600px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIframedetail' frameborder="0" src="" style="width: 98%; height: 98%;"></iframe>
+</div>
+

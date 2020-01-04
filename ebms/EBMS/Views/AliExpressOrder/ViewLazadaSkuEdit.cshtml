@@ -1,0 +1,80 @@
+﻿@model EBMS.Models.T_LazadaGyCode
+@{
+    ViewBag.Title = "ViewLazadaSkuEdit";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+
+<script type="text/javascript">
+
+    $(function () {
+        var flag = 0;
+        $('#btnSave').click(function () {
+            if ($("#Sku").val().trim() == "" || $("#ItemCode").val().trim() == "") {
+                $.messager.alert("提示", "不能为空", "info")
+                return false;
+            }
+            if (flag == 0) {
+                flag = 1;
+                loading(0);
+                $.ajax({
+                    url: "/AliExpressOrder/LazadaConfigSkuEditSave",
+                    type: "Post",
+                    data: { id: "@Model.ID", sku: $("#Sku").val().trim(), code: $("#ItemCode").val().trim() },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.State == "Success") {
+                            $.messager.alert("提示", "@Lib.MessageRes.SaveOK", "info", function () {
+                                loading(1)
+                                parent.$('#editDiv').dialog('close')
+                                parent.$('#List').datagrid('reload');
+                                flag = 0;
+                            })
+                        }
+                        else {
+                            loading(1)
+                            $.messager.alert("提示", data.Message, "info");
+                            flag = 0;
+
+                        }
+                    }
+                });
+            }
+        })
+    })
+
+
+</script>
+<div class="mvctool">
+    <a id="btnSave" href="javascript:;" class="modal-btn modal-btn-save">保存</a>
+
+</div>
+
+<div>
+    @using (Html.BeginForm("EditForm", "Controllers", null, FormMethod.Post, new { Id = "EditForm" }))
+    {
+        @Html.ValidationSummary(true)
+        <table class="fromEditTable setTextWidth300">
+
+            <tbody>
+                <tr>
+                    <td class="lab" style="width: 20%; text-align: right">SKU:
+                    </td>
+                    <td style="width: 40%;">
+                        @Html.TextBoxFor(model => model.Sku, new { @style = "width:200px" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="lab" style="text-align: right">管易代码:
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.ItemCode, new { @style = "width:200px" })
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    }
+
+</div>
+
+

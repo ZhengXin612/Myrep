@@ -1,0 +1,55 @@
+﻿@{
+     ViewBag.Title = "VieCompanyAdd";
+     Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+<style>
+.mvctool {display:table;margin-bottom:10px}
+.smallBox {margin-left:20px}
+</style>
+<div class="mvctool">
+     <a id="btnSave" href="javascript:;" class="modal-btn modal-btn-save">保存</a>
+</div>
+<div class="smallBox">
+    <label>部门名称：</label><input class="Com-input" type="text" id="companyName" placeholder="请输入需要创建的部门的名称">
+</div>
+<input id="thePid" value="@ViewData["Pid"]" type="hidden">
+<script>
+    $(function () {
+        var flag = 0
+        $("#btnSave").click(function () {
+            loading(0);
+            if (flag == 0) {
+                flag++;
+                var $val = $("#companyName").val();
+                var $type = $("#theType").val();
+                var $Pid = $("#thePid").val();
+                if ($val.replace(/(^\s*)|(\s*$)/g, "") == "") {
+                    loading(1);
+                    alert("公司名不能为空");
+                    flag = 0;
+                } else
+                {
+                    $.ajax({
+                        url: "../System/AddCompanySave?comName="+$val+"&Pid="+$Pid,
+                        type: "Post",
+                        contentType: "application/json",
+                        dataType: "json",
+                        success: function (data) {
+                            loading(1);
+                            $.messager.alert('提示', '保存成功', "info", function () {
+                                parent.$('#openDivNew').dialog('close');
+                                parent.loadTreeAfterAddCom(data.ID, data.name)
+                                flag = 0;
+                            })
+                        },
+                        error: function (data) {
+                            //失败 
+                            loading(1);
+                            flag = 0;
+                        }
+                    });
+                }
+            }
+        })
+    })
+</script>

@@ -1,0 +1,127 @@
+﻿@model EBMS.Models.T_InterceptLogistics
+@{
+    ViewBag.Title = "InterceptLogisticsListAdd";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<div class="mvctool">
+    <input id="btnSave" class="modal-btn modal-btn-save" type="submit" value="保存">
+</div>
+@using (Html.BeginForm("", "", FormMethod.Post, new { @id = "addForm" }))
+{
+    @Html.ValidationSummary(true)
+    <table class="fromEditTable setTextWidth300">
+        <tr>
+            <td style="width: 25%; text-align: right">
+                @Html.LabelFor(model => model.OrderNumber)：
+            </td>
+            <td style="width:75%;">
+                @Html.TextBoxFor(model => model.OrderNumber)
+                <input type="button" value="查询" id="btnQuery" class="icon-search">
+            </td>
+            <td style="text-align: left">@Html.ValidationMessageFor(model => model.OrderNumber)</td>
+        </tr>
+        <tr>
+            <td style="text-align: right">
+                @Html.LabelFor(model => model.ExpressName)：
+            </td>
+            <td>@Html.TextBoxFor(model => model.ExpressName, new { @readonly = "readonly" })</td>
+            <td>@Html.ValidationMessageFor(model => model.ExpressName)</td>
+        </tr>
+        <tr>
+            <td style="text-align: right">
+                @Html.LabelFor(model => model.ExpressNumber)：
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.ExpressNumber, new { @readonly = "readonly" })
+            </td>
+            <td style="text-align: left">@Html.ValidationMessageFor(model => model.ExpressNumber)</td>
+        </tr>
+        <tr>
+            <td style="text-align: right">
+                @Html.LabelFor(model => model.OrderMoney)：
+            </td>
+            <td>@Html.TextBoxFor(model => model.OrderMoney, new { @readonly = "readonly" })</td>
+            <td style="text-align: left">@Html.ValidationMessageFor(model => model.OrderMoney)</td>
+        </tr>
+    </table>
+}
+<script>
+    $("#btnQuery").click(function () {
+        var OrderNumber = $('#OrderNumber').val();
+        //console.log(OrderNumber)
+        $.ajax({
+            url: "QuyerOrderBYcode?code=" + OrderNumber,
+            type: "post",
+            dataType: "json",
+            success: function (data) {
+                console.log(data);
+                if (data == "-1") {
+                    alert("订单查询有问题，请确认订单正确性。");
+                }
+                else if (data != "") {
+                    console.log(data)
+                    if (data.Repeat == "") {
+                        $("#ExpressName").val(data.ModelList["ExpressName"]);
+                        $("#ExpressNumber").val(data.ModelList["ExpressNumber"]);
+                        $("#OrderMoney").val(data.ModelList["OrderMoney"]);
+                    }
+                    else {
+                        alert(data.Repeat);
+                    }
+                }
+                else {
+                    alert("找不到订单号，请核查订单号");
+                }
+                
+            },
+            error: function (err) {
+                console.log(err);
+                
+            }
+        })
+
+    });
+    var flag=-1;
+    $("#btnSave").click(function () {
+        if (flag == -1) {
+            flag = 1;
+            if ($("#OrderNumber").val() == "") {
+                alert("订单号不能为空");
+                flag = -1;
+                return;
+            }
+            if ($("#ExpressName").val() == "" || $("#ExpressNumber").val() == "") {
+                alert("快递不能为空");
+                flag = -1;
+                return;
+            }
+            //if ($("#OrderMoney").val() == "") {
+            //    alert("金额不能为空");
+            //    flag = -1;
+            //    return;
+            //}
+
+            $.ajax({
+                url: "InterceptLogisticsSave",
+                type: "post",
+                dataType: "json",
+                data: $("#addForm").serialize(),
+                success: function (data) {
+                    //alert(data.Msg);
+                    if (data.State == "Success") {
+                        parent.$('#List').datagrid('reload');
+                        parent.$('#addDialog').dialog('close');
+                    }
+                    else {
+                        alert(data.Msg);
+                    }
+                    flag = -1;
+                },
+                error: function (err) {
+                    flag = -1;
+                    console.log(err);
+                }
+            })
+        }
+    });
+</script>

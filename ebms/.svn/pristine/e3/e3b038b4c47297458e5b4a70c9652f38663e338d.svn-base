@@ -1,0 +1,187 @@
+﻿@{
+    ViewBag.Title = "打印报损单";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+<script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+<style>
+    .is-top-div {
+        position:fixed;z-index:9999
+    }
+     .is-top-div a{
+       color:#666
+    }
+    .print-btn {
+     font-size:22px;
+    }
+    .is-top-div .print-btn:hover {
+   color:#2299ee
+    }
+    .LossReportTableHead {
+        width: 794px;
+        margin:10px auto 0 auto;
+        position: relative;
+    }
+
+    .get-code {
+        position: absolute;
+        right:0px;
+        z-index: 2;
+        top: -5px;
+    }
+
+    .title-h2 {
+        font-size: 16px;
+        text-align: center;
+        letter-spacing: 15px;
+        padding-left: 15px;
+    }
+
+    .border-box {
+        height: 1px;
+        border: 1px solid #000;
+        border-right: 0;
+        border-left: 0;
+        width: 130px;
+        margin: 2px auto;
+    }
+
+    .table-info {
+        line-height: 25px;
+    }
+
+        .table-info span {
+            margin-right: 30px;
+        }
+
+        .table-info .Time {
+            letter-spacing: 3px;
+        }
+
+    .LossReportTable .table {
+        border: 1px solid #000;
+        border-spacing: 0;
+        width: 100%;
+        text-align: center;
+        border-collapse: collapse;
+    }
+
+    .table-header, .table-header td {
+        line-height: 30px;
+        height: 30px;
+    }
+
+    td {
+        border-right: 1px solid #000;
+        overflow: hidden;
+    }
+
+    tr {
+        border-bottom: 1px solid #000;
+        height: 30px;
+    }
+
+    .approve {
+        margin-top: 16px;
+    }
+
+        .approve .man {
+            border-bottom: 1px solid #000;
+            margin-right: 15px;
+            display: inline-block;
+            width: 100px;
+            line-height: 30px;
+            margin-left: 2px;
+        }
+
+    @@media print {
+        .noprint {
+            display: none;
+            color: green;
+        }
+    }
+</style>
+<div class="mvctool is-top-div">
+    <div class="noprint">
+        <a class="job-btn job-btn-6 print-btn" href="javascript:window.print(); ">打印</a>
+        <br />
+        分页：@Html.Raw(ViewData["pager"])
+    </div>
+</div>
+<div class="LossReportTable">
+    <div class="LossReportTableHead">
+        <h2 class="title-h2">报损单</h2>
+        <div class="border-box"></div>
+        <div class="get-code">
+            <img src="~/Content/barCode.ashx?code=@ViewData["code"]"   width="273" height="40">
+        </div>
+        <p class="table-info"><span class="Department">报销部门：@ViewData["Department"]</span><span class="Shop">报损店铺：@ViewData["Shop"]</span><span class="Time" id="theDate"></span></p>
+        <table class="table" style="table-layout: fixed; word-wrap: break-word;" id="LossReportTable">
+            <tr class="table-header">
+                <td style="width: 90px">产品代码</td>
+                <td style="width: 90px">产品名称</td>
+                <td style="width: 90px">旺旺号码</td>
+                <td style="width: 90px">订单号码</td>
+                <td style="width: 120px">报损原因</td>
+                <td style="width: 30px">数量</td>
+                <td style="width: 30px">单价</td>
+                <td style="width: 60px">金额（元）</td>
+                <td style="width: 90px">备注</td>
+            </tr>
+
+        </table>
+        <div class="approve">
+            <span>申请人:</span><span class="man"></span>
+            <span>审核:</span><span class="man"></span>
+            <span>会计主管:</span><span class="man"></span>
+            <span>核准:</span><span class="man"></span>
+            <span>第 @ViewData["page"] 页/共 @ViewData["total"] 页</span>
+        </div>
+    </div>
+</div>
+<input type="hidden" id="time" value="@ViewData["Time"]">
+<input type="hidden" id="price" value="@ViewData["tTotal"]">
+<script>
+    var id = "@ViewData["id"]";
+    var page = " @ViewData["page"]";
+    var oTotal = "@ViewData["total"]";
+
+    $(function () {
+        var $time = $("#time").val();
+        var time = formatDateBoxFullnianyueri($time);
+        $("#theDate").html(time);
+        var price = $("#price").val();
+        var t = parseFloat(price).toFixed(2)
+        $("#the-total").html(t);
+        getData(id, page)
+    })
+    function getData(id) {
+        $.post("/LossReport/getPrintData/", { "id": id, "page": page }, function (data) {
+            var oTr = "";
+            var count = 0
+            $(data.rows).each(function (i, item) {
+                for (var key in item) {
+                    if (item[key] == null || item[key] === undefined) {
+                        item[key] = "";
+                    }
+                }
+                oTr += '<tr><td>' + item.ProductCode + '</td><td>' + item.ProductName + '</td><td>' + item.WangWang + '</td><td>' + item.OrderNumber + '</td><td>' + item.Reason + '</td><td>' + item.Qty + '</td><td>' + item.UnitPrice.toFixed(2) + '</td><td>' + item.Amount.toFixed(2) + '</td><td>' + item.Note + '</td></tr>'
+                count++;
+            })
+            blankTr = "<tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>";
+            if (count<3) {
+                for (var j = 0; j < 3 - count; j++) {
+                    oTr += blankTr;
+                }
+            }
+            $("#LossReportTable").append(oTr)
+            if (parseInt(page) == parseInt(oTotal)) {
+                var footer = '<tr><td colspan="7">合计</td><td id="the-total">' + parseFloat(@ViewData["tTotal"]).toFixed(2) + '</td><td></td></tr>'
+        } else {
+                //oTr += '<tr><td colspan="7">合计</td><td id="the-total"></td><td></td></tr>'
+        }
+            $("#LossReportTable").append(footer)
+
+        })
+}
+
+</script>

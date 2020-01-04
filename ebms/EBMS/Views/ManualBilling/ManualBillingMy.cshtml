@@ -1,0 +1,172 @@
+﻿@{
+    ViewBag.Title = "我的手工订单";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+
+<div class="Company-top-box">
+    <div class="search-box">
+         <input type="text" placeholder="订单号.." id="txtQuery"  class="icon-search-txt">
+         <input type="button" value="查询" id="btnQuery" class="icon-search">
+
+     </div>
+     <div class="btn-bar">
+        
+          <a href="#" id="btnDelete" class="icon-remove">删除</a>
+    </div>
+</div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+
+<script type="text/javascript">
+    enterSearch("#btnQuery");
+
+    $(function () {
+        var url = "/ManualBilling/GetManualBilling/";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() - 45,
+            fitColumns: true,
+            // sortName: 'Code',
+            sortOrder: 'desc',
+            idField: 'ID',
+            pageSize: 20,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                { field: 'DeliverGoodsWarehouse', title: '发货仓库', width: 120, align: 'center' },
+                   { field: 'ShopName', title: '店铺名称', width: 100, align: 'center' },
+                { field: 'DeliverGoodsReason', title: '发货备注', width: 100, align: 'center' },
+                { field: 'PaymentMethod', title: '支付方式', width: 100, align: 'center' },
+                   { field: 'ExpressFee', title: '快递费用', width: 100, align: 'center' },
+                { field: 'PaymentAmount', title: '支付金额', width: 100, align: 'center' },
+                { field: 'OrderNumber', title: '订单号', width: 100, align: 'center' },
+                { field: 'GoodsReceiptName', title: '收货人', width: 100, align: 'center' },
+                { field: 'GoodsReceiptPhone', title: '收货人电话', width: 100, align: 'center' },
+                    { field: 'GoodsAddress', title: '收货人地址', width: 100, align: 'center' },
+                { field: 'GoodsReceiptAddress', title: '收货人详细地址', width: 100, align: 'center' },
+                { field: 'ApplyRemarks', title: '卖家备注', width: 100, align: 'center' },
+               {
+                   field: 'Status', title: '状态', width: 100, align: 'center', formatter: function (value, row, index) {
+                       switch (row.Status) {
+                           case -1:
+                               return "<font color=#d02e2e>未审核</font>";
+                               break;
+                           case 0:
+                               return "<font color=#2967c9>审核中</font>";
+                               break;
+                           case 1:
+                               return "<font color=#1fc73a>已同意</font>";
+                               break;
+                           case 2:
+                               return "<font color=#d02e2e>不同意</font>";
+                               break;
+                           case 3:
+                               return "<font color=#d02e2e>已作废</font>";
+                               break;
+
+                       }
+                   }
+               },
+            ]],
+            onDblClickRow: function (value, row, index) {
+
+                $('#openIframedetail')[0].src = "/ManualBilling/ManualBillingDetail?ID=" + row.ID;
+                $("#detailDiv").dialog({
+                    onClose: function () {
+                        $("#List").datagrid("reload");//刷新列表 
+                    }
+                });
+                $('#detailDiv').dialog('open');
+            },
+
+
+        })
+
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 40
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 40
+            });
+        });
+
+
+    })
+
+    function Query() {
+        var queryStr = $("#txtQuery").val();
+        $('#List').datagrid({
+            url: '/ManualBilling/GetManualBilling?queryStr=' + encodeURI(queryStr)   //+ '&statedate=' + statedate + '&EndDate=' + EndDate + '&dianming=' + dianming
+        });
+        $("#txtQuery").focus().select();
+    }
+
+    $('#btnQuery').click(function () {
+        Query();
+    });
+    $('#btnEdit').click(function () {
+        var row = $('#List').datagrid('getSelected');
+        if (row) {
+            $('#EditDiv').dialog('open');
+            $('#IframeEdit')[0].src = "ViewConfigEdit?ID=" + row.ID;
+        }
+        else {
+            $.messager.alert("提示", '@Lib.MessageRes.PleaseSelect', "info");
+        }
+    })
+    $('#btnDelete').click(function () {
+        var row = $('#List').datagrid('getSelected');
+        if (row.Status == 1 || row.Status == 0) {
+            alert("审核中或已同意的不允许删除");
+            return;
+        }
+        if (row) {
+            $.messager.confirm('提示', '@Lib.MessageRes.DelConfirm', function (r) {
+             if (r) {
+                 loading(0)
+                 var row = $('#List').datagrid('getSelected');
+                 $.ajax({
+                     url: "/ManualBilling/DeleteInvoiceFinance?ID=" + row.ID,
+                     type: "Post",
+                     contentType: "application/json",
+                     dataType: "json",
+                     success: function (data) {
+                         if (data == "1") {
+                             $.messager.alert('提示', '@Lib.MessageRes.DelOK', "info");
+                                $('#List').datagrid('reload');
+                                loading(1)
+                            }
+                            else {
+                                loading(1)
+                                $.messager.alert('提示', data.Message, "info");
+
+                            }
+                        },
+                        error: function (data) {
+                            loading(1)
+                            $.messager.alert('提示', data, "info");
+
+                        }
+                    });
+                }
+         })
+        }
+        else {
+            $.messager.alert("提示", '@Lib.MessageRes.PleaseSelect', "info");
+     }
+ })
+</script>
+<div id="EditDiv" class="easyui-dialog" closed="true" modal="true" title="编辑" style="width:400px; height:260px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='IframeEdit' frameborder="0" src="" style="width:100%;height:98%;"></iframe>
+</div>
+<div id="detailDiv" class="easyui-dialog" closed="true" modal="true" title="详情" style="width: 800px; height: 600px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIframedetail' frameborder="0" src="" style="width: 98%; height: 98%;"></iframe>
+</div>
+

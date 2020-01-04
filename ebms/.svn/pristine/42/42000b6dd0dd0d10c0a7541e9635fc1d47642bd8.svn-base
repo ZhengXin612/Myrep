@@ -1,0 +1,260 @@
+﻿@model EBMS.Models.T_AssetsTransferApply
+@{
+    ViewBag.Title = "ViewAssetsRequest";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+<script src="/Scripts/jquery.validate.min.js" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/jquery.validate.unobtrusive.min.js")" type="text/javascript"></script>
+<script type="text/javascript">
+
+    $(function () {
+        var flag = 0;
+        $("#btnSave").click(function () {
+            if ($('#TransferOwner').val() == null || $('#TransferOwner').val().trim() == "") {
+                $.messager.alert("提示", "请填写转移后使用人", "info");
+                return false;
+            }
+            if ($('#TransferPlace').val() == null || $('#TransferPlace').val().trim() == "") {
+                $.messager.alert("提示", "请填写转移后地点", "info");
+                return false;
+            }
+            if ($('#TransferDepartment').val() == null || $('#TransferDepartment').val().trim() == "") {
+                $.messager.alert("提示", "请填写转移后部门", "info");
+                return false;
+            }
+            if ($('#LastApproveName').val() == null || $('#LastApproveName').val().trim() == "") {
+                $.messager.alert("提示", "请填写转移后负责人", "info");
+                return false;
+            }
+            if ($("#EditForm").valid() && flag == 0) {
+                flag = 1;
+                loading(0);
+                $.ajax({
+                    url: "/FixedAssets/AssetsTransferApplySave",
+                    type: "Post",
+                    data: $("#EditForm").serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        if (data > 0) {
+                            $.messager.alert("提示", "保存成功", "info", function () {
+                                loading(1)
+                                window.location.reload();
+                                //parent.$('#editDiv').dialog('close')
+                            })
+                        }
+                        else {
+                            loading(1)
+                            $.messager.alert("提示", "保存失败", "info");
+                            flag = 0;
+
+                        }
+                    },
+                    error: function (data) {
+                        loading(1);
+                        $.messager.alert('提示', data, "info");
+                    }
+                });
+
+            }
+        })
+       
+    })
+   
+
+    function FindAssets() {
+        $('#IframeEdit')[0].src = "/FixedAssets/ViewAssetsNotInUseList?NotInUse=1";
+        $('#editDiv').dialog('open');
+    }
+    function bindData(row)
+    {
+       
+        $('#editDiv').dialog('close');
+            $.post("/FixedAssets/checkTransferApply", { Code: row.Code }, function (data) {//
+                if (data > 0) {
+                    $.messager.alert("提示", "该资产已有相关审核进行中,请领用其他同类资产", "info");
+                }
+                else {
+                    $('#TransferType').val("领用")
+                    $('#Code').val(row.Code)
+                    $('#Name').val(row.Name)
+                    $('#Owner').val(row.Owner)
+                    $('#Place').val(row.Place)
+                    $('#Department').val(row.Department)
+                    $('#Responsible').val(row.Responsible)
+                    $('#TransferOwner').val("@ViewData["Name"]");
+                    $('#TransferDepartment').val("@ViewData["dept"]");
+                    $('#LastApproveName').val("@ViewData["Name"]");
+
+                }
+            }, 'json')
+       
+       
+       
+       
+        
+    }
+</script>
+<style>
+    .lab {
+  width: 110px; 
+  text-align: right;}
+</style>
+@using (Html.BeginForm("EditForm", "Controllers", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+<div class="mvctool">
+     <a id="btnSave" href="javascript:;" class="modal-btn modal-btn-save">保存</a>
+</div>
+ @Html.ValidationSummary(true)
+    <table class="fromEditTable ">
+      
+       
+        <tbody>
+              
+             <tr>
+                <td class="lab">
+                    @Html.LabelFor(model => model.Code)：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.Code, new { @readonly="readonly",@onclick="FindAssets()"})
+                </td>
+                  <td colspan="4">
+                    @Html.ValidationMessageFor(model => model.Code)
+                </td>
+
+             </tr>
+
+           
+            <tr>
+                 <td class="lab">
+                    @Html.LabelFor(model => model.Name)：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.Name, new { @readonly="readonly"})
+                </td>
+                  <td colspan="4">
+                    @Html.ValidationMessageFor(model => model.Name)
+                </td>
+            </tr> 
+            <tr>
+                 <td class="lab">
+                    @Html.LabelFor(model => model.TransferType)：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.TransferType, new { @readonly="readonly"})
+                </td>
+                  <td colspan="4">
+                    @Html.ValidationMessageFor(model => model.TransferType)
+                </td>
+            </tr> 
+              <tr>
+                   <td></td>
+                  <td  style="text-align:left;font-size:14px;font-weight:600">领用前</td>
+                 
+                   <td></td>
+                   <td></td>
+                  <td  style="text-align:left;font-size:14px;font-weight:600">领用后</td>
+                 
+                   <td></td>
+              </tr>  
+            <tr>
+                 <td class="lab">
+                    @Html.LabelFor(model => model.Owner)：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.Owner, new { @readonly="readonly"})
+                </td>
+                  <td>
+                    @Html.ValidationMessageFor(model => model.Owner)
+                </td>
+                <td class="lab">
+                    @Html.LabelFor(model => model.TransferOwner)：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.TransferOwner, new { @placeholder="请输入真名..", @readonly="readonly"})
+                </td>
+                  <td>
+                    @Html.ValidationMessageFor(model => model.TransferOwner)
+                </td>
+            </tr>    
+            <tr>
+                 <td class="lab">
+                    @Html.LabelFor(model => model.Place)：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.Place, new { @readonly="readonly"})
+                </td>
+                  <td>
+                    @Html.ValidationMessageFor(model => model.Place)
+                </td>
+                 <td class="lab">
+                    @Html.LabelFor(model => model.TransferPlace)：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.TransferPlace)
+                </td>
+                  <td>
+                    @Html.ValidationMessageFor(model => model.TransferPlace)
+                </td>
+            </tr>    
+            <tr>
+                 <td class="lab">
+                    @Html.LabelFor(model => model.Department)：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.Department, new { @readonly="readonly"})
+                </td>
+                  <td>
+                    @Html.ValidationMessageFor(model => model.Department)
+                </td>
+                <td class="lab">
+                    @Html.LabelFor(model => model.TransferDepartment)：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.TransferDepartment)
+                </td>
+                  <td>
+                    @Html.ValidationMessageFor(model => model.TransferDepartment)
+                </td>
+            </tr>    
+            <tr>
+                 <td class="lab">
+                    @Html.LabelFor(model => model.Responsible)：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.Responsible, new { @readonly="readonly"})
+                </td>
+                  <td>
+                    @Html.ValidationMessageFor(model => model.Responsible)
+                </td>
+                <td class="lab">
+                    @Html.LabelFor(model => model.LastApproveName)：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.LastApproveName, new { @placeholder="请输入真名..", @readonly="readonly"})
+                </td>
+                  <td>
+                    @Html.ValidationMessageFor(model => model.LastApproveName)
+                </td>
+            </tr>    
+           
+          
+            <tr>
+
+                 <td class="lab" style="text-align:right" colspan="4">
+                    @Html.LabelFor(model => model.Memo)：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.Memo)
+                </td>
+                  <td>
+                    @Html.ValidationMessageFor(model => model.Memo)
+                </td>
+            </tr>     
+           
+              
+            </tbody>
+        </table>
+}
+<div id="editDiv" class="easyui-dialog" closed="true" modal="true" title="我的资产" style="width:50%; height:75%;"resizable="true" closable="true">
+    <iframe scrolling="yes" id='IframeEdit' frameborder="0" src="" style="width:100%;height:98%;"></iframe>
+</div>

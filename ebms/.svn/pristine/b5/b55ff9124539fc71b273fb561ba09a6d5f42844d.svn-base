@@ -1,0 +1,646 @@
+﻿@model EBMS.Models.T_Expense
+@{
+    ViewBag.Title = "ViewExpenceAdd";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<link rel="stylesheet" href="~/Scripts/editor/themes/default/default.css" />
+<script charset="utf-8" src="~/Scripts/editor/kindeditor.js"></script>
+<script charset="utf-8" src="~/Scripts/editor/lang/zh_CN.js"></script>
+<script charset="utf-8" src="~/Scripts/editor/plugins/code/prettify.js"></script>
+<script src="/Scripts/jquery.validate.min.js" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/jquery.validate.unobtrusive.min.js")" type="text/javascript"></script>
+<style>
+    .setTextWidth600 input[type="text"] {
+        width: 600px;
+    }
+
+    #Sex {
+        width: 60px;
+        text-align: center;
+    }
+
+    /*#Memo {
+        width: 600px;
+        height: 60px;
+        margin: 10px 0;
+        resize: none;
+    }*/
+
+    #data-tr p {
+        float: left;
+        margin-right: 15px;
+    }
+
+        #data-tr p input[type="checkbox"] {
+            float: left;
+            margin: 1px 5px 0 0;
+        }
+
+    .uploadBtn {
+        color: #2299ee;
+    }
+
+        .uploadBtn:hover {
+            color: #1d51a5;
+        }
+
+    .multiple-hidden {
+        display: none;
+    }
+
+    #files-btn {
+        color: #333;
+        margin-right: 15px;
+        padding-left: 16px;
+        margin-bottom: 10px;
+        display: table;
+        margin-top: 15px;
+    }
+
+        #files-btn:hover {
+            color: #2299ee;
+        }
+
+    #files-box {
+        margin: 10px 0;
+        float: left;
+    }
+
+        #files-box li {
+            height: 25px;
+            line-height: 25px;
+            float: left;
+            margin-right: 10px;
+        }
+
+    .files-name {
+        height: 25px;
+        overflow: hidden;
+    }
+
+    .files-size {
+        margin: 0 10px;
+        color: #999;
+    }
+
+    #files-box li a {
+        color: #333;
+    }
+
+    #files-box li .files-delete {
+        color: #2299ee;
+    }
+
+    .no-border {
+        border: 0;
+    }
+</style>
+<script type="text/javascript">
+    var urls = new Array();
+    var p = 0;
+    var i = 1;
+    KindEditor.ready(function (K) {
+
+        prettyPrint();
+
+        var editor = K.editor({
+            allowFileManager: true,
+            uploadJson: '/scripts/editor/upload_posun.ashx',
+        });
+        //批量上传 
+        var div = K('#J_imageView');
+        div.html('');
+        K('#uploadimg').click(function () {
+
+            editor.loadPlugin('multiimage', function () {
+                editor.plugin.multiImageDialog({
+                    clickFn: function (urlList) {
+                        K.each(urlList, function (i, data) {
+
+                            var z = p + i;
+
+                            urls.push(data.url);
+                            div.append('<img id=I' + z + ' width=150 height=130 src="' + data.url + '">');
+                            div.append('<a id=A' + z + '  href=javascript:ImgRemove(' + z + ',"")>[删除]</a>');
+
+                        });
+                        alert("上传成功！");
+                        //var tupurl = "";
+                        //for (var a = 0; a < urls.length; a++) {
+                        //    tupurl += urls[a] + '^^';
+                        //}
+                        $('#picUrls').val(urls);
+
+                        editor.hideDialog();
+                    }
+                });
+            });
+        });
+
+    });
+    function ImgRemove(i, pid) {
+
+        $("#I" + i).remove();
+        $("#A" + i).remove();
+        $("#R" + i).remove();
+        $("#l" + i).remove();
+
+
+        urls.baoremove(i);
+
+        var v = document.getElementsByName('F');
+        var Fvalue = "";
+        for (var i = 0; i < v.length; i++) {
+            v.item(i).checked = false;
+        }
+        $("#J_imageView").html('');
+
+        for (var q = 0; q < urls.length; q++) {
+            $("#J_imageView").append('<img id=I' + q + ' width=150 height=130 src="' + urls[q] + '">');
+            $("#J_imageView").append('<a id=A' + q + '  href=javascript:ImgRemove(' + q + ',"")>[删除]</a>');
+        }
+    }
+    var grid; //定义全局变量datagrid
+    var editRow = -1;
+
+    //function saveJson1() {
+    //    JsonText = "[";
+    //    var rows = $('#files-box li');
+    //    if (rows.length == 0) {
+    //        $("#jsonStr1").val("");
+    //        return
+    //    }
+    //    for (var i = 0; i < rows.length; i++) {
+    //        var row = $(rows[i]);
+    //        JsonText += '{';
+    //        JsonText += '"ScName":' + '"' + row.attr("data-name") + '",';
+    //        JsonText += '"Url":' + '"' + row.attr("data-url") + '",';
+    //        JsonText += '"Size":' + '"' + row.attr("data-size") + '",';
+    //        JsonText += '"Path":' + '"' + row.attr("data-path") + '"},';
+    //    }
+    //    JsonText = JsonText.substring(0, JsonText.length - 1);
+    //    JsonText += "]";
+    //    if (rows.length == 0)
+    //        JsonText = "";
+    //    $("#jsonStr1").val(JsonText);
+    //}
+    //saveJson1()
+    //function DeleteFile(_this, path) {
+    //    $(_this).closest("li").remove();
+    //    $.ajax({
+    //        type: "POST",
+    //        url: "DeleteModelFile?path=" + path,
+    //        contentType: false,
+    //        processData: false,
+    //    }).success(function (data) {
+    //        saveJson1()
+    //    }).error(function (data) {
+    //        alert(data);
+    //    });
+    //}
+    //加载数据
+    $(function () {
+
+
+        $.ajax({
+            url: 'GetApproveByDeptID',
+            type: 'POST',
+            data: JSON.stringify({ ID: "@Model.Department" }),
+            dataType: 'json',
+            contentType: 'application/json',
+            success: function (data) {
+                $('select#ExpenseNextApprove').empty();
+                $.each(data, function (key, value) {
+                    $('select#ExpenseNextApprove').append(
+                        '<option value="' + value.Key + '">'
+                        + value.Value +
+                        '</option>');
+                });
+            }
+        });
+
+        //$("#files-btn").click(function () {
+        //    $("#file").click();
+        //})
+
+        //$("#file").change(function () {
+        //    var files = $("#file")[0].files
+        //    var $li = "";
+        //    var $size = 0;
+        //    var postSize = files[0].size;
+        //    if (postSize > 10485760) {
+        //        $.messager.alert('提示', "单个文件不能大于10M", "info")
+        //        return;
+        //    }
+        //    loading(0);
+        //    var formData = new FormData($("#EditForm")[0]);
+        //    $.ajax({
+        //        type: "POST",
+        //        data: formData,
+        //        url: "Upload",
+        //        contentType: false,
+        //        processData: false
+        //    }).success(function (data) {
+        //        loading(1);
+        //        if (data.status) {
+        //            $size = files[0].size / 1024;
+        //            $li += "<li data-name=" + files[0].name + " data-url=" + data.link + " data-size = " + $size.toFixed(2) + " data-path=" + data.title + "><a href='" + data.link + "' target='_blank'><span class='files-name'>" + files[0].name + "</span><span  class='files-size'>(" + $size.toFixed(2) + "KB)</span></a><a href='#' onclick='DeleteFile(this,\"" + data.title + "\")' title=" + data.title + " class='files-delete'>删除</a></li>";
+        //            $("#files-box").append($li);
+        //            saveJson1();
+        //        } else {
+        //            $.messager.alert('提示', data.msg, "info")
+        //        }
+
+        //    }).error(function (data) {
+        //        loading(1);
+        //        $.messager.alert('提示', "图片太大", "info");
+        //    });
+        //})
+
+        //部门下拉框联动
+        $('select#Department').change(function () {
+            var deptId = $(this).val();
+            $.ajax({
+                url: 'GetApproveByDeptID',
+                type: 'POST',
+                data: JSON.stringify({ ID: deptId }),
+                dataType: 'json',
+                contentType: 'application/json',
+                success: function (data) {
+                    $('select#ExpenseNextApprove').empty();
+                    $.each(data, function (key, value) {
+                        $('select#ExpenseNextApprove').append(
+                            '<option value="' + value.Key + '">'
+                            + value.Value +
+                            '</option>');
+                    });
+                }
+            });
+        });
+
+        //后台申请绑定
+        $("#Shop").change(function () {
+            $("#Car_Number").val($("#Shop option:selected").val());
+            if ($("#Car_Number").val() == "") {
+                $("#Reun_Name").val("");
+                $("#Reun_Bank").val("");
+            } else {
+                $("#Reun_Name").val($("#Shop option:selected").text());
+                $("#Reun_Bank").val("支付宝");
+            }
+        })
+
+        //新增明细
+        $('#btnAdd').bind('click', function () {
+            if (editRow != -1) {
+                grid.datagrid("endEdit", editRow);
+                editRow = -1;
+            }
+            else {
+                $('#List').datagrid('appendRow', {
+                    StoreName: "",
+                    Num: "",
+                    Price: "",
+                    Type: "",
+                    Abstract: ""
+                })
+            }
+        });
+        grid = $('#List').datagrid({
+            width: $(window).width() - 10,
+            height: $(window).height() * 0.65,
+            fitColumns: true,
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                    { field: 'StoreName', title: '店铺名称', width: 140, align: 'center' },
+                    { field: 'Type', title: '类型', width: 100, align: 'center' },
+                    { field: 'Num', title: '数量', width: 60, align: 'center', editor: { type: 'numberbox' } },
+                    { field: 'Price', title: '单价', width: 60, align: 'center', editor: { type: 'numberbox', options: { precision: 2 } } },
+                    { field: 'Abstract', title: '摘要', width: 120, align: 'center', editor: { type: 'validatebox' } },
+                 {
+                     field: 'action', title: '操作', width: 40, align: 'center', formatter: function (value, row, index) {
+                         return '<div class="btn-bar"><a herf="#"  onclick="removeRow(' + index + ')" class="icon-remove">删除</a></div>';
+                     }
+
+                 },
+            ]],
+            onClickCell: function (index, field) {
+                if (field == "StoreName") {
+                    $('#openIframeshop')[0].src = "ViewShop?index=" + index;
+                    $('#shopDiv').dialog('open');
+                    grid.datagrid('endEdit', index);
+                }
+                else if (field == "Type") {
+                    $('#openIexpenseCostType')[0].src = "ViewExpenseCostType?index=" + index;
+                    $('#expenseCostTypeDiv').dialog('open');
+                    grid.datagrid('endEdit', index);
+                }
+                else
+                    editCell(index, field);
+            },
+            onAfterEdit: function (index) {
+                saveJson();
+                grid.datagrid('refreshRow', index);
+            }
+        });
+
+
+
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 10,
+                height: $(window).height() - 40
+            }).datagrid('resize', {
+                width: $(window).width() - 10,
+                height: $(window).height() - 40
+            });
+        });
+
+        $("#AccountType").change(function () {
+            if ($("#AccountType option:selected").val() == "支付宝")
+                $("#Reun_Bank").val("支付宝");
+            else
+                $("#Reun_Bank").val("");
+        });
+
+        var sign = 0;
+        $("#btnSave").click(function () {
+            if ($("#EditForm").valid()) {
+                grid.datagrid("endEdit", editRow);
+                var rows = $('#List').datagrid("getRows");
+
+                if ($("input[name='IsBlending']:checked").val() == "0" && $("#Memo").val().trim() == "") {
+                    $.messager.alert('提示', "发票备注不能为空", "info");
+                    sign = 0;
+                    return false;
+                }
+                for (var i = 0; i < rows.length; i++) {
+                    if (rows[i].Num == undefined || rows[i].Num == "") {
+                        $.messager.alert('提示', "数量不能为空", "info");
+                        grid.datagrid('beginEdit');
+                        return false;
+                    }
+                    if (rows[i].Price == undefined || rows[i].Price == "") {
+                        $.messager.alert('提示', "单价不能为空", "info");
+                        grid.datagrid('beginEdit');
+                        return false;
+                    }
+                    if (rows[i].Abstract == undefined || rows[i].Abstract == "") {
+                        $.messager.alert('提示', "摘要不能为空", "info");
+                        grid.datagrid('beginEdit');
+                        return false;
+                    }
+                    if (rows[i].StoreName == undefined || rows[i].StoreName == "") {
+                        $.messager.alert('提示', "店铺不能为空", "info");
+                        grid.datagrid('beginEdit');
+                        return false;
+                    }
+                    if (rows[i].Type == undefined || rows[i].Type == "") {
+                        $.messager.alert('提示', "类型不能为空", "info");
+                        grid.datagrid('beginEdit');
+                        return false;
+                    }
+                }
+                if (sign == 0) {
+                    sign++;
+                    loading(0);
+                    $.ajax({
+                        url: "ViewExpenseAddSave",
+                        type: "Post",
+                        data: $("#EditForm").serialize(),
+                        success: function (data) {
+                            loading(1);
+                            if (data.State == "Success") {
+                                $.messager.alert('提示', '操作成功', "info", function () {
+                                    window.location.reload();
+                                    sign = 0
+                                });
+                            } else {
+                                $.messager.alert('提示', data.Message, "info", function () {
+                                    $("#List").datagrid("reload");
+                                    sign = 0
+                                });
+                            }
+                        },
+                        error: function () {
+                            loading(1);
+                            sign = 0;
+                        }
+                    });
+                }
+            }
+        });
+    });
+
+    function removeRow(index) {
+        $('#List').datagrid('deleteRow', index);
+        var rows = $('#List').datagrid("getRows");
+        $('#List').datagrid("loadData", rows);
+        saveJson();
+    }
+
+
+    function saveJson() {
+
+        JsonText = "[";
+        var rows = $('#List').datagrid('getRows');
+
+        for (var i = 0; i < rows.length; i++) {
+            JsonText += '{';
+            JsonText += '"StoreName":' + '"' + rows[i].StoreName + '",';
+            JsonText += '"Num":' + '"' + rows[i].Num + '",';
+            JsonText += '"Price":' + '"' + rows[i].Price + '",';
+            JsonText += '"Type":' + '"' + rows[i].Type + '",';
+            JsonText += '"Abstract":' + '"' + rows[i].Abstract + '"},';
+        }
+        JsonText = JsonText.substring(0, JsonText.length - 1);
+        JsonText += "]";
+        if (rows.length == 0)
+            JsonText = "";
+        $("#jsonStr").val(JsonText);
+    }
+
+    function addshop(rows, index) {
+        $('#shopDiv').dialog('close');
+        $('#List').datagrid('updateRow', {
+            index: index,
+            row: {
+                StoreName: rows[0].name,
+            }
+        });
+        saveJson();
+    }
+
+    function addCostType(rows, index) {
+        $('#expenseCostTypeDiv').dialog('close');
+        $('#List').datagrid('updateRow', {
+            index: index,
+            row: {
+                Type: rows[0].Type,
+            }
+        });
+        saveJson();
+    }
+
+    function editCell(index, field) {
+        grid.datagrid('endEdit', editRow);
+        editRow = index;
+        grid.datagrid('selectRow', index);
+        grid.datagrid('beginEdit', index);
+        var editor = grid.datagrid('getEditor', { index: index, field: field });
+        //numberbox 特殊处理
+        setTimeout(function () {
+            editor.target.focus();
+        }, 0);
+
+        var editors = grid.datagrid('getEditors', index);
+        for (var i = 0; i < editors.length; i++) {
+            editors[i].target.bind('keydown', { field: editors[i].field }, function (e) {
+                if (e.keyCode == 13) {
+                    grid.datagrid('endEdit', index);
+                    editRow = -1;;
+                } else if (e.keyCode == 38) {	// up
+
+                    if (editRow > 0) {
+                        editCell(editRow - 1, e.data.field);
+                    }
+                } else if (e.keyCode == 40) {	// down
+
+                    if (editRow < grid.datagrid('getRows').length - 1) {
+                        editCell(parseInt(editRow) + 1, e.data.field);
+                    }
+                }
+                if (i < 2) {
+                    if (!(event.keyCode == 46) && !(event.keyCode == 9) && !(event.keyCode == 8) && !(event.keyCode == 37) && !(event.keyCode == 39))
+                        if (!((event.keyCode >= 48 && event.keyCode <= 57) || (event.keyCode >= 96 && event.keyCode <= 105)))
+                            event.returnValue = false;
+                }
+            });
+        }
+    }
+    $(document).not(grid).on("click", function () {
+        grid.datagrid("endEdit", editRow);
+        grid.datagrid('unselectAll');
+    });
+</script>
+<div class="mvctool">
+    <input id="btnSave" class="modal-btn modal-btn-save" type="submit" value="保存">
+    <a href="#" class="easyui-linkbutton" plain="true" iconcls="icon-add" id="btnAdd">添加报销详情</a>
+</div>
+@using (Html.BeginForm("EditForm", "Controller", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+    <table class="fromEditTable setTextWidth300">
+
+        <tr>
+            <td style="width: 16.5%; text-align: right">
+                @Html.LabelFor(model => model.Reun_Code)：
+            </td>
+            <td style="width: 16.5%;">@Html.TextBoxFor(model => model.Reun_Code, new { @readonly = "readonly", @style = "width:150px" })</td>
+            <td style="width: 16.5%;"></td>
+            <td style="width: 16.5%; text-align: right">
+                @Html.Hidden("jsonStr")
+                @Html.Hidden("jsonStr1")
+                @Html.HiddenFor(model => model.ID)
+                @Html.LabelFor(model => model.Car_Number)：
+            </td>
+            <td style="width: 16.5%;">@Html.TextBoxFor(model => model.Car_Number)</td>
+            <td style="width: 16.5%;">@Html.ValidationMessageFor(model => model.Car_Number)</td>
+        </tr>
+        <tr>
+            <td style="text-align: right">
+                @Html.LabelFor(model => model.AccountType)：
+            </td>
+            <td colspan="2">
+                <select id="AccountType" name="AccountType">
+                    <option value="支付宝" selected="selected">支付宝</option>
+                    <option value="银行卡">银行卡</option>
+                </select>
+            </td>
+            <td style="text-align: right">
+                @Html.LabelFor(model => model.Reun_Name)：
+            </td>
+            <td>@Html.TextBoxFor(model => model.Reun_Name)</td>
+            <td style="text-align: left">@Html.ValidationMessageFor(model => model.Reun_Name)</td>
+        </tr>
+        <tr>
+            <td style="text-align: right">
+                @Html.LabelFor(model => model.Reun_Bank)：
+            </td>
+            <td>@Html.TextBoxFor(model => model.Reun_Bank, new { Value = "支付宝" })</td>
+            <td style="text-align: left">@Html.ValidationMessageFor(model => model.Reun_Bank)</td>
+            <td style="text-align: right">@Html.LabelFor(model => model.ExpenseNextApprove)：
+            </td>
+            <td colspan="2">
+                <select id="ExpenseNextApprove" name="ExpenseNextApprove">
+                </select></td>
+        </tr>
+        <tr>
+            <td style="text-align: right">
+				@Html.Label("公司")：
+				 
+               
+            </td>
+			
+            <td>
+				@Html.DropDownListFor(model => model.Company, ViewData["CompanyList"] as List<SelectListItem>)
+				@Html.LabelFor(model => model.Department)： 
+			@Html.DropDownListFor(model => model.Department, ViewData["ReportDepartment"] as List<SelectListItem>)</td>
+            <td style="text-align: left">@Html.ValidationMessageFor(model => model.Department)</td>
+            <td style="text-align: right">
+                @Html.LabelFor(model => model.MatchBorrowNumber)：
+            </td>
+            <td colspan="2">@Html.DropDownListFor(model => model.MatchBorrowNumber, ViewData["BorrowCode"] as List<SelectListItem>)</td>
+        </tr>
+        <tr>
+            <td style="text-align: right">
+                @Html.LabelFor(model => model.IsBlending):
+            </td>
+            <td>
+                <input type="radio" name="IsBlending" value="1" />是
+                <input type="radio" name="IsBlending" value="0" checked="checked" />否
+            </td>
+            <td></td>
+            <td style="text-align: right">
+                @Html.LabelFor(model => model.Memo):
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.Memo)
+            </td>
+            <td></td>
+        </tr>
+      @Html.Hidden("picUrls")
+    </table>
+    <table>
+            <tr>
+            <td style="text-align: right">
+                @Html.LabelFor(model => model.Reun_Reason)：
+            </td>
+            <td>@Html.TextBoxFor(model => model.Reun_Reason, new { placeholder = "比如出差,聚会" })</td>
+            <td style="text-align: left">@Html.ValidationMessageFor(model => model.Reun_Reason)</td>
+            <td style="width: 120px; text-align: right;">
+                <font color="#2299ee">单个附件需小于10M：</font>
+            </td>
+            <td>
+                 <div style="width: 600px; margin-left: 8%; margin-bottom: 20px; font-size: large;">
+                <a id="uploadimg" href="#">点击上传图片</a><br />
+                   <div id="J_imageView"></div>
+                </div>
+              @*  <ul id="files-box"></ul>
+                <a href="#" class="icon-add" id="files-btn">上传附件</a>
+                <div class="multiple-hidden">
+                    <input type="file" name="file" id="file" accept="image/*" />
+                </div>*@
+            </td>
+            <td></td>
+        </tr> 
+  </table>
+}
+<table id="List"></table>
+<div id="shopDiv" class="easyui-dialog" closed="true" modal="true" title="选择店铺" style="width: 500px; height: 420px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIframeshop' frameborder="0" src="" style="width: 98%; height: 98%;"></iframe>
+</div>
+<div id="expenseCostTypeDiv" class="easyui-dialog" closed="true" modal="true" title="选择费用类别" style="width: 500px; height: 420px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIexpenseCostType' frameborder="0" src="" style="width: 98%; height: 98%;"></iframe>
+</div>

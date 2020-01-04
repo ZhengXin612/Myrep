@@ -1,0 +1,413 @@
+﻿@model EBMS.Models.T_CashBack
+@using Lib
+@{
+    ViewBag.Title = "ViewLossReportAdd";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<style>
+    #Repeat {
+        border: 0;
+        outline: 0;
+    }
+</style>
+<div class="mvctool">
+    <input id="btnSave" class="modal-btn modal-btn-save" type="submit" value="保存">
+</div>
+@using (Html.BeginForm("EditForm", "Controller", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.HiddenFor(model => model.OrderId)
+    @Html.ValidationSummary(true)
+    <table class="fromEditTable setTextWidth300" id="cashback">
+        <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.OrderNum)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.OrderNum, new { @class = "ck", @title = "请输入订单号" })
+                <input type="button" value="查询" id="btnQuery" class="icon-search">
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.OrderNum)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.PostUser)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.PostUser, new { @Value = Server.UrlDecode(Request.Cookies["NickName"].Value), @readonly = true })
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.PostUser)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.VipName)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.VipName, new { @class = "ck", @title = "请输入会员名称" }) @*@readonly = true,*@
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.VipName)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.ShopName)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.ShopName, new { @readonly = true, @class = "ck", @title = "请输入店铺名称" })
+
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.ShopName)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.WangWang)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.WangWang, new { @class = "ck", @title = "请输入旺旺帐号" })
+
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.WangWang)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.Reason)：   
+            </td>
+            <td>
+                @Html.DropDownListFor(model => model.Reason, ViewData["Reason"] as List<SelectListItem>, new { @class = "ck", @title = "请选择返现原因" })
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.Reason)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.BackMoney)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.BackMoney, new { @class = "ck", @title = "请输入返现金额" })
+
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.BackMoney)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.ApproveName)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.ApproveName, new { @class = "ck", @title = "请输入同意人" })
+
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.ApproveName)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.OrderMoney)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.OrderMoney, new { @class = "ck", @title = "请输入订单实付金额" })
+
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.OrderMoney)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.AlipayName)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.AlipayName, new { @class = "ck", @title = "请输入支付宝名称" })
+
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.AlipayName)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.AlipayAccount)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.AlipayAccount, new { @class = "ck", @title = "请输入支付宝账户" })
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.AlipayAccount)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.Note)：   
+            </td>
+            <td>
+                @Html.TextAreaFor(model => model.Note, new { @Style = "resize :none;width:420px;height:100px" })
+
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.Note)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 140px; text-align: right;">
+                @Html.LabelFor(model => model.Repeat)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.Repeat, new { @readonly = "none" })
+            </td>
+            <td></td>
+        </tr>
+        <input type="hidden" id="jsonStr" name="jsonStr" />
+    </table>
+    <div class="detail-list">
+        <table id="List"></table>
+    </div>
+}<div id="addDiv" class="easyui-dialog" closed="true" modal="true" title="订单列表" style="width: 820px; height: 420px;" resizable="true" closable="true">
+    <iframe scrolling="yes" id='openIframeAdd' frameborder="0" src="" style="width: 100%; height: 98%;"></iframe>
+</div>
+
+<script type="text/javascript">
+    var grid; //定义全局变量datagrid
+    var editRow = -1;
+    //创建一个新的Grid
+    grid = $('#List').datagrid({
+        width: $(window).width() - 10,
+        height: $(window).height() - 300,
+        fitColumns: true,
+        showFooter: true,
+        singleSelect: true,//单选模式
+        rownumbers: false,//行号
+        columns: [[
+            {
+                field: 'goods_no', title: '产品编码', width: 80
+            },
+                  {
+                      field: 'goods_name', title: '产品名称', width: 80
+                  },
+                   {
+                       field: 'spec_name', title: '规格', width: 80
+                   },
+                  {
+                      field: 'unit', title: '单位', width: 80
+                  },
+                    {
+                        field: 'price', title: '支付单价价格', width: 80
+                    },
+                     
+                      {
+                          field: 'qty', title: '发货数量', width: 80
+                      },
+                       //{
+                       //    field: 'BackMoney', title: '返现金额', width: 80, editor: {
+                       //        type: 'text', options: { required: true }
+                       //    }
+                       //},
+                     
+             
+             
+        ]],
+        //onClickCell: function (index, field) {
+        //    if (field == "BackMoney") {
+        //        editCell(index, field);
+        //    }
+            
+        //},
+        //onAfterEdit: function (index) {
+        //    grid.datagrid('refreshRow', index);
+        //    //updateFooter()
+        //    saveJson();
+        //}
+    });
+    grid.datagrid('loadData', { total: 0, rows: [], "footer": [{ "Unit": "合计", "UnitPrice": 0.00, "Qty": 0 }] });
+    $(window).resize(function () {
+        $('#List').datagrid('resize', {
+            width: $(window).width() - 10,
+            height: $(window).height() - 191
+        })
+    });
+
+    function editCell(index, field) {
+
+        //给时间控件默认值
+        //var rows = $('#List').datagrid('getRows');
+        //if (rows[index].RequirementDate == null || rows[index].RequirementDate == "") {
+        //    rows[index].RequirementDate = formatDatebox(new Date())
+        //}
+        grid.datagrid('endEdit', editRow);
+        editRow = index;
+        grid.datagrid('selectRow', index);
+        grid.datagrid('beginEdit', index);
+        var editor = grid.datagrid('getEditor', { index: index, field: field });
+        setTimeout(function () {
+            editor.target.focus();
+        }, 0);
+
+        var editors = grid.datagrid('getEditors', index);
+        for (var i = 0; i < editors.length; i++) {
+            editors[i].target.bind('keydown', { field: editors[i].field }, function (e) {
+                if (e.keyCode == 13) {
+                    grid.datagrid('endEdit', index);
+                    editRow = -1;;
+                } else if (e.keyCode == 38) {	// up
+
+                    if (editRow > 0) {
+                        editCell(editRow - 1, e.data.field);
+                    }
+                } else if (e.keyCode == 40) {	// down
+
+                    if (editRow < grid.datagrid('getRows').length - 1) {
+                        editCell(parseInt(editRow) + 1, e.data.field);
+                    }
+                }
+                if (i < 2) {
+                    if (!(event.keyCode == 46) && !(event.keyCode == 9) && !(event.keyCode == 8) && !(event.keyCode == 37) && !(event.keyCode == 39))
+                        if (!((event.keyCode >= 48 && event.keyCode <= 57) || (event.keyCode >= 96 && event.keyCode <= 105)))
+                            event.returnValue = false;
+                }
+            });
+        }
+
+    }
+    $(function () {
+        enterSearch("#btnQuery");
+        $("#btnQuery").click(function () {
+            $('.window-mask,.messager-window,.window-shadow').remove()
+            if ($("#OrderNum").val().trim() == "") {
+                $.messager.alert('提示', "请输入订单号", "info");
+                return false;
+            }
+            loading(0);
+            $.post("GetCashBackByGy", { "code": $("#OrderNum").val().trim() }, function (data) {
+                if (data.State == "Success") {
+                    if (data.ModelList["Repeat"] != "") {
+                        $.messager.confirm('提示', data.ModelList["Repeat"] + "是否继续", function (r) {
+                            if (r) {
+                                $("#OrderNum").val(data.ModelList["OrderNum"]);
+                                $("#VipName").val(data.ModelList["VipName"]);
+                                $("#ShopName").val(data.ModelList["ShopName"]);
+                                $("#WangWang").val(data.ModelList["WangWang"]);
+                                $("#OrderMoney").val(data.ModelList["OrderMoney"]);
+                                $("#OrderpaymentMoney").val(data.ModelList["OrderpaymentMoney"]);
+                                $("#Repeat").val(data.ModelList["Repeat"]);
+                                if (data.ModelList["Repeat"] != "")
+                                    $("#Repeat").css("color", "#d02e2e")
+                                loading(1);
+                                $('#List').datagrid('loadData', { total: 0, rows: [] });
+                                $(data.Json.rows).each(function (i, item) {
+
+                                    $('#List').datagrid('appendRow', { goods_no: item.goods_no, goods_name: item.goods_name, spec_name: item.spec_name, unit: item.unit, qty: item.qty, price: item.price })
+                                });
+                                saveJson();
+                            } else
+                                window.location.reload();
+                        });
+                    } else {
+                        $("#OrderNum").val(data.ModelList["OrderNum"]);
+                        $("#VipName").val(data.ModelList["VipName"]);
+                        $("#ShopName").val(data.ModelList["ShopName"]);
+                        $("#WangWang").val(data.ModelList["WangWang"]);
+                        $("#OrderMoney").val(data.ModelList["OrderMoney"]);
+                        $("#OrderpaymentMoney").val(data.ModelList["OrderpaymentMoney"]);
+                        $("#Repeat").val(data.ModelList["Repeat"]);
+                        if (data.ModelList["Repeat"] != "")
+                            $("#Repeat").css("color", "#d02e2e")
+                        $('#List').datagrid('loadData', { total: 0, rows: [] });
+                        $(data.Json.rows).each(function (i, item) {
+
+                            $('#List').datagrid('appendRow', { goods_no: item.goods_no, goods_name: item.goods_name, spec_name: item.spec_name, unit: item.unit, qty: item.qty, price: item.price })
+                        });
+                        saveJson();
+                        loading(1);
+                    }
+                } else {
+                    $.messager.alert('提示', data.Message, "info", function () {
+                        window.location.reload();
+                    });
+                }
+            });
+        })
+    })
+    //function op(name, url) {
+    //    self.parent.addTab(name, url, '');
+    //    getContextmenu()
+    //}
+    ////关闭当前页面
+    //function closeCurTab(name) {
+    //    var parentTab = parent.$('#mainTab').tabs('select', name);
+    //    var curTab = self.parent.$('#mainTab').tabs('getSelected');// 当前tab
+    //    var index = self.parent.$('#mainTab').tabs('getTabIndex', curTab);
+    //    self.parent.$('#mainTab').tabs('close', index);
+    //}
+    //序列化数据
+    function saveJson() {
+        JsonText = "[";
+        var rows = $('#List').datagrid('getRows');
+        for (var i = 0; i < rows.length; i++) {
+            JsonText += '{';
+            JsonText += '"goods_no":' + '"' + rows[i].goods_no + '",';
+            JsonText += '"goods_name":' + '"' + rows[i].goods_name + '",';
+            JsonText += '"price":' + '"' + rows[i].price + '",';
+            JsonText += '"unit":' + '"' + rows[i].unit + '",';
+            JsonText += '"qty":' + '"' + rows[i].qty + '",';
+            
+            JsonText += '"spec_name":' + '"' + rows[i].spec_name + '"},';
+        }
+        JsonText = JsonText.substring(0, JsonText.length - 1);
+        JsonText += "]";
+        $("#jsonStr").val(JsonText);
+    }
+
+    var flag = 0
+    var V = 0;
+    $("#btnSave").click(function () {
+        if (flag == 0) {
+            flag++;
+            loading(0)
+            V = 0;
+            //验证输入;
+            $("#cashback .ck").each(function () {
+                var $val = $(this).val();
+                var require = $(this).attr("title");
+                if ($.trim($val) == "") {
+                    $.messager.alert('提示', require, "info", function () { });
+                    flag = 0;
+                    loading(1);
+                    V = 1;
+                    return false
+                }
+            })
+            if (V == 0 && $("#EditForm").valid()) {
+                $.ajax({
+                    url: "AddSave",
+                    type: "Post",
+                    data: $("#EditForm").serialize(),
+                    success: function (data) {
+                        if (data.State == "Success") {
+                            $.messager.alert('提示', "操作成功", "info", function () {
+                                loading(1)
+                                window.location.reload();
+                            });
+                        } else {
+                            $.messager.alert('提示', data.Message, "info", function () {
+                                flag = 0;
+                                loading(1)
+                            });
+                        }
+                    }
+                });
+            }
+        }
+    })
+
+</script>
+

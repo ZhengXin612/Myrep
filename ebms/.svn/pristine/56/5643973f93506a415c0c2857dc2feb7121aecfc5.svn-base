@@ -1,0 +1,199 @@
+﻿@{
+    ViewBag.Title = "登录";
+}
+
+
+<div class="login col-md-offset-3 col-lg-offset-4col-xl-offset-4"  >
+	<div class="bg"></div>
+	<div class="head">
+		<div class="head-content">
+			<img class="logo" src="~/Content/logo.png">
+			
+			@*<a href="#"><i>好护士EBMS系统</i></a>*@
+		</div>
+	</div>
+	<div class="primary">
+		<div class="primary-content" >
+			
+			
+
+			<div class="sign-in" >
+				<div>好护士<label>EBMS系统</label></div>
+				<div class="dd-qr" id="login_container">
+					<!-- 二维码 -->
+				</div>
+			</div>
+		</div>
+	</div>
+	
+</div>
+
+
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style>
+	body {
+		margin: 0;
+		padding: 0;
+	}
+
+	.login {
+		width: 100%;
+		height: 100%;
+	}
+
+	.head {
+		width: 100%;
+		height:80px;
+		border-bottom: 1px solid #e9e8ed;
+		box-shadow: 0 -8px 20px #999;
+		/*height:8%;*/
+		margin-left:auto;
+		margin-right:auto;
+	}
+	        .bg {
+				background:url(/Content/blue/images/03.jpg) no-repeat top center;
+				/*background:url(/Content/blue/images/loginBg.jpg) no-repeat top center;*/
+				
+				 background-size:cover;width:100%;height:100%;
+				 position:fixed;z-index:-1;
+				 animation:mymove 5s 1 alternate forwards;
+				 -webkit-animation:mymove 5s 1 alternate forwards ; /*Safari and Chrome*/}
+    
+		 @@keyframes mymove
+		 {
+from {transform:scale(0.95,0.95);}
+to {transform:scale(1.1,1.1);}
+}
+@@-webkit-keyframes mymove /*Safari and Chrome*/
+{
+from {transform:scale(1,1);}
+to {transform:scale(1.3,1.3);}
+}
+  
+
+		.head-content img {
+			float: left;
+			/*height:80px;
+			width: 80px;*/
+			margin-top: 1%;
+			margin-left:10%;
+			margin-right:2%;
+		}
+	.head-text {
+	height: 50px;
+	width: auto;
+	color:#31528d;
+	font:bold 20px arial ;
+	margin: 1% 10%;
+	}
+		.head-content i {
+			/*float: right;*/
+			font-size: 36px;
+			line-height: 85px;
+			width: 100px;
+			text-align: center;
+			color:#31528d;
+			font-style:normal;
+			letter-spacing:10px;
+		}
+
+	.primary {
+		clear: both;
+		width: 100%;
+		height: 82%;
+		margin-left:auto;
+		margin-right:auto;
+		/*background-color: #7864dd;*/
+	}
+	.primary-bg {
+	
+	
+	background-color:#FF0000;
+	width:500px;
+	height:500px;
+	float:left;
+	}
+
+	.primary div {
+		text-align: center;
+	}
+
+	.primary-content {
+		/*background:url(/Content/bg.png) no-repeat;*/
+		width: 70%;
+		height:100%;
+		margin: 10% auto;
+
+	}
+
+		.primary-content h1 {
+			color: #ffffff;
+			font-size: 50px;
+			font-weight: bold;
+			margin-top: 14%;
+			margin-bottom: 5%;
+		}
+
+	.sign-in {
+		
+		background-color: rgba(255,255,255,0.1);
+		border: 1px solid #eeeeee;
+		margin-top: 1%;
+		margin-right:20%;
+		/*width: 30%;
+		height: 60%;*/
+		width:400px;
+		height:456px;
+		border-radius: 10px;
+		font-size: 15px;
+		float:right;
+	}
+
+	.login_content {
+		width: 356px !important;
+		height: 400px !important;
+	}
+
+	.sign-in label {
+		color: #999;
+		line-height: 80px;
+	}
+
+	.dd-qr {
+		/*background: rgba(228,14,225,0.2);*/
+		margin-left: 1px;
+	}
+
+	.sign-in span {
+		line-height: 60px;
+	}
+
+	
+
+	/*.cf-qr {
+		margin-top: 42px;
+	}*/
+
+	.cf-qr span {
+		line-height: 44px;
+	}
+</style>
+<script src="//g.alicdn.com/dingding/dinglogin/0.0.5/ddLogin.js"></script>
+<script src="~/scripts/dingLogin.js"></script>
+@*<script src="~/Content/canvas-nest.min.js"></script>*@
+
+<script type="text/javascript">
+	var appid ="@ViewData["appid"]";
+	var redirect_uri ="@ViewData["redirect_uri"]";
+	var elementID = "login_container"
+	DingLogin(elementID, appid, redirect_uri, 383, 346)
+</script>
+
+<script type="text/javascript" src="https://s4.cnzz.com/z_stat.php?id=1278228176&web_id=1278228176"></script>
+
+
+
+
+
+

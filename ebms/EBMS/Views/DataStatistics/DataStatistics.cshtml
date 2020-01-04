@@ -1,0 +1,85 @@
+﻿@{
+    ViewBag.Title = "DataStatistics";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+
+<style>
+    * {
+    margin:0;
+    padding:0;
+    }
+
+    body {
+    font-size:24px;
+    font-style:normal;
+    background: #FFF;
+    background-color: #f6f5f8;
+    }
+     .triangle {width: 0;
+    height: 0;
+    border-bottom: 10px solid #ddd;
+    border-left: 10px solid transparent;position:absolute;bottom:5px;right:5px;z-index:999; transition:all 0.3s ease;
+    -webkit-transition:all 0.3s ease}
+    h2 {
+    font-size:28px;
+    font-weight:normal;
+    text-align:center;    margin-bottom: 5px;
+    }
+    p {font-size:14px}
+     ul {
+    overflow:hidden; text-align:center
+    /*padding:3em;*/
+    }
+    ul li {
+    list-style:none;
+    margin:5px ;
+    float:left;
+    position:relative;
+    border:1px solid #fff;
+    width:24%;
+    transition:all 0.3s ease;
+    -webkit-transition:all 0.3s ease;box-shadow: 0px 0px 10px #eee;
+    }
+        ul li:hover {
+        border:1px solid   #2299ee
+        }
+    ul li a {
+        
+        text-decoration:none;
+      color:#444;
+       background:#fff;
+       display:block;
+       padding:5px; 
+       padding:10px 0 15px 0;
+     }
+        ul li:hover .triangle {
+        border-bottom:10px solid #2299ee;
+    border-left:10px solid transparent;
+        }
+</style>
+<script type="text/javascript">
+   
+    $(function () {
+        $("body").css("overflow", "hidden")
+        $.ajax({
+            url: "../DataStatistics/getMapItem",//获取订单情况
+            type: "Post",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+
+                for (var i = 0; i < data.length; i++) {
+
+                    //$("#Map").append("<li onclick=op('" + data[i].Name + "','" + data[i].Url + "')><a href=\"#\"> <h2>" + data[i].Qty + "</h2><p>" + data[i].Name + "</p><span class=\"triangle\"></span></a></li>");
+                    $("#Map").append("<li><a href=\"#\"> <h2>" + data[i].Qty + "</h2><p>" + data[i].Name + "</p><span class=\"triangle\"></span></a></li>");
+                }
+            },
+            error: function (data) {
+                //失败 
+            }
+
+        })
+    })
+</script>
+
+<ul id="Map"></ul>

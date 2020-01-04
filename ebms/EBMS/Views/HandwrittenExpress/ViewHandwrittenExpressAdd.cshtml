@@ -1,0 +1,147 @@
+﻿@model EBMS.Models.T_HandwrittenExpress
+@using Lib
+@{
+    ViewBag.Title = "HandwrittenExpress";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+@*退货退款新增
+2016-10-12 刘明*@
+<script type="text/javascript">
+    var grid; //定义全局变量datagrid
+    var editRow = -1;
+
+    //加载数据
+    $(function () {
+      
+
+        //提交后台方法
+        var sign = 0;
+        $("#btnSave").click(function () {
+            if ($("#ApplyPurpose").val() == "") {
+                $.messager.alert('提示', "用途必须填写", "info")
+                loading(1);
+                return
+            }
+            if ($("#ApplyNumber").val() == "") {
+                $.messager.alert('提示', "数量必须填写", "info")
+                loading(1);
+                return
+            }
+            if ($("#Address").val() == "") {
+                $.messager.alert('提示', "地址必须填写", "info")
+                loading(1);
+                return
+            }
+            if ($("#Telephone").val() == "") {
+                $.messager.alert('提示', "电话必须填写", "info")
+                loading(1);
+                return
+            }
+            if ($("#AddressName").val() == "") {
+                $.messager.alert('提示', "收件人姓名必须填写", "info")
+                loading(1);
+                return
+            }
+            loading(0);
+            if ($("#EditForm").valid()) {
+                if (sign == 0) {
+                    sign = 1;
+                    $.ajax({
+                        url: "HandwrittenExpressAdd",
+                        type: "Post",
+                        data: $("#EditForm").serialize(),
+                        success: function (data) {
+                            if (data.State == "Success") {
+                                loading(1);
+                                $.messager.alert('提示', '保存成功', "info", function () {
+                                    window.location.reload();
+                                    sign = 0;
+                                });
+                            } else {
+                                loading(1);
+                                $.messager.alert('提示', data.Message, "info", function () {
+                                    sign = 0;
+                                });
+                            }
+                        }
+                    });
+                }
+            }
+        });
+        addCompany("@ViewData["code"]");
+    });
+
+
+
+
+</script>
+<div class="mvctool">
+    <input id="btnSave" class="modal-btn modal-btn-save" type="submit" value="保存">
+</div>
+@using (Html.BeginForm("EditForm", "Controller", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+    <table class="fromEditTable setTextWidth300">
+        <tr>
+              <td style="width: 120px;">
+                @Html.LabelFor(model => model.ApplyPurpose)：    
+            </td>
+            <td>
+                  @Html.TextBoxFor(model => model.ApplyPurpose)
+            </td>
+            <td>
+                @Html.LabelFor(model => model.ApplyNumber)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.ApplyNumber)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px;">
+                @Html.LabelFor(model => model.Address)：    
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.Address)
+            </td>
+
+            <td>
+                @Html.LabelFor(model => model.Telephone)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.Telephone)
+            </td>
+        </tr>
+        <tr>
+          
+            <td style="width: 120px;">
+                @Html.LabelFor(model => model.AddressName)：    
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.AddressName)
+            </td>
+              <td>
+                @Html.LabelFor(model => model.Zip)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.Zip)
+            </td>
+        </tr>
+          <tr>
+            <td style="text-align: right">
+                @Html.LabelFor(model => model.Warehouse)：
+            </td>
+            <td>@Html.DropDownListFor(model => model.Warehouse, ViewData["Warehouse"] as List<SelectListItem>)</td>
+            <td style="text-align: left">@Html.ValidationMessageFor(model => model.Warehouse)</td>
+            <td style="text-align: right">
+             
+            </td>
+            <td></td>
+            <td></td>
+        </tr>
+        <input type="hidden" id="jsonStr" name="jsonStr" />
+    </table>
+}
+
+
+
+  

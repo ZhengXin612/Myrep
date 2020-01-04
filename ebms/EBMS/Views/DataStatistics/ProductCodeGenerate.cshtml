@@ -1,0 +1,304 @@
+﻿@model EBMS.Models.T_ProductCodeGenerate
+@{
+    ViewBag.Title = "ViewReissueAdd";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<script type="text/javascript">
+    var grid; //定义全局变量datagrid
+    var editRow = -1;
+    function op(name, url) {
+        self.parent.addTab(name, url, '');
+        getContextmenu()
+    }
+    //加载数据
+    $(function () {
+         var shengcheng="@ViewData["Code"]";
+        $("#Code").val(shengcheng);
+        grid = $('#List').datagrid({
+            width: $(window).width() - 10,
+            height: $(window).height() * 0.65,
+            fitColumns: true,
+            showFooter: true,
+            sortName: 'ID',
+            sortOrder: 'desc',
+            idField: 'ID',
+            pageSize: 10,
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                { field: 'CpCode', title: '产品编码', width: 100, align: 'center' },
+                    { field: 'CpName', title: '产品名称', width: 140, align: 'center' },
+                      { field: 'CpSimpleName', title: '产品简称', width: 80, align: 'center' },
+                    { field: 'CpNumber', title: '数量', width: 80, align: 'center', editor: { type: 'numberbox' } },
+                       { field: 'CpPrice', title: '价格', width: 80, align: 'center' },
+                    { field: 'CpWeight', title: '权衡比重', width: 100, align: 'center', editor: { type: 'numberbox' } },
+                                     {
+                                         field: 'action', title: '操作', width: 100, align: 'center', formatter: function (value, row, index) {
+                                             return '<div class="btn-bar"><a herf="#"  onclick="removeRow(' + index + ')" class="icon-remove">删除</a></div>';
+                                         }
+
+                                     }
+            ]],
+            onClickCell: function (index, field) {
+                //只有数量可以编辑
+                if (field == 'CpNumber' || field == 'CpWeight')
+                    editCell(index, field);
+                else if (field == "CpCode" || field == "CpName") {
+                    $('#openIframeproduct')[0].src = "../ExchangeCenter/ViewProduct?index=" + index;
+                    $('#productDiv').dialog('open');
+                    grid.datagrid('endEdit', index);
+                } else
+                    grid.datagrid('endEdit', index);
+
+            }, onAfterEdit: function (value, row) {
+                saveJson();
+            }
+        });
+      
+
+        $("#OrderCode").click(function () {
+            $('#openIframeOrder')[0].src = "../ExchangeCenter/ViewOrderList?status=" + 2;
+            $('#openOrder').dialog('open');
+        });
+
+        $("#btnSubmit").click(function () {
+            Save()
+        });
+        var sign = 0;
+        function Save() {
+            var name = $("#Name").val();
+            if (name == "" || name == null)
+            {
+                $.messager.alert('提示', "组合名称必须填写", "info")
+                return false;
+            }
+            var Price = $("#Price").val();
+            if (Price == "" || Price == null)
+            {
+                $.messager.alert('提示', "价格必须填写", "info")
+                return false;
+            }
+            var Weight = 0;
+            if ($("#EditForm").valid()) {
+
+                grid.datagrid("endEdit", editRow);
+                var rows = $('#List').datagrid("getRows");
+               
+                for (var i = 0; i < rows.length; i++) {
+                    if (rows[i].CpNumber == undefined || rows[i].CpNumber == "") {
+                        $.messager.alert('提示', "数量不能为空", "info")
+                        return false;
+                    }
+                    if (rows[i].CpCode == undefined || rows[i].CpCode == "") {
+                        $.messager.alert('提示', "产品代码不能为空", "info")
+                        return false;
+                    }
+                    Weight =Weight+parseInt(rows[i].CpWeight);
+                }
+                
+                if (Weight != 100)
+                {
+                    $.messager.alert('提示', "权衡比重相加不等于100", "info")
+                    return false;
+                }
+                saveJson();
+                if (sign == 0) {
+                    sign++;
+                    loading(0);
+                    $.ajax({
+                        url: "ProductCodeGenerateAddSave?detailList=" + $("#jsonStr").val(),
+                        type: "Post",
+                        data: $("#EditForm").serialize(),
+                        success: function (data) {
+                            loading(1);
+                            if (data.State == "Success") {
+                                $.messager.alert('提示', '@Lib.MessageRes.SaveOK', "info", function () {
+                                    addTab()
+                                    sign = 0
+                                });
+                            } else {
+                                $.messager.alert('提示', data.Message, "info", function () {
+                                    addTab();
+                                    sign = 0
+                                });
+                            }
+                        },
+                        error: function () {
+                            loading(1);
+                            sign = 0;
+                        }
+                    });
+                }
+            }
+        }
+
+        //新增明细
+        $('#btnAdd').bind('click', function () {
+            if (editRow != -1) {
+                grid.datagrid("endEdit", editRow);
+                editRow = -1;
+            }
+            else {
+                $('#List').datagrid('appendRow', {
+                    CpCode: "",
+                    CpName: "",
+                    CpSimpleName: "",
+                    CpPrice: "",
+                    CpWeight: 0,
+                    CpNumber: 0
+                })
+            }
+        });
+
+    });
+
+    function removeRow(index) {
+        $('#List').datagrid('deleteRow', index);
+        var rows = $('#List').datagrid("getRows");
+        $('#List').datagrid("loadData", rows);
+        saveJson();
+    }
+
+    function addproduct(rows, index) {
+       
+        $('#productDiv').dialog('close');
+        $('#List').datagrid('updateRow', {
+            index: index,
+            row: {
+                CpCode: rows.code,
+                CpName: rows.name,
+                CpSimpleName: rows.simple_name,
+                CpPrice: rows.sales_price
+            }
+        });
+        saveJson();
+    }
+
+   
+
+    //关闭当前页面
+    function closeCurTab(name) {
+        var parentTab = parent.$('#mainTab').tabs('select', name);
+        var curTab = self.parent.$('#mainTab').tabs('getSelected');// 当前tab
+        var index = self.parent.$('#mainTab').tabs('getTabIndex', curTab);
+        self.parent.$('#mainTab').tabs('close', index);
+    }
+
+    function addTab() {
+        op("补发货新增订单", "../Reissue/ViewOrderList");
+        closeCurTab("补发货新增");//关闭当前页面
+    }
+
+    function saveJson() {
+
+        JsonText = "[";
+        var rows = $('#List').datagrid('getRows');
+        
+        for (var i = 0; i < rows.length; i++) {
+
+            JsonText += '{';
+            JsonText += '"CpCode":' + '"' + rows[i].CpCode + '",';
+            JsonText += '"CpName":' + '"' + rows[i].CpName + '",';
+            JsonText += '"CpSimpleName":' + '"' + rows[i].CpSimpleName + '",';
+            JsonText += '"CpNumber":' + '"' + rows[i].CpNumber + '",';
+            JsonText += '"CpPrice":' + '"' + rows[i].CpPrice + '",';
+            JsonText += '"CpWeight":' + '"' + rows[i].CpWeight + '"},';
+        }
+        JsonText = JsonText.substring(0, JsonText.length - 1);
+        JsonText += "]";
+        if (rows.length == 0)
+            JsonText = "";
+        $("#jsonStr").val(JsonText);
+    }
+
+    function editCell(index, field) {
+        grid.datagrid('endEdit', editRow);
+        editRow = index;
+        grid.datagrid('selectRow', index);
+        grid.datagrid('beginEdit', index);
+        var editor = grid.datagrid('getEditor', { index: index, field: field });
+        //numberbox 特殊处理
+        setTimeout(function () {
+            editor.target.focus();
+        }, 0);
+
+        var editors = grid.datagrid('getEditors', index);
+        for (var i = 0; i < editors.length; i++) {
+            editors[i].target.bind('keydown', { field: editors[i].field }, function (e) {
+                if (e.keyCode == 13) {
+                    grid.datagrid('endEdit', index);
+                    editRow = -1;;
+                } else if (e.keyCode == 38) {	// up
+
+                    if (editRow > 0) {
+                        editCell(editRow - 1, e.data.field);
+                    }
+                } else if (e.keyCode == 40) {	// down
+
+                    if (editRow < grid.datagrid('getRows').length - 1) {
+                        editCell(parseInt(editRow) + 1, e.data.field);
+                    }
+                }
+                if (i < 2) {
+                    if (!(event.keyCode == 46) && !(event.keyCode == 9) && !(event.keyCode == 8) && !(event.keyCode == 37) && !(event.keyCode == 39))
+                        if (!((event.keyCode >= 48 && event.keyCode <= 57) || (event.keyCode >= 96 && event.keyCode <= 105)))
+                            event.returnValue = false;
+                }
+            });
+        }
+    }
+    $(document).not(grid).on("click", function () {
+        grid.datagrid("endEdit", editRow);
+        grid.datagrid('unselectAll');
+    });
+</script>
+<div class="mvctool">
+   
+    <input id="btnSubmit" class="modal-btn modal-btn-save" type="submit" value="提交">
+     <a href="#" class="easyui-linkbutton" plain="true" iconcls="icon-add" id="btnAdd">添加详情</a>
+</div>
+@using (Html.BeginForm("EditForm", "Controller", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+    <table class="fromEditTable setTextWidth300">
+        <tr>
+          <input type="hidden" id="jsonStr" />
+             <td  style="width: 16.5%; text-align: right"  >组合代码：</td>
+            <td >@Html.TextBoxFor(model => model.Code, new { @readonly = "readonly" })</td>
+            <td>@Html.ValidationMessageFor(model => model.Code)</td>
+            <td style="width: 16.5%; text-align: right">组合名称：</td>
+            <td >@Html.TextBoxFor(model => model.Name)</td>
+            <td >@Html.ValidationMessageFor(model => model.Name)</td>
+        </tr>
+       
+    
+        <tr>
+            <td style="text-align: right">
+               组合简称：
+            </td>
+            <td>@Html.TextBoxFor(model => model.simpleName)</td>
+            <td style="text-align: left">@Html.ValidationMessageFor(model => model.simpleName)</td>
+            <td style="text-align: right">
+              价格：
+            </td>
+            <td>@Html.TextBoxFor(model => model.Price)</td>
+            <td style="text-align: left">@Html.ValidationMessageFor(model => model.Price)</td>
+        </tr>
+        <tr>
+            <td style="text-align: right">
+                备注：
+            </td>
+            <td>@Html.TextBoxFor(model => model.Remarks)</td>
+            <td style="text-align: left">@Html.ValidationMessageFor(model => model.Remarks)</td>
+        </tr>
+         @Html.HiddenFor(model => model.ID)
+    </table>
+}
+<table id="List"></table>
+<div id="productDiv" class="easyui-dialog" closed="true" modal="true" title="选择需发产品" style="width: 500px; height: 420px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIframeproduct' frameborder="0" src="" style="width: 98%; height: 98%;"></iframe>
+</div>
+<div id="openOrder" class="easyui-dialog" closed="true" modal="true" title="选择订单信息" style="width: 750px; height: 400px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIframeOrder' frameborder="0" src="" style="width: 100%; height: 98%;"></iframe>
+</div>

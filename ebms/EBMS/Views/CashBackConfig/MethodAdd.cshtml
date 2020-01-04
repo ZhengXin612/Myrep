@@ -1,0 +1,120 @@
+﻿@model EBMS.Models.T_CashbackMethod
+@using Lib
+@{
+    ViewBag.Title = "MethodAdd";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<style>
+    .row-add {padding-left:15px;color:#333;cursor:pointer}
+    .row-add:hover{color:#2299ee}
+    #methodBox {margin-left:10px}
+    #methodBox p {margin-top:10px;display:table;width:100%}
+    .del {margin-left:15px;color:#2299ee}
+    .del:hover{margin-left:15px;color:#2299ee}
+    .l {float:left;width:40px}
+    .r {float:left}
+    .method-input {cursor:pointer}
+</style>
+<div class="mvctool">
+    <input id="btnSave" class="modal-btn modal-btn-save" type="submit" value="保存">
+    <a onclick="addRow()" class="icon-add row-add">添加</a>
+</div>
+@using (Html.BeginForm("EditForm", "Controller", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+  
+    <div id="methodBox">
+        <p><span class="l">出纳</span><span class="r">审核人</span></p>
+        <p><span class="l"><input type="radio" name="Cashier" class="Cashier" value="0"></span><span class="r"><input class="method-input" type="text" readonly="true" onclick="getUser(this)" id="Name0"/></span></p>
+    </div>
+}
+<div id="userDiv" class="easyui-dialog" closed="true" modal="true" title="审批人" style="width:320px; height:320px;" resizable="true" closable="true">
+    <iframe scrolling="yes" id='openIframeUser' frameborder="0" src="" style="width:100%;height:98%;"></iframe>
+</div>
+<script>
+    //给所有的出纳单选框赋值
+    function Cashier() {
+        $("input[name='Cashier']").each(function (i) {
+            $(this).attr("value", i);
+        })
+        $(".method-input").each(function (i) {
+            $(this).attr("id","Name"+i)
+        });
+    }
+    //添加一个审核步骤
+    function addRow() {
+        var $p = "<p><span class=\"l\"><input type=\"radio\" name=\"Cashier\" class=\"Cashier\"></span><span class=\"r\"><input class=\"method-input\" type=\"text\" readonly=\"true\" onclick=\"getUser(this)\"/><a href=\"javascript:;\" class=\"del\" onclick=\"del(this)\">[×]</a></span></p>";
+        $("#methodBox").append($p);
+        Cashier()
+    }
+    //传到后台的所有审核人
+    function getJson() {
+        var methodArr = "";
+        $(".method-input").each(function () {
+            methodArr += $(this).val() + ",";
+        });
+        methodArr = methodArr.substring(0, methodArr.length - 1);
+        return methodArr;
+    }
+    //删除一个审核步骤
+    function del(_this) {
+        $(_this).closest("p").remove();
+        getJson()
+        Cashier()
+    }
+    //弹出人员输入框 
+    function getUser(_This) {
+        var ID = $(_This).attr("id");
+        $('#openIframeUser')[0].src = "/CashBackConfig/UserTable?ID=" + ID;
+        $('#userDiv').dialog('open');
+    }
+    //提交到后台保存
+    var flag = 0;
+    $("#btnSave").click(function () {
+        //验证审核人是否全填写了
+        var validation = 0;
+        $(".method-input").each(function () {
+            if ($.trim($(this).val()) == "") {
+                validation = 1;
+                return validation;
+            }
+        });
+        if (validation == 1) {
+            $.messager.alert('提示', "请输入审核人", "info", function () {
+            });
+            return false
+        }
+        //next
+        //得到一个整形的值如（0,1...） 判断第几部是财务出纳 
+        var CashierIndex = $("input[name='Cashier']:checked").val();
+        if (!CashierIndex) {
+            $.messager.alert('提示', "请选择出纳", "info", function () { })
+            return
+        }
+        //next
+        if (flag == 0) {
+            flag++;
+            loading(0);
+            var methodArr = getJson(); //
+            $.ajax({
+                url: "../CashBackConfig/MethodAdd" ,
+                type: "Post",
+                data: { "method": methodArr, "cashier": CashierIndex },
+                success: function (data) {
+                    $.messager.alert('提示', data, "info", function () {
+                        parent.$('#addDiv').dialog('close');
+                        parent.$('#List').datagrid('reload');
+                        parent.$('#List').datagrid("clearSelections");
+                        loading(1);
+                        flag = 0
+                    });
+                },
+                error: function (data) {
+                    //失败 
+                loading(1);
+                flag = 0;
+            }
+            })
+        }
+    })
+</script>

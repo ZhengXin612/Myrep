@@ -1,0 +1,390 @@
+﻿@model EBMS.Controllers.PersonnelController.personelModel
+@{
+    ViewBag.Title = "ViewAddOtherInfo";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+
+<script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+<script src="/Scripts/jquery.validate.min.js" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/jquery.validate.unobtrusive.min.js")" type="text/javascript"></script>
+<script type="text/javascript">
+    $(function () {
+        var id = "@ViewData["id"]"
+        var flag = "@ViewBag.flag";
+        var a = 0;
+        $('#btnSave').click(function () {
+            if ($("#EditForm").valid()) {
+            if (a == 0) {
+                a += 1;
+                loading(0)
+                $.ajax({
+                    url: "/Personnel/AddOtherInfo?id=" + id + "&flag=" + flag,
+                    type: "Post",
+                    data: $("#EditForm").serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        if (data >0) {
+                            $.messager.alert("提示", "保存成功", "info", function () {
+                                //parent.$("#openDivAddInfo").dialog("close");
+                                //parent.$("#List").datagrid("reload");
+                                window.location.reload()
+                                loading(1)
+                            })
+                        }
+                        else {
+                            $.messager.alert("提示", "保存失败", "info");
+                            a = 0;
+                            loading(1)
+                        }
+                    }
+                });
+                       }
+            }
+            return false;
+
+        });
+        for (var n = 0; n < $('.getDate').length; n++) {
+           
+            if ($('.getDate')[n].textContent.length == 38 || $('.getDate')[n].textContent == null || $('.getDate')[n].textContent == "") {
+                $('.getDate')[n].innerHTML = ""
+            }
+            else {
+              
+                $('.getDate')[n].innerHTML = formatDatebox($('.getDate')[n].textContent);
+            }
+
+        }
+    });
+    function shuju() { //jquery获取复选框值 
+        var chk_value = [];
+        $('input[name="quit_data"]:checked').each(function () {
+            chk_value.push($(this).val());
+        });
+        $('#quit_QuitData').val(chk_value)
+    }
+    function edit(id, flag) {
+       
+        $("#openDivEditInfo").prev(".panel-header").find(".panel-title").html("修改其他信息")
+       
+        $('#openIframeEditInfo')[0].src = "ViewEditOtherInfo?id=" + id + "&flag=" + flag;
+       
+        $('#openDivEditInfo').dialog('open');
+       
+    }
+    function  delinfo(id, flag) {
+       
+        $.messager.confirm('提示', '确定删除该记录吗', function (r) {
+            if (r) {
+                loading(0)
+                $.ajax({
+                    url: "/Personnel/DeleteOtherInfo?ID=" + id + "&flag=" + flag,
+                    type: "Post",
+                    contentType: "application/json",
+                    dataType: "json",
+                    success: function (data) {
+                        loading(1)
+                        window.location.reload()
+                    }
+                });
+            }
+        }
+       )
+       
+     
+       
+      
+       
+    }
+   
+</script>
+<div class="mvctool">
+    <a id="btnSave" href="javascript:;" class="modal-btn modal-btn-save">保存</a>
+ 
+</div>
+<div>
+    @using (Html.BeginForm("EditForm", "Controllers", null, FormMethod.Post, new { Id = "EditForm" }))
+    {
+    @Html.ValidationSummary(true)
+   <span style="text-align:center;width:300px">真名：@Model.person.TrueName , 花名： @Model.person.NickName</span>
+        
+            
+          
+        if (ViewBag.flag == 1)
+        { 
+             <table class="fromEditTable setTextWidth300">
+                  <thead><tr><td colspan="2" style="text-align:center">家庭成员</td></tr></thead>
+        <tbody>
+          <tr>
+                <td style="width: 100px; text-align: right;">
+                    @Html.Label("姓名" )：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.family.Name)
+                </td>
+                  
+                
+            </tr>  
+              <tr>
+           <td style="width: 100px; text-align: right;">
+                   @Html.Label("关系" )：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.family.Relation)
+                </td>
+                  </tr>
+              <tr>
+           <td style="width: 100px; text-align: right;">
+                    @Html.Label("工作单位" )：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.family.WorkUnit)
+                </td>
+                  </tr>
+                  <tr>
+           <td style="width: 100px; text-align: right;">
+                    @Html.Label("职务" )：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.family.Job)
+                </td>
+                  </tr>
+                 </tbody>
+    </table>
+    
+            if (ViewBag.family != null)
+            {
+   <table class="fromEditTable setTextWidth300 tab">
+       
+       <tr> <td class="c">姓名</td>
+           <td class="fam">关系</td>
+           <td class="fam">职业</td>
+           <td class="fam">单位</td>
+           <td class="fam">操作</td></tr>
+@foreach (dynamic p in ViewBag.family)
+{
+     <tr>
+         <td class="c">@p.Name</td>
+         <td class="fam">@p.Relation</td>
+         <td class="fam">@p.Job</td>
+         <td class="fam">@p.WorkUnit</td>
+         <td><a href="#" onclick="edit(@p.ID,@ViewBag.flag)">修改</a> | <a href="#" onclick="delinfo(@p.ID,@ViewBag.flag)">删除</a></td>   
+         </tr>
+}
+</table>
+        
+            }
+         
+        } 
+        else if (ViewBag.flag == 2)
+        {
+            <table class="fromEditTable setTextWidth300">
+        <tbody>
+           <tr>
+                <td style="width: 100px; text-align: right;">
+                    @Html.LabelFor(model => model.reward.RewardPunishDate)：   
+                </td>
+                <td >
+                    @Html.TextBoxFor(model => model.reward.RewardPunishDate, new { @class = "easyui-datebox" })
+                </td>
+                  
+                
+            </tr>  
+              <tr>
+           <td style="width: 100px; text-align: right;">
+                    @Html.LabelFor(model => model.reward.RewardPunishiDetails)：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.reward.RewardPunishiDetails)
+                </td>
+                  </tr>
+             </tbody>
+    </table>@*
+            if (ViewBag.rew != null)
+            {    
+      <table class="fromEditTable setTextWidth300 tab">
+         
+       <tr>
+           <td  class="c" style="width:200px;">奖惩时间</td>
+           <td class="fam">奖惩明细</td><td class="fam">操作</td>
+
+       </tr>
+    @foreach (dynamic p in ViewBag.rew)
+    {
+     <tr>
+         <td class="c getDate">@p.RewardPunishDate.ToShortDateString()</td>
+         <td class="fam">@p.RewardPunishiDetails</td>
+         <td><a href="#" onclick="edit(@p.ID,@ViewBag.flag)">修改</a> | <a href="#" onclick="delinfo(@p.ID,@ViewBag.flag)">删除</a></td>
+
+     </tr>
+    }
+   </table> 
+        
+            }*@
+         
+        }
+        else if (ViewBag.flag == 3)
+        { <table class="fromEditTable setTextWidth300">
+        <tbody>
+           <tr>
+                <td style="width: 100px; text-align: right;">
+                    @Html.LabelFor(model => model.performance.PerformanceDate)：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.performance.PerformanceDate, new { @class = "easyui-datebox" })
+                </td>
+                  
+                
+            </tr>  
+              <tr>
+           <td style="width: 100px; text-align: right;">
+                    @Html.LabelFor(model => model.performance.PerformanceDetails)：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.performance.PerformanceDetails)
+                </td>
+                  </tr>
+             </tbody>
+    </table>
+            if (ViewBag.performance != null)
+            {
+         <table class="fromEditTable setTextWidth300 tab">
+              
+       <tr>
+           <td class="c" style="width:200px;">日期</td>
+           <td class="fam">成绩</td>
+           <td class="fam">操作</td>
+
+       </tr>
+         
+@foreach (dynamic p in ViewBag.performance)
+{
+    <tr>
+        <td class="c getDate">@p.PerformanceDate</td>
+        <td class="fam">@p.PerformanceDetails</td>
+        <td><a href="#" onclick="edit(@p.ID,@ViewBag.flag)">修改</a> | <a href="#" onclick="delinfo(@p.ID,@ViewBag.flag)">删除</a></td></tr>
+}
+         </table>
+        
+            }
+
+        }
+        else if (ViewBag.flag == 6)
+        { <table class="fromEditTable setTextWidth300">
+            <thead><tr><td colspan="2" style="text-align:center">工作经验</td></tr></thead>
+        <tbody>
+           <tr>
+                <td style="width: 100px; text-align: right;">
+                    @Html.Label("公司")：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.experience.Company)
+                </td>
+                  
+                
+            </tr>  
+              <tr>
+           <td style="width: 100px; text-align: right;">
+                    @Html.Label("职务")：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.experience.Job)
+                </td>
+                  </tr>
+
+             <tr>
+           <td style="width: 100px; text-align: right;">
+                    @Html.Label("离职原因")：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.experience.QuitReason)
+                </td>
+                  </tr>
+
+             <tr>
+           <td style="width: 100px; text-align: right;">
+                    @Html.Label("工作起始时间")：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.experience.StartFinishTime)
+                </td>
+                  </tr>
+
+             <tr>
+           <td style="width: 100px; text-align: right;">
+                    @Html.Label("证明人")：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.experience.Winter)
+                </td>
+                  </tr>
+
+              <tr>
+           <td style="width: 100px; text-align: right;">
+                    @Html.Label("证明人职位")：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.experience.WinterJob)
+                </td>
+                  </tr>
+
+              <tr>
+           <td style="width: 100px; text-align: right;">
+                    @Html.Label("证明人电话")：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.experience.WinterTel)
+                </td>
+                  </tr>
+             </tbody>
+    </table>
+           
+
+        }
+         else if (ViewBag.flag == 7)
+        { <table class="fromEditTable setTextWidth300">
+            <thead><tr><td colspan="2" style="text-align:center">教育背景</td></tr></thead>
+        <tbody>
+           <tr>
+                <td style="width: 100px; text-align: right;">
+                    @Html.Label("学校")：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.EduBackgroud.School)
+                </td>
+                  
+                
+            </tr>  
+              <tr>
+           <td style="width: 100px; text-align: right;">
+                    @Html.Label("专业")：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.EduBackgroud.Specialty)
+                </td>
+                  </tr>
+
+             <tr>
+           <td style="width: 100px; text-align: right;">
+                    @Html.Label("起始时间")：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.EduBackgroud.StartFinishTime)
+                </td>
+                  </tr>
+
+           
+             </tbody>
+    </table>
+           
+
+        }
+     
+   
+           @Html.HiddenFor(model => model.person.ID)
+    }
+
+     </div>
+<div id="openDivEditInfo"  class="easyui-dialog" closed="true" modal="true" title="修改其他信息"
+    style="width:500px; height: 500px;" resizable="true" closable="true">
+    <iframe scrolling="no" id='openIframeEditInfo' frameborder="0" src="" style="width: 100%; height: 98%;"></iframe>
+</div>

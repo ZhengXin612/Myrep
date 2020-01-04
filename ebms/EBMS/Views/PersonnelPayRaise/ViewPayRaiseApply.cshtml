@@ -1,0 +1,121 @@
+﻿@model EBMS.Models.T_PersonnelPayRaise
+@{
+    ViewBag.Title = "ViewPayRaiseApply";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+
+<script type="text/javascript">
+    $(function () {
+        var flag = 0;
+        $('#btnSave').click(function () {
+           
+            if ($("#EditForm").valid() && flag == 0) {
+                loading(0)
+                flag += 1;
+                $.ajax({
+                    url: "/PersonnelPayRaise/PersonnelPayRaiseApplySave",
+                    type: "Post",
+                    data: $("#EditForm").serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        loading(1);
+                        if (data.State == "Success") {
+                            $.messager.alert("提示", "@Lib.MessageRes.SaveOK", "info", function () {
+                                window.location.reload();
+                            })
+                        }
+                        else {
+                            $.messager.alert("提示", data.Message, "info");
+                            flag = 0;
+                           
+                        }
+                    },
+                    error: function (data)
+                    {
+                        flag = 0;
+                        $.messager.alert("提示", data, "info");
+                    }
+                });
+            }
+            return false;
+
+        });
+
+    })
+   
+
+
+</script>
+<style>
+    .lab {
+  width: 110px; 
+  text-align: right;}
+</style>
+<div class="mvctool">
+    <a id="btnSave" href="javascript:;" class="modal-btn modal-btn-save">保存</a>
+    
+</div>
+
+<div>
+    @using (Html.BeginForm("EditForm", "Controllers", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+    <table class="fromEditTable setTextWidth300">
+       
+        <tbody>
+            <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.PresentSalary):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model => model.PresentSalary)
+               </td>
+                  <td>
+                   @Html.ValidationMessageFor(model => model.PresentSalary)
+               </td>
+          </tr> 
+          <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.PayRaise):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model => model.PayRaise)
+               </td>
+               <td>
+                   @Html.ValidationMessageFor(model => model.PayRaise)
+               </td>
+          </tr> 
+             
+              <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.Reason):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model => model.Reason)
+               </td>
+                   <td>
+                   @Html.ValidationMessageFor(model => model.Reason)
+               </td>
+          </tr> 
+             <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.CurrentApproveName):
+               </td>
+               <td>
+                   @Html.DropDownListFor(model => model.CurrentApproveName,ViewData["approveList"] as List<SelectListItem>)
+               </td>
+                   <td>
+                   @Html.ValidationMessageFor(model => model.CurrentApproveName)
+               </td>
+          </tr>  
+
+        </tbody>
+    </table>
+           @Html.HiddenFor(model => model.ID)
+        @Html.HiddenFor(model => model.PFID)
+        @Html.HiddenFor(model => model.PostUser)
+        
+}
+
+</div>
+

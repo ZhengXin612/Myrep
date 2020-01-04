@@ -1,0 +1,119 @@
+﻿@model EBMS.Models.T_Borrow
+@{
+    ViewBag.Title = "ViewSetement";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<script type="text/javascript">
+    $(function () {
+        var sign = 0;
+        if ($("#num").val() == 2) {
+            $("#txtSettementCost").attr("readonly", "readonly");
+        }
+        $("#btnSave").click(function () {
+            var reg = /^(([0-9]+)|([0-9]+\.[0-9]{1,2}))$/;
+            if (!reg.test($("#txtSettementCost").val().trim())) {
+                $.messager.alert('提示', "结算金额格式有误", "info");
+                return false;
+            }
+            var para = { code: "@Model.BorrowCode", settementCost: $("#txtSettementCost").val().trim(), SurplusCost: $("#SurplusCost").text(), remark: $("#txtRemark").val().trim(), num: $("#num").val() };
+            if ($("#num").val() == 2) {
+                if ($("#txtReunCode").val().trim() == "") {
+                    $.messager.alert('提示', "报销单号不能为空", "info");
+                    return false;
+                }
+                para = { code: "@Model.BorrowCode", settementCost: $("#txtSettementCost").val().trim(), SurplusCost: $("#SurplusCost").text(), remark: $("#txtRemark").val().trim(), num: $("#num").val(), ReunCode: $("#txtReunCode").val().trim() };
+            }
+            if (sign == 0) {
+                sign++;
+                loading(0);
+                $.ajax({
+                    url: "ViewSettementSave",
+                    type: "Post",
+                    data: para,
+                    success: function (data) {
+                        loading(1);
+                        if (data.State == "Success") {
+                            $.messager.alert('提示', '操作成功', "info", function () {
+                                parent.$('#settementlDiv').dialog('close');
+                                parent.$("#List").datagrid("reload");
+                                sign = 0
+                            });
+                        } else {
+                            $.messager.alert('提示', data.Message, "info", function () {
+                                $("#List").datagrid("reload");
+                                sign = 0
+                            });
+                        }
+                        parent.$('#List').datagrid("clearSelections");
+                    },
+                    error: function () {
+                        loading(1);
+                        sign = 0;
+                    }
+                });
+            }
+        });
+        $("#txtReunCode").click(function () {
+            $('#openIframeExpense')[0].src = "ViewExpenseCodeIscheck";
+            $('#openExpense').dialog('open');
+        })
+    });
+
+    function addtext(rows) {
+        $('#openExpense').dialog('close');
+        for (var i = 0; i < rows.length; i++) {
+            $("#txtReunCode").val(rows[i].Reun_Code);
+            $("#txtSettementCost").val(rows[i].Reun_Cost);
+        }
+    }
+</script>
+<div class="mvctool">
+    <input type="hidden" name="num" value="@ViewData["num"]" id="num" />
+    <input id="btnSave" class="modal-btn modal-btn-save" type="submit" value="保存">
+</div>
+<table class="fromEditTable setTextWidth300">
+    <tbody>
+        <tr>
+            <td style="width: 170px; text-align: right;">借支金额：    
+            </td>
+            <td>
+                <span id="BorrowMoney">@Model.BorrowMoney</span>
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 170px; text-align: right;">剩余金额：    
+            </td>
+            <td>
+                <span id="SurplusCost">@ViewData["SurplusCost"]</span>
+            </td>
+        </tr>
+        @if (ViewData["num"].ToString() == "2")
+        {
+            <tr>
+                <td style="text-align: right;">报销单号：    
+                </td>
+                <td>
+                    <input type="text" name="txtReunCode" id="txtReunCode" style="width: 170px;" readonly="readonly" />
+                </td>
+            </tr>
+        }
+        <tr>
+            <td style="text-align: right;">结算金额：    
+            </td>
+            <td>
+                <input type="text" name="txtSettementCost" id="txtSettementCost" style="width: 170px;" />
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align: right;">备注：    
+            </td>
+            <td>
+                <input type="text" name="txtRemark" id="txtRemark" style="width: 170px;" />
+            </td>
+        </tr>
+    </tbody>
+</table>
+<div id="openExpense" class="easyui-dialog" closed="true" modal="true" title="选择报销单号" style="width: 550px; height: 400px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIframeExpense' frameborder="0" src="" style="width: 100%; height: 98%;"></iframe>
+</div>
+

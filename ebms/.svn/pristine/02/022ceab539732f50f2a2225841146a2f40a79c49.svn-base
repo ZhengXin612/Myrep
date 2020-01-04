@@ -1,0 +1,102 @@
+﻿@model  EBMS.Models.T_SecurityCode
+@using Lib;
+@{
+    ViewBag.Title = "新增";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+    
+}
+
+<script type="text/javascript">
+    $(function () {
+        $("#btnSave").click(function () {
+            if ($("#EditForm").valid()) {
+                if ($('#ManufactorAddress').val() == null || $('#ManufactorAddress').val() == "") {
+                    $.messager.alert("提示", "厂家地址必须填写", "info")
+                    return false;
+                }
+                if ($('#ProductName').val() == null || $('#ProductName').val() == "") {
+                    $.messager.alert("提示", "产品名称必须填写", "info")
+                    return false;
+                }
+                $.ajax({
+                    url: "../SecurityCode/SecurityCodeApp",
+                    type: "Post",
+                    data: $("#EditForm").serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        if (data == "1") {
+                            $.messager.alert("提示", "保存成功", "info", function () {
+                                window.location.reload();
+                            })
+                        }
+                        else {
+                            $.messager.alert("提示", "保存失败", "info");
+                        }
+
+                    }
+                });
+            }
+
+        });
+    });
+
+</script>
+<div class="mvctool">
+  <input id="btnSave" class="modal-btn modal-btn-save" type="submit" value="保存">
+</div>
+<div>
+    @using (Html.BeginForm("EditForm", "Controllers", null, FormMethod.Post, new { Id = "EditForm" }))
+    {
+    @Html.ValidationSummary(true)
+    <table class="fromEditTable setTextWidth300">
+        <tbody>
+            <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.ManufactorAddress):
+               </td>
+               <td>
+                 @Html.TextBoxFor(model => model.ManufactorAddress)
+               </td>
+               <td>
+                   @Html.ValidationMessageFor(model => model.ManufactorAddress)
+               </td>
+                  <td class="lab">
+                  @Html.LabelFor(model => model.ProductName):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model => model.ProductName)
+               </td>
+               <td>
+                   @Html.ValidationMessageFor(model => model.ProductName)
+               </td>
+          </tr> 
+               <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.LabelNumber):
+               </td>
+               <td>
+                 @Html.TextBoxFor(model => model.LabelNumber)
+               </td>
+               <td>
+                   @Html.ValidationMessageFor(model => model.LabelNumber)
+               </td>
+                  <td class="lab">
+                  @Html.LabelFor(model => model.ProductNumber):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model => model.ProductNumber)
+               </td>
+               <td>
+                   @Html.ValidationMessageFor(model => model.ProductNumber)
+               </td>
+          </tr> 
+         
+        </tbody>
+    </table>
+           @Html.HiddenFor(model => model.ID)
+       
+    }
+</div>
+
+
+

@@ -1,0 +1,177 @@
+﻿@model EBMS.Models.T_PurchaseFinance
+@{
+    ViewBag.Title = "ViewBorrowAdd";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<script type="text/javascript">
+    $(function () {
+      
+        var sign = 0;
+        $("#btnSave").click(function () {
+            if ($("#PurchaseOddNum").val() == "") {
+                $.messager.alert('提示', "采购单号", "info");
+                return false;
+            }
+            if ($("#needpay").val() == "") {
+                $.messager.alert('提示', "需付金额必须填写", "info");
+                return false;
+            }
+            if ($("#paymentaccounts").val() == "") {
+                $.messager.alert('提示', "需付帐号必须填写", "info");
+                return false;
+            }
+         
+            if ($("#EditForm").valid()) {
+                if (sign == 0) {
+                    sign++;
+                    loading(0);
+                    $.ajax({
+                        url: "PurchaseFinanceAdd?Purchase=" + $("#PurchaseOddNum").val(),
+                        type: "Post",
+                        data: $("#EditForm").serialize(),
+                        success: function (data) {
+                            loading(1);
+                            if (data == "保存成功") {
+                                $.messager.alert('提示', '申请成功', "info", function () {
+                                    window.location.reload();
+                                    sign = 0
+                                });
+                            } else {
+                                $.messager.alert('提示', data.Message, "info", function () {
+                                    $("#List").datagrid("reload");
+                                    sign = 0
+                                });
+                            }
+                        },
+                        error: function () {
+                            loading(1);
+                            sign = 0;
+                        }
+                    });
+                }
+            }
+        });
+    });
+    function addCompany(rows)
+    {
+        $('#ReceivingDiv').dialog('close');
+        $("#PurchaseOddNum").val(rows[0].PurchaseOddNum);
+        $("#CopelPay").val(rows[0].CopelPay);
+        $("#needpay").val(rows[0].needpay);
+        $("#ActualPay").val(rows[0].ActualPay);
+    }
+    function Purchase()
+    {
+        $('#openIframeReceiving')[0].src = "../Purchase/ViewPurchaseQuery";
+        $('#ReceivingDiv').dialog('open');
+    }
+
+</script>
+<div class="mvctool">
+    <input id="btnSave" class="modal-btn modal-btn-save" type="submit" value="保存">
+</div>
+@using (Html.BeginForm("EditForm", "Controller", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+   
+    @Html.ValidationSummary(true)
+   
+    <table class="fromEditTable setTextWidth300">
+        <tbody>
+            <tr>
+                <td style="width: 170px; text-align: right;">
+                    @Html.LabelFor(model => model.ApplyName)：    
+                </td>
+                <td style="width: 250px;">
+                    @Html.TextBoxFor(model => model.ApplyName, new { @readonly = true, style = "width:120px;" })
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.ApplyName)
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right;">
+                    @Html.LabelFor(model => model.PurchaseOddNum)：    
+                </td>
+                <td>
+                    <input type="text" id="PurchaseOddNum" style="width:170px" readonly="readonly"  onclick="Purchase()" />
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.PurchaseOddNum)
+                </td>
+            </tr>
+             <tr>
+                <td style="text-align: right;">
+                  应付金额：
+                </td>
+                <td>
+                    <input type="text" id="CopelPay" style="width:170px" readonly="readonly"   />
+                </td>
+                
+            </tr>
+             <tr>
+                <td style="text-align: right;">
+                   待财务付款金额：
+                </td>
+                <td>
+                    <input type="text" id="needpay" style="width:170px" readonly="readonly" />
+                </td>
+            </tr>
+             <tr>
+                <td style="text-align: right;">
+                   已付金额：
+                </td>
+                <td>
+                    <input type="text" id="ActualPay" style="width:170px" readonly="readonly" />
+                </td>
+            </tr>
+           <tr>
+                <td style="text-align: right;">
+                    @Html.LabelFor(model => model.needpay)：    
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.needpay, new {  style = "width:170px;" })
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.needpay)
+                </td>
+            </tr>
+           <tr>
+                <td style="text-align: right;">
+                    @Html.LabelFor(model => model.paymentaccounts)：    
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.paymentaccounts, new {  style = "width:170px;" })
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.paymentaccounts)
+                </td>
+            </tr>
+             <tr>
+                <td style="text-align: right;">
+                    @Html.LabelFor(model => model.paymenmode)：    
+                </td>
+                <td>
+                        @Html.DropDownListFor(model => model.paymenmode, ViewData["paymenmode"] as List<SelectListItem>)
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.paymenmode)
+                </td>
+            </tr>
+             <tr>
+                <td style="text-align: right;">
+                    @Html.LabelFor(model => model.ApplyRemarks)：    
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.ApplyRemarks, new { style = "width:170px;" })
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.ApplyRemarks)
+                </td>
+            </tr>
+        </tbody>
+    </table>
+}
+<div id="ReceivingDiv" class="easyui-dialog" closed="true" modal="true" title="查看采购单" style="width:1050px; height:600px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIframeReceiving' frameborder="0" src="" style="width:100%;height:98%;"></iframe>
+</div>

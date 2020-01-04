@@ -1,0 +1,32 @@
+﻿@{
+    ViewBag.Title = "ViewReceiptDetail";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+<script type="text/javascript">
+
+    $(function () {
+        grid = $('#List').datagrid({
+            url: "GetReceiptDetail?receiptId=" + "@ViewData["receiptId"]",
+            width: $(window).width() - 10,
+            height: $(window).height() * 0.98,
+            method: 'post',
+            fitColumns: true,
+            sortName: 'ID',
+            sortOrder: 'desc',
+            idField: 'ID',
+            pageSize: 10,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                    { field: 'ProductName', title: '商品名称', width: 140, align: 'center' },
+                    { field: 'Unit', title: '单位', width: 80, align: 'center' },
+                    { field: 'Qty', title: '数量', width: 60, align: 'center' }
+            ]]
+        });
+    });
+</script>

@@ -1,0 +1,214 @@
+﻿@{
+    ViewBag.Title = "ViewEmployeeDemandMyList";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+
+<div class="Company-top-box">
+   
+     <div class="search-box">
+         <input type="text" placeholder="岗位.." id="txtQuery"  class="icon-search-txt">
+     
+         <input type="button" value="查询" id="btnQuery" class="icon-search">
+    </div>
+     <div class="btn-bar">
+        <a href="#" id="btnEdit" class="icon-edit">编辑</a>
+          <a href="#" id="btnVoid" class="icon-void">作废</a>
+        <a href="#" id="btnDelete" class="icon-remove">删除</a>
+         <a href="#" id="btnDetail" class="showBar">审核详情</a>
+    </div>
+</div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+
+<script type="text/javascript">
+    function op(name, url) {
+        self.parent.addTab(name, url, '');
+        getContextmenu()
+    }
+    enterSearch("#btnQuery");
+    $(function () {
+        var url = "/EmployeeDemand/GetEmployeeDemandList/?isMy=1";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width()-15,
+            method: 'post',
+            height: $(window).height() - 45,
+            fitColumns: true,
+           // sortName: 'Code',
+            sortOrder: 'desc',
+            idField: 'ID',
+            pageSize: 20,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                
+                { field: 'Job', title: '岗位', width: 60, align: 'center' },
+                 { field: 'DemandDepartment', title: '部门', width: 60, align: 'center' },
+                { field: 'PeopleNum', title: '人数', width: 80, align: 'center' },
+                { field: 'DistributionNum', title: '已分配人数', width: 80, align: 'center' },
+                {field: 'State', title: '审核状态', width: 40, align: 'center', formatter: stateSecond},
+                { field: 'Date', title: '申请时间', width: 60, align: 'center' },
+                { field: 'Memo', title: '备注', width: 110, align: 'center' },
+
+            ]],
+            onDblClickRow: function (rowIndex, rowData) {
+                Detail()
+            },
+
+
+        })
+
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 40
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 40
+            });
+        });
+
+
+    })
+
+ function Query()
+    {
+     var queryStr = $("#txtQuery").val();
+     //var State = $("#State").val();
+     $('#List').datagrid({
+            url: '/EmployeeDemand/GetEmployeeDemandList?isMy=1&queryStr=' + encodeURI(queryStr) //+ '&State=' + State// + '&EndDate=' + EndDate + '&dianming=' + dianming
+
+        });
+        $("#txtQuery").focus().select();
+    }
+    $('#btnQuery').click(function () {
+
+        Query();
+
+    });
+    $("#btnEdit").click(function () {
+        var row = $('#List').datagrid('getSelected');
+        if (row != null) {
+            if (row.State == -1||row.State ==2) {
+             
+                $('#IframeEdit')[0].src = "/EmployeeDemand/ViewEmployeeDemandEdit?ID=" + row.ID;
+                $('#editDiv').dialog('open');
+            }
+            else { $.messager.alert('提示', '不允许修改已处理的记录', "info"); }
+        }
+        else { $.messager.alert('提示', '@Lib.MessageRes.PleaseSelect', "info"); }
+    });
+
+    $("#btnDelete").click(function () {
+        var row = $('#List').datagrid('getSelected');
+        if (row != null) {
+            if (row.State == -1) {
+                $.messager.confirm('提示', "@Lib.MessageRes.DelConfirm", function (r) {
+                  
+                    if (r) {
+                        loading(0);
+                        var flag = 0
+                        if (flag == 0) {
+                            flag++
+                            $.ajax({
+                                url: "/EmployeeDemand/EmployeeDemandDelete?ID=" + row.ID,
+                                type: "Post",
+                                contentType: "application/json",
+                                // data: JSON.stringify(p),
+                                dataType: "json",
+                                success: function (data) {
+                                    if (data > 0) {
+                                        loading(1);
+                                        $('#List').datagrid('reload');
+
+                                        $.messager.alert('提示', '@Lib.MessageRes.DelOK', "info");
+
+                                    }
+                                    else {
+                                        loading(1);
+                                        flag = 0
+                                        $.messager.alert('提示', '删除失败', "info");
+                                    }
+                                }, error: function (data) {
+                                    loading(1);
+                                    flag = 0;
+                                    $.messager.alert('提示', data, "info");
+                                }
+
+                            });
+                        }
+                    }
+                });
+            }
+            else { $.messager.alert('提示', '不允许删除已处理的记录', "info"); }
+        }
+        else {
+            $.messager.alert('提示', '@Lib.MessageRes.PleaseSelect', "info");
+        }
+    });
+    $("#btnVoid").click(function () {
+        var row = $('#List').datagrid('getSelected');
+        if (row != null) {
+            if (row.State == -1||row.State ==2) {
+                $.messager.confirm('提示', "确定作废该记录吗", function (r) {
+
+                    if (r) {
+                        loading(0);
+                        var flag = 0
+                        if (flag == 0) {
+                            flag++
+                            $.ajax({
+                                url: "/EmployeeDemand/EmployeeDemandVoid?ID=" + row.ID,
+                                type: "Post",
+                                contentType: "application/json",
+                                // data: JSON.stringify(p),
+                                dataType: "json",
+                                success: function (data) {
+                                    if (data > 0) {
+                                        loading(1);
+                                        $('#List').datagrid('reload');
+                                        $.messager.alert('提示', '成功', "info");
+                                    }
+                                    else {
+                                        loading(1);
+                                        flag = 0
+                                        $.messager.alert('提示', '失败', "info");
+                                    }
+                                    $('#List').datagrid("clearSelections");
+                                }, error: function (data) {
+                                    loading(1);
+                                    flag = 0;
+                                    $.messager.alert('提示', data, "info");
+                                }
+
+                            });
+                        }
+                    }
+                });
+            }
+            else { $.messager.alert('提示', '不允许作废该记录', "info"); }
+        }
+        else {
+            $.messager.alert('提示', '@Lib.MessageRes.PleaseSelect', "info");
+        }
+    });
+    function Detail() {
+        var row = $('#List').datagrid('getSelected');
+        if (row != null) {
+            $("#DetailDiv").prev(".panel-header").find(".panel-title").html("详情")
+            $('#IframeDetail')[0].src = "ViewEmployeeDemandCheckDetail?DID=" +row.ID;
+            $('#DetailDiv').dialog('open');
+        }
+        else { $.messager.alert('提示', '@Lib.MessageRes.PleaseSelect', "info"); }
+    }
+
+</script>
+<div id="DetailDiv" class="easyui-dialog" closed="true" modal="true" title="详情" style="width:50%; height:50%;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='IframeDetail' frameborder="0" src="" style="width:100%;height:98%;"></iframe>
+</div>
+<div id="editDiv" class="easyui-dialog" closed="true" modal="true" title="编辑" style="width:40%; height:50%;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='IframeEdit' frameborder="0" src="" style="width:100%;height:98%;"></iframe>
+</div>

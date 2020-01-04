@@ -1,0 +1,220 @@
+﻿@{
+    ViewBag.Title = "ViewExpenseListManage";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+<div class="Company-top-box">
+    <div class="search-box">
+     
+        <input type="text" id="txtQuery" style="width: 150px;" placeholder="单号" />
+           <input type="text" id="txtjine" style="width: 150px;" placeholder="金额" />
+           <input type="text" id="txtName" style="width: 150px;" placeholder="申请人" />
+        <span style="color: #808080; padding-right: 10px; font-size: 13px; margin-top: 3px; margin-left: 10px;">开始时间</span>
+        <input name="statethisdate" style="float: left;" value="" id="statethisdate" class="easyui-datebox" data-options="sharedCalendar:'#statethisdate'">
+        <span style="color: #808080; padding-right: 10px; font-size: 13px; margin-top: 3px; margin-left: 10px;">结束时间</span>
+        <input name="Endthisdate" style="float: left;" value="" id="Endthisdate" class="easyui-datebox" data-options="sharedCalendar:'#Endthisdate'">
+        <input type="button" value="查询" id="btnQuery" class="icon-search">
+         <input type="button" value="勾选" id="btnBlending" class="icon-search">
+    </div>
+    <div class="btn-bar">
+        <p class="showBar">查看详情 : 请双击需要查看的数据</p>
+    </div>
+</div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+<script type="text/javascript">
+    //回车触发查询
+    enterSearch("#btnQuery");
+    $(function () {
+        var url = "ViewViewExpenceBlendingList";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() * 0.95,
+            fitColumns: true,
+            sortName: 'ID',
+            sortOrder: 'desc',
+            idField: 'id',
+            pageSize: 20,
+            pagination: true,
+            showFooter: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                { field: 'PostUser', title: '操作人', width: 60, align: 'center' },
+                { field: 'Reun_Code', title: '报销单号', width: 100, align: 'center' },
+                { field: 'Department', title: '所属部门', width: 80, align: 'center' },
+                { field: 'AccountType', title: '账号类型', width: 60, align: 'center' },
+                { field: 'Reun_Name', title: '账户名称', width: 80, align: 'center' },
+                 { field: 'Reun_Bank', title: '开户行', width: 80, align: 'center' },
+                { field: 'Car_Number', title: '账号', width: 80, align: 'center' },
+                 { field: 'Reun_Cost', title: '报销金额', width: 60, align: 'center' },
+                { field: 'Reun_Reason', title: '报销原因', width: 120, align: 'center' },
+                { field: 'CrateDate', title: '申请日期', width: 60, align: 'center', formatter: formatDatebox },
+                                {
+                                    field: 'MatchBorrowNumber', title: '冲抵借支批号', width: 100, align: 'center', formatter: function (value, row, index) {
+                                        if (value == null)
+                                            return "无"
+                                        else
+                                            return value
+                                    }
+                                },
+                {
+                    field: 'IsExpenseEnclosure', title: '存在附件', width: 60, align: 'center', formatter: function (value, row, index) {
+                        switch (value) {
+                            case 1:
+                                return "<font color=green>是</font>"
+                                break;
+                            case 0:
+                                return "<font color=red>否</font>"
+                                break;
+                            default:
+                                return ""
+                        }
+                    }
+                },
+                  {
+                      field: 'Status', title: '状态', width: 60, align: 'center', formatter: function (value, row, index) {
+                          switch (value) {
+                              case -1:
+                                  return "<font color=blue>未审核</font>"
+                                  break;
+                              case 0:
+                                  return "<font color=blue>审批中</font>"
+                                  break;
+                              case 1:
+                                  return "<font color=green>已同意</font>"
+                                  break;
+                              case 2:
+                                  return "<font color=red>不同意</font>"
+                                  break;
+                              case 3:
+                                  return "<font color=red>已作废</font>"
+                                  break;
+                              default:
+                                  return "<font color=red></font>"
+                          }
+                      }
+                  }
+            ]],
+            onDblClickRow: function (value, row, index) {
+                $('#openIframedetail')[0].src = "ViewExpenseProductDetail?expenseId=" + row.ID;
+                $("#detailDiv").dialog({
+                    onClose: function () {
+                        $("#List").datagrid("reload");//刷新列表 
+                    }
+                });
+                $('#detailDiv').dialog('open');
+            }
+        });
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            });
+        });
+    });
+
+    //打印
+    function Print() {
+        var row = $('#List').datagrid("getSelected");
+        if (row == null) {
+            $.messager.alert('提示', "请选中需要操作的数据", "info");
+            return false;
+        }
+        $('#framePrint')[0].src = "ViewExpensePrint?id=" + row.ID;
+        $("#PrintDiv").dialog({
+            onClose: function () {
+                $("#List").datagrid("reload");//刷新列表 
+            }
+        });
+        $('#PrintDiv').dialog('open');
+    }
+    //得到选中行集合的id
+    function getSelections() {
+        var ss = [];
+        var rows = $('#List').datagrid('getSelections');
+        for (var i = 0; i < rows.length; i++) {
+            var row = rows[i];
+            ss.push(row.ID);
+        }
+        return ss;
+    }
+    
+    $("#btnBlending").click(function () {
+        var row = getSelections();
+      
+        if (row == null)
+        {
+            alert("请选择一条记录");
+            return;
+        }
+
+        $.ajax({
+            url: "../Expense/ExpenceBlendingFinance?del=" + row,
+            type: "Post",
+            contentType: "application/json",
+            // data: JSON.stringify(p),
+            dataType: "json",
+            success: function (data) {
+                if (data >0 )
+                {
+                    alert("勾兑成功")
+                    Query();
+                }
+                loading(1);
+            }, error: function () {
+                loading(1);
+            }
+
+        });
+        
+       
+
+    });
+    $("#btnQuery").click(function () {
+
+        var queryStr = $("#txtQuery").val().trim();
+        var txtjine = $("#txtjine").val().trim();
+        var txtName = $("#txtName").val().trim();
+        var statedate = $('#statethisdate').datebox('getValue');
+        var EndDate = $('#Endthisdate').datebox('getValue');
+        //如果查询条件为空默认查询全部
+        if (queryStr == null) {
+            queryStr = "%";
+        }
+
+        $('#List').datagrid({
+            url: 'ViewViewExpenceBlendingList?code=' + encodeURI(queryStr) + "&startDate=" + statedate + "&endDate=" + EndDate + "&txtjine=" + txtjine + "&txtName=" + txtName
+        });
+
+    });
+    function Query()
+    {
+        var queryStr = $("#txtQuery").val().trim();
+        var status = $("#selStatus").val();
+        var statedate = $('#statethisdate').datebox('getValue');
+        var EndDate = $('#Endthisdate').datebox('getValue');
+        //如果查询条件为空默认查询全部
+        if (queryStr == null) {
+            queryStr = "%";
+        }
+
+        $('#List').datagrid({
+            url: 'ViewViewExpenceBlendingList?code=' + encodeURI(queryStr) + "&startDate=" + statedate + "&endDate=" + EndDate
+        });
+
+    }
+
+</script>
+<div id="detailDiv" class="easyui-dialog" closed="true" modal="true" title="详情" style="width: 800px; height: 600px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIframedetail' frameborder="0" src="" style="width: 98%; height: 98%;"></iframe>
+</div>
+

@@ -1,0 +1,146 @@
+﻿@model EBMS.Models.T_Freeze
+@{
+    ViewBag.Title = "ViewFundFreezeApprove";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<script type="text/javascript">
+    $(function () {
+        $("#btnAgree").click(function () {
+            var para = { "approveid": "@ViewData["approID"]", "status": 3, "memo": $("#Memo").val(), step: "@Model.Step" };
+            if ($("#hiddenConfig").val() == "") {
+                var reg = /^(([0-9]+)|([0-9]+\.[0-9]{1,2}))$/;
+                if (!reg.test($("#usedMoney").val().trim())) {
+                    $.messager.alert('提示', "金额格式有误", "info");
+                    return false;
+                }
+                else
+                    para = { "approveid": "@ViewData["approID"]", "status": 3, "memo": $("#Memo").val(), step: "@Model.Step", usedMoney: $("#usedMoney").val() };
+            }
+            $.messager.confirm("操作提示", "您确定要执行操作吗？", function (data) {
+                if (data) {
+                    post(para);
+                }
+            });
+        });
+
+        $("#btnUnAgree").click(function () {
+            $.messager.confirm("操作提示", "您确定要执行操作吗？", function (data) {
+                if (data) {
+                    var para = { "approveid": "@ViewData["approID"]", "status": 4, "memo": $("#Memo").val(), step: "@Model.Step" };
+                    post(para);
+                }
+            });
+        });
+
+        var sign = 0;
+        function post(para) {
+            if (sign == 0) {
+                loading(0);
+                sign++;
+                $.ajax({
+                    url: "FreezeCheck",
+                    type: "post",
+                    data: para,
+                    dataType: "json",
+                    success: function (data) {
+                        loading(1);
+                        if (data.State == "Success") {
+                            $.messager.alert('提示', "操作成功", "info", function () {
+                                parent.$('#approveDiv').dialog('close');
+                                parent.$('#List').datagrid('reload');
+                                sign = 0;
+                            });
+                        }
+                        else {
+                            $.messager.alert('提示', data.Message, "info");
+                            sign = 0;
+                        }
+                        parent.$('#List').datagrid("clearSelections");
+                    },
+                    error: function () {
+                        loading(1);
+                        sign = 0;
+                    }
+                });
+            }
+        }
+    });
+</script>
+<div>
+    <table class="fromEditTable setTextWidth300">
+        <tr>
+            <td>
+                <div class="approve-btn-box">
+                    <div class="btn-bar">
+                        <a href="#" id="btnAgree" class="icon-agree">同意</a>
+                        <a href="#" id="btnUnAgree" class="icon-disagree">不同意</a>
+                    </div>
+                </div>
+            </td>
+            <td style="text-align: right">审核备注：
+            </td>
+            <td>
+                <input type="text" id="Memo" /></td>
+        </tr>
+    </table>
+    <table class="fromEditTable setTextWidth300">
+        <tbody>
+            <tr>
+                <td style="text-align: right;">
+                    <input type="hidden" id="hiddenConfig" value="@ViewData["config"]" />
+                    @Html.LabelFor(model => model.userName)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.userName)
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right;">
+                    @Html.LabelFor(model => model.alipay)：    
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.alipay)
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right;">
+                    @Html.LabelFor(model => model.shopName)：    
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.shopName)
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right;">
+                    @Html.LabelFor(model => model.freezeMoney)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.freezeMoney)
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right;">
+                    @Html.LabelFor(model => model.freezeReason)：   
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.freezeReason)
+                </td>
+            </tr>
+            @if (ViewData["config"].ToString() == "")
+            {
+                <tr>
+                    <td style="text-align: right;">
+                        @Html.LabelFor(model => model.usedMoney)：   
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.usedMoney, new { @style = "width:60px;" })
+                    </td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+</div>
+<hr style="height: 3px; color: blue" />
+@Html.Raw(ViewData["history"])

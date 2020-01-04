@@ -1,0 +1,277 @@
+﻿@{
+    ViewBag.Title = "ViewExpensePrint";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/NumIntoChinese.js")" type="text/javascript"></script>
+<script type="text/javascript">
+
+	var total = "@ViewData["total"]";
+	$(function () {
+		var id = "@ViewData["Bid"]";
+		var page = "@ViewData["page"]";
+		var PrintCount = "@ViewData["PrintCount"]";
+		bandingshuju(id, page);
+		bandingchanp(id, page);
+	})
+	function guanbi() {
+		parent.$('#openDivbaoxiaodan').dialog('close');
+
+	}
+
+	function printpage(id) {
+		$.ajax({
+			url: "UpdateprintCountByID",
+			type: "Post",
+			data: { id: id },
+			dataType: "json",
+			success: function (data) {
+				if (data.State == "Success") {
+					parent.$("#List").datagrid("reload");
+					window.print();
+				}
+				else {
+					$.messager.alert("提示", data.Message, "info");
+				}
+
+			}
+		});
+
+	}
+
+	function bandingshuju(id, page) {
+
+		$.post("GetExpensePrint", { "id": id }, function (data) {
+			var dates = formatDateBoxFullnianyueri(data.CrateDate);
+			$("#riqi").html(dates);
+			$("#bumen").html("-"+data.Department);
+			$("#postName").html(data.PostUser);
+			$("#bankAccount").html( data.Car_Number);
+			$("#ReceiverName").html(data.Reun_Name);
+			
+			$("#bankName").html(data.Reun_Bank);
+			// $("#fujianzongshu").html(15);
+
+		});
+
+	}
+	function bandingchanp(id, page) {
+
+		$.post("GetExpenseProductPrint", { "expenseId": id, "page": page }, function (data) {
+			
+
+			var htmlStr = "";
+			for (var i = 0; i < data.length; i++) {
+				
+					htmlStr += "<tr class=\"b-b\">" +
+					"<td >"+((page-1)*35+i+1)+"</td> "+
+					"<td >" + data[i].Type + "</td> <td></td>" +
+					"<td colspan=\"2\" >" + data[i].Abstract + "</td>"+
+					"<td >" + (data[i].Price * data[i].Num).toFixed(2) + "</td> <td></td>" +
+					"</tr>";
+				
+				$("#tbodyItem").html(htmlStr);
+				
+			}
+			//分页打印
+			if (page > 1 && total == page) {
+				zongjiage = (parseFloat( @ViewData["jine"]) * 100).toFixed(0);
+			}
+			$("#footPage").html("第" + page + "/" + total + "页");
+			$("#memo").html( "@ViewData["borrowCode"]");
+			
+			if (page == total) {
+				$("#UppercaseMoney").html(ChinaCost(parseFloat( @ViewData["jine"])));
+				var LowercaseMoney = "￥" + @ViewData["jine"]
+            	$("#LowercaseMoney").html(LowercaseMoney);
+				$("#LowercaseMoney1").html(LowercaseMoney);
+				$("#LowercaseMoney2").html(LowercaseMoney);
+
+			}
+			else {
+				$("#tfootItem").html("");
+				
+			}
+           
+        });
+
+    }
+
+    
+    function baocun() {
+
+        var page = "@ViewData["page"]";
+
+		if (page == 1) {
+
+			var id = "@ViewData["Bid"]";
+		}
+	}
+</script>
+<style>
+	select {
+		appearance: none;
+		-moz-appearance: none;
+		-webkit-appearance: none;
+		/*background: url("http://ourjs.github.io/static/2015/arrow.png") no-repeat scroll right center transparent;*/
+		/*padding-right: 14px;*/
+	}
+	select option {
+    direction: ltr;
+}
+</style>
+<!DOCTYPE html>
+<html>
+<head>
+	<title>费用报销单</title>
+	<meta name="renderer" content="webkit">
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<link href="~/Content/Print.css" rel="stylesheet" />
+</head>
+<body>
+	<div class="noprint">
+		<a href="javascript:printpage(@ViewData["id"]);" class="icon-ok">打印</a>
+		<br />
+		分页：@Html.Raw(ViewData["pager"])
+	</div>
+
+	<div class="Any_single">
+		<h2 >费用报销单</h2>
+		<div class="bian-hao">
+			<p>@ViewData["code"]</p>
+			@*<img src="~/Content/barCode.ashx?code=@ViewData["code"]" width="169" height="50">*@
+		</div>
+		
+		<div class="Any_single_body">
+			<p class="fx-item">
+				<span class="fx-t fx-item-a">公司及部门：
+				@Html.DropDownList("Company", ViewData["CompanyList"] as List<SelectListItem>, new { @selected = Model.Company , @dir = "rtl" })
+				<b id="bumen"></b></span>
+				<span class="fx-t fx-item-b">报账人：<b id="postName"></b></span>
+				<span class="fx-t fx-item-b">电话：<b id="Tel"></b></span>
+				<span class="fx-t  fx-item-b">填报日期：<b id="riqi"></b></span>
+				
+			</p>
+			<table class="expense-table">
+				<tr class="b-b">
+					<td>报销事由</td>
+					<td colspan="6" ></td>
+				</tr>
+				<tr class="b-b">
+					<td width="10%">序号</td>
+					<td width="20%">费用项目</td>
+					<td width="10%">业务日期</td>
+					
+					<td width="40%" colspan="2">事由摘要</td>
+					<td width="10%">申报金额</td>
+					<td width="10%">核定金额</td>
+					
+				</tr>
+			
+				<tbody id="tbodyItem">
+					<tr class="b-b">
+						<td id="no0"></td>
+						<td id="type0"></td>
+						<td></td>
+						<td colspan="2" id="zhaiyao0"></td>
+						<td id="money0"></td>
+						<td></td>
+					</tr>
+					<tr class="b-b">
+						<td id="no1"></td>
+						<td id="type1"></td>
+						<td></td>
+						<td colspan="2" id="zhaiyao1"></td>
+						<td id="money1"></td>
+						<td></td>
+					</tr>
+					<tr class="b-b">
+						<td id="no2"></td>
+						<td id="type2"></td>
+						<td></td>
+						<td colspan="2" id="zhaiyao2"></td>
+						<td id="money2"></td>
+						<td></td>
+					</tr>
+				</tbody>
+				
+
+				<tfoot id="tfootItem">
+					<tr class="b-b">
+						<td colspan="5">合计</td>
+						<td id="LowercaseMoney1"></td>
+						<td></td>
+					</tr>
+					<tr class="b-b">
+						<td>申报合计</td>
+						<td id="LowercaseMoney2"></td>
+						<td>会计核定总计</td>
+						<td></td>
+						<td colspan="3">预支 &nbsp; 核销 &nbsp;退补</td>
+					</tr>
+					<tr class="b-b">
+						<td>
+							<p>人民币(大写)</p>
+						</td>
+						<td colspan="2"><b id="UppercaseMoney"></b></td>
+						<td>
+							<p>人民币(小写)</p>
+						</td>
+						<td>
+							<b id="LowercaseMoney"></b>
+						</td>
+						<td colspan="2"><span>附单据 &nbsp;张</span></td>
+					</tr>
+					<tr class="b-b">
+						<td>收款单位</td>
+						<td id="ReceiverName"></td>
+						<td>开户银行</td>
+						<td id="bankName"></td>
+						<td>银行账号</td>
+						<td id="bankAccount" colspan="2"></td>
+
+
+					</tr>
+					<tr class="b-b">
+						<td>经办人</td>
+						<td></td>
+						<td>部门主管</td>
+						<td></td>
+						<td>部门负责人</td>
+						<td colspan="2"></td>
+
+					</tr>
+					<tr class="b-b">
+						<td>报账会计</td>
+						<td></td>
+						<td>财务负责人</td>
+						<td></td>
+						<td>总经理</td>
+						<td colspan="2"></td>
+
+					</tr>
+					<tr class="b-b">
+						<td>备注</td>
+						<td colspan="6" id="memo"></td>
+
+
+					</tr>
+				</tfoot>
+				
+			</table>
+			<div class="table-bot">
+				<p>单据流转说明:填报人→部门主管→部门负责人→报账会计初审→财务负责人→总经理→会计记账→出纳付款</p>
+				<p id="footPage" ></p>
+
+			</div>
+		</div>
+		<!--Any_single_body end-->
+
+	</div>
+	<!--Any_single end-->
+
+</body>
+</html>
+

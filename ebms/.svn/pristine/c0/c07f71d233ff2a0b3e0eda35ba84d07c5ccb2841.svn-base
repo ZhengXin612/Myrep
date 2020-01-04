@@ -1,0 +1,140 @@
+﻿@{
+    ViewBag.Title = "ViewExpenseAcountList";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+
+<script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+<div class="Company-top-box">
+    <div class="search-box">
+        <input type="text" id="txtQuery" style="width: 150px;" placeholder="公司" />
+        <input type="button" value="查询" id="btnQuery" class="icon-search">
+    </div>
+    <div class="btn-bar">
+        <a href="#" id="btnAdd" class="icon-add">新增</a>
+        <a href="#" id="btnDelete" class="icon-remove">删除</a>
+        <a href="#" id="btnEdit" class="icon-edit">编辑</a>
+    </div>
+</div>
+
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+<script type="text/javascript">
+    //回车触发查询
+    enterSearch("#btnQuery");
+    $(function () {
+        var url = "GetExpenseAcountList";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() * 0.95,
+            fitColumns: true,
+            sortName: 'ID',
+            sortOrder: 'desc',
+            idField: 'ID',
+            pageSize: 30,
+            pagination: true,
+            showFooter: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                { field: 'type', title: '序号', width: 140, align: 'center' },
+                { field: 'ComPany', title: '公司', width: 100, align: 'center' },
+                { field: 'Number', title: '账号', width: 140, align: 'center' },
+                 
+            ]]
+        });
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            });
+        });
+
+    });
+
+    $(function () {
+        $('#btnAdd').click(function () {
+            var row = $('#List').datagrid("getSelected");
+            if (row == null) {
+                $.messager.alert('提示', "请选中所属公司", "info");
+                return false;
+            }
+            $('#IframeAdd')[0].src = "ViewExpenseAcountAdd?comPany=" + row.ComPany;
+            $("#AddDiv").dialog({
+                onClose: function () {
+                    $("#List").datagrid("reload");//刷新列表 
+                }
+            });
+            $('#AddDiv').dialog('open');
+        });
+    });
+    $('#btnEdit').click(function () {
+        var row = $('#List').datagrid('getSelected')
+        if (row != null) {
+            $("#AddDiv").prev(".panel-header").find(".panel-title").html("编辑")
+            $('#IframeAdd')[0].src = "/BasicInformation/ViewExpenseAcountEdit?ID=" + row.ID;
+            $('#AddDiv').dialog('open');
+        }
+        else { $.messager.alert("提示", "@Lib.MessageRes.PleaseSelect", "info") }
+    });
+    $('#btnDelete').click(function () {
+        var row = $('#List').datagrid('getSelected')
+        if (row != null) {
+            $.messager.confirm('提示', "@Lib.MessageRes.DelConfirm", function (r) {
+                var flag = 0
+                if (r) {
+                    loading(0);
+                    if (flag == 0) {
+                        flag++
+                        $.ajax({
+                            url: "/BasicInformation/ExpenseAcountDelete?ID=" + row.ID,
+                            type: "Post",
+                            contentType: "application/json",
+                            // data: JSON.stringify(p),
+                            dataType: "json",
+                            success: function (data) {
+                                if (data.State == "Success") {
+                                    loading(1);
+                                    $('#List').datagrid('reload');
+                                    $.messager.alert('提示', '@Lib.MessageRes.DelOK', "info");
+                                }
+                                else {
+                                    loading(1);
+                                    flag = 0
+                                    $.messager.alert('提示', data.Message, "info");
+                                }
+                                $('#List').datagrid("clearSelections");
+                            }, error: function (data) {
+                                loading(1);
+                                flag = 0;
+                                $.messager.alert('提示', data, "info");
+                            }
+
+                        });
+                    }
+                }
+            });
+        }
+        else { $.messager.alert("提示", "@Lib.MessageRes.PleaseSelect", "info") }
+    });
+
+    $("#btnQuery").click(function () {
+
+        var queryStr = $("#txtQuery").val().trim();
+        $('#List').datagrid({
+            url: '../BasicInformation/GetExpenseAcountList?queryStr=' + queryStr 
+        });
+
+    });
+
+</script>
+<div id="AddDiv" class="easyui-dialog" closed="true" modal="true" title="新增" style="width: 500px; height: 300px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='IframeAdd' frameborder="0" src="" style="width: 100%; height: 98%;"></iframe>
+</div>

@@ -1,0 +1,49 @@
+﻿@{
+    ViewBag.Title = "ViewAliImportExcel";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+    
+}
+<script type="text/javascript">
+    $(function () {
+        var flag = "@ViewData["flag"]";
+        if (flag == "2") {
+            $('#order').hide();
+        }
+        else {
+            $('#freight').hide();
+        }
+    });
+    var only = 0;
+    function fun1() {
+        if (only == 0) {
+            var flag = "@ViewData["flag"]";
+                 form1 = document.getElementById("form1");
+
+                 form1.action = "/AliExpressOrder/ImportExcel?flag=" + flag;
+                 document.getElementById("form1").submit();
+                 loading(0);
+                only = 1;
+            }
+        };
+ </script>
+<form method="post" id="form1" action="#"
+enctype="multipart/form-data"  data-ajax="false" > 
+    <div style="line-height:30px">
+           <label><span style="color:red;font-size:medium">&nbsp;&nbsp;文件格式顺序：</span><br />
+         <span id="order" style="font-size:medium">&nbsp;&nbsp; 订单号,订单状态,负责人(业务员),买家名称,买家邮箱,下单时间,付款时间,<br />
+           &nbsp;&nbsp;产品总金额,物流费用,订单金额,满立减,产品信息,订单备注,<br />
+              &nbsp;&nbsp;收货地址,收货人名称,收货国家,州/省，城市，地址，邮编，联系电话,手机,<br />
+             &nbsp;&nbsp;买家选择物流,发货期限,实际发货物流:运单号,发货时间,确认收货时间,备注
+         </span> 
+           <span id="freight" style="font-size:medium">&nbsp;&nbsp; 国际物流单号,订单重量,国外运费,国内运费
+          
+         </span> 
+       </label>
+    <br />
+                        <input name="file" type="file" id="file" /> 
+                    <br />
+       
+           <input type="button" onclick="fun1();" name="Upload" id="btnbaocun" value="导入"  />
+     </div>
+
+</form>

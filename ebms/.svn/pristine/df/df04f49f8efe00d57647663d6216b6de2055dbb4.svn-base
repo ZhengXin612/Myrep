@@ -1,0 +1,168 @@
+﻿@{
+    ViewBag.Title = "ViewListJPW";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<script>enterSearch("#btnQuery");</script>
+<script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+<div class="Company-top-box">
+    <div class="search-box">
+        <input type="text" id="txtQuery" style="width: 150px;" placeholder="订单号" />
+        <select id="viewType" name="viewType">
+            <option value="-1" selected>状态</option>
+            <option value="0">未审核</option>
+            <option value="1">已审核</option>
+        </select>
+        <input type="button" value="查询" id="btnQuery" class="icon-search">
+    </div>
+
+    <div class="btn-bar">
+        <a href="#" onclick="Agree()" class="icon-agree">同意</a>
+        <a href="#" onclick="Delete()" class="icon-remove">删除</a>
+        <p class="showBar">查看详情 : 请双击需要查看的数据</p>
+    </div>
+</div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+<script type="text/javascript">
+    $(function () {
+        var url = "GetJPWOrdersList?start=" + $("#statethisdate").val() + "&end=" + $("#Endthisdate").val();
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 10,
+            method: 'post',
+            height: $(window).height() * 0.95,
+            fitColumns: true,
+            pageSize: 30,
+            pagination: true,
+            striped: true,
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号 
+            columns: [[
+                { field: 'platform_code', title: '平台单号', width: 80, align: 'center' },
+                { field: 'shop_code', title: '店铺代码', width: 60, align: 'center' },
+                { field: 'vip_code', title: '会员账号', width: 60, align: 'center' },
+                { field: 'receiver_name', title: '收货人', width: 60, align: 'center' },
+                { field: 'receiver_address', title: '收货人地址', width: 100, align: 'center' },
+                  { field: 'deal_datetime', title: '下单时间', width: 60, align: 'center' },
+                {
+                    field: 'orderstatus', title: '状态', width: 80, align: 'center', formatter: function (value, row, index) {
+                        if (row.orderstatus == 0) {
+                            return "<font color=red>未审核</font>"
+                        } else {
+                            return "<font color=green>已审核</font>"
+                        }
+                    }
+                },
+                  {
+                      field: 'action', title: '操作', width: 100, align: 'center',
+                      formatter: function (value, row, index) {
+                          var e = '<a href="#" class="job-btn job-btn-3" onclick="detail(' + row.platform_code + ')">详情</a> ';
+                          return e;
+                      }
+                  }
+            ]],
+            onDblClickRow: function (value, row, index) {
+                detail(row.platform_code);
+            }
+        });
+
+        $("#btnQuery").click(function () {
+            var queryStr = $("#txtQuery").val();
+            var status = $("#viewType").val();
+            $('#List').datagrid({
+                url: 'GetJPWOrdersList?queryStr=' + encodeURI(queryStr.trim()) + "&status=" + status
+            });
+            $("#txtQuery").focus().select();
+        });
+
+
+
+    });
+
+    function detail(code) {
+        $('#openIframedetail')[0].src = "ViewDetailListJPW?code=" + code;
+        $("#detailDiv").dialog({
+            onClose: function () {
+                $("#List").datagrid("reload");//刷新列表 
+            }
+        });
+        $('#detailDiv').dialog('open');
+    }
+
+    function Delete() {
+        var row = $('#List').datagrid("getSelected");
+        if (row == null) {
+            $.messager.alert('提示', "请选中需要操作的数据", "info");
+            return false;
+        }
+        if (row.orderstatus == 0) {
+            $.messager.confirm('提示', '是否删除该记录?请谨慎选择，删除后不能恢复', function (r) {
+                if (r) {
+                    $.ajax({
+                        url: "ViewListJPWDelete?id=" + row.ID,
+                        type: "Post",
+                        contentType: "application/json",
+                        dataType: "json",
+                        success: function (data) {
+                            if (data.State == "Success") {
+                                $.messager.alert('提示', '操作成功', "info", function () {
+                                    $('#List').datagrid('reload');
+                                });
+                            }
+                            else {
+                                $.messager.alert('提示', data.Message, "info", function () {
+                                    $('#List').datagrid('reload');
+                                });
+                            }
+                        },
+                        error: function () {
+                        }
+                    });
+                }
+            });
+        } else {
+            $.messager.alert('提示', "只有未审批状态才可删除", "info");
+            $("#List").datagrid("reload");
+        }
+    }
+    function Agree() {
+        var row = $('#List').datagrid("getSelected");
+        if (row == null) {
+            $.messager.alert('提示', "请选中需要操作的数据", "info");
+            return false;
+        }
+        if (row.orderstatus == 1) {
+            $.messager.alert('提示', "该数据已经写入管易", "info");
+            return false;
+        }
+        $.messager.confirm("操作提示", "确定审核并写入管易吗？", function (data) {
+            if (data) {
+                loading(0);
+                $.ajax({
+                    url: "Approve",
+                    type: "post",
+                    data: { "id": row.ID },
+                    dataType: "json",
+                    success: function (data) {
+                        loading(1);
+                        if (data.State == "Success") {
+                            $.messager.alert('提示', '操作成功', "info", function () {
+                                $('#List').datagrid('reload');
+                            });
+                        }
+                        else {
+                            $.messager.alert('提示', data.Message, "info", function () {
+                                $('#List').datagrid('reload');
+                            });
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+</script>
+<div id="detailDiv" class="easyui-dialog" closed="true" modal="true" title="详情" style="width: 800px; height: 450px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIframedetail' frameborder="0" src="" style="width: 98%; height: 98%;"></iframe>
+</div>

@@ -1,0 +1,162 @@
+﻿@model EBMS.Models.T_CashBack
+@using Lib
+@{
+    ViewBag.Title = "Detail";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<style>
+    h2 {color:#2299ee;font-size:16px;line-height:30px;padding-left:10px}
+</style>
+<h2>返现详情</h2>
+@using (Html.BeginForm("EditForm", "Controller", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+    <table class="fromEditTable setTextWidth300" id="cashback">
+         <tr>
+            <td style="width:120px; text-align: right;">
+                @Html.LabelFor(model => model.OrderNum)：   
+            </td>
+            <td>
+                 @Html.DisplayFor(model => model.OrderNum)
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.OrderNum)
+            </td>
+        </tr>
+      <tr>
+            <td style="width:120px; text-align: right;">
+                @Html.LabelFor(model => model.PostUser)：   
+            </td>
+            <td>
+               @Html.DisplayFor(model => model.PostUser)
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.PostUser)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.VipName)：   
+            </td>
+            <td>
+               @Html.DisplayFor(model => model.VipName)
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.VipName)
+            </td>
+        </tr>
+        <tr>
+            <td style="width:120px; text-align: right;">
+                @Html.LabelFor(model => model.ShopName)：   
+            </td>
+            <td>
+                 @Html.DisplayFor(model => model.ShopName)
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.ShopName)
+            </td>
+        </tr>
+          <tr>
+            <td style="width:120px; text-align: right;">
+                @Html.LabelFor(model => model.WangWang)：   
+            </td>
+            <td>
+                  @Html.DisplayFor(model => model.WangWang)
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.WangWang)
+            </td>
+        </tr>
+       <tr>
+            <td style="width:120px; text-align: right;">
+                @Html.LabelFor(model => model.Reason)：   
+            </td>
+            <td>
+               @Html.DisplayFor(model => model.Reason)
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.Reason)
+            </td>
+        </tr>
+         <tr>
+            <td style="width:120px; text-align: right;">
+                @Html.LabelFor(model => model.BackMoney)：   
+            </td>
+            <td>
+                  @Html.DisplayFor(model => model.BackMoney)
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.BackMoney)
+            </td>
+        </tr>
+         <tr>
+            <td style="width:120px; text-align: right;">
+                @Html.LabelFor(model => model.ApproveName)：   
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.ApproveName)
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.ApproveName)
+            </td>
+        </tr>
+        <tr>
+            <td style="width:120px; text-align: right;">
+                @Html.LabelFor(model => model.OrderMoney)：   
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.OrderMoney)
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.OrderMoney)
+            </td>
+        </tr>
+         <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.AlipayName)：   
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.AlipayName)
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.AlipayName)
+            </td>
+        </tr>
+         <tr>
+            <td style="width:120px; text-align: right;">
+                @Html.LabelFor(model => model.AlipayAccount)：   
+            </td>
+            <td>
+                 @Html.DisplayFor(model => model.AlipayAccount)
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.AlipayAccount)
+            </td>
+        </tr>
+          <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.Note)：   
+            </td>
+            <td>
+                 @Html.DisplayFor(model => model.Note)
+            </td>
+            <td>
+                @Html.ValidationMessageFor(model => model.Note)
+            </td>
+        </tr>
+        <tr>
+            <td style="width:140px; text-align: right;">
+                @Html.LabelFor(model => model.Repeat)：   
+            </td>
+            <td style="color:#d02e2e">
+                  @Html.DisplayFor(model => model.Repeat)
+             </td><td></td>
+        </tr>
+    </table>
+}
+<h2>审核详情</h2>
+<div class="history-box">@Html.Raw( ViewData["history"])</div>
+<script type="text/javascript">
+  
+</script>
+

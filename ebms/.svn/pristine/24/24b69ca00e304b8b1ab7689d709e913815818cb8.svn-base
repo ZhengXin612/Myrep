@@ -1,0 +1,110 @@
+﻿
+@{
+   
+    ViewBag.Title = "组合商品";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+<script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+<div class="Company-top-box">
+    <div class="search-box">
+         <input type="text" placeholder="组合代码或名称.." id="txtQuery"  class="icon-search-txt">
+         <input type="button" value="查询" id="btnQuery" class="icon-search">
+    </div>
+      <div class="btn-bar">
+           <a href="#" onclick="OutputExcel(this)" class="icon-check">导出Excel</a>
+         <p class="showBar">查看组合商品 : 请双击需要查看的数据</p>
+    </div>
+</div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+<script type="text/javascript">
+    enterSearch("#btnQuery");
+    function op(name, url) {
+        self.parent.addTab(name, url, '');
+        getContextmenu()
+    }    $(function () {
+        var url = "../DataStatistics/ShowProductCodeGenerateList"
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() - 50,
+            fitColumns: true,
+            sortName: 'ID',
+            sortOrder: 'desc',
+            idField: 'ID',
+            pageSize: 20,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            columns: [[
+                 { field: 'Code', title: '组合代码', width: 200, align: 'center' },
+                  { field: 'Name', title: '组合名称', width: 100, align: 'center' },
+                 { field: 'CreateName', title: '创建人', width: 100, align: 'center' },
+                 { field: 'CreateDate', title: '创建时间', width: 100, align: 'center' },
+                 { field: 'simpleName', title: '组合简称', width: 100, align: 'center' },
+                 { field: 'Price', title: '价格', width: 100, align: 'center' },
+                 { field: 'Remarks', title: '备注', width: 100, align: 'center' },
+            {
+                field: 'action', title: '组合详情', width: 100, align: 'center',
+                formatter: function (value, row, index) {
+                    var e = ' <div class="btn-bar"><a href="#" class="icon-edit" onclick=Show(' + row.ID + ')>组合详情</a></div>';
+                    return e;
+                }
+            }
+            ]],
+            onDblClickRow: function (rowIndex, rowData) {
+                var url = "../DataStatistics/ViewProductCodeGenerateDetail?tid=" + rowData.ID
+                window.open(url, "_blank", "height=" + (window.screen.availHeight - 30) + ",width=" + (window.screen.availWidth - 10) + ",scrollbars=yes,resizable=1,modal=false,alwaysRaised=yes");
+            },            onAfterEdit: function (index, rowData) {//回调函数可以直接用于操作页面
+            }
+        });
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            });
+        });
+    });
+ 
+
+    //得到选中行集合的id
+    function getSelections() {
+        var ss = [];
+        var rows = $('#List').datagrid('getSelections');
+        for (var i = 0; i < rows.length; i++) {
+            var row = rows[i];
+            ss.push(row.Id);
+        }
+        return ss;
+    }
+    $("#btnQuery").click(function () {
+
+        var queryStr = $("#txtQuery").val();
+
+        //如果查询条件为空默认查询全部
+        if (queryStr == null) {
+            queryStr = "%";
+        }
+        var val = $("#selStatus").val();
+        $('#List').datagrid({
+            url: '../DataStatistics/ShowProductCodeGenerateList?queryStr=' + encodeURI(queryStr) 
+        });
+
+    });
+    
+    function OutputExcel(s) {
+        var name = $("#txtQuery").val().trim();
+        s.href = 'OutPutExcel?name=' + name ;
+    }
+    function Show(id) {
+        var url = "../DataStatistics/ViewProductCodeGenerateDetail?tid=" + id
+        window.open(url, "_blank", "height=" + (window.screen.availHeight - 30) + ",width=" + (window.screen.availWidth - 10) + ",scrollbars=yes,resizable=1,modal=false,alwaysRaised=yes");
+    }
+   
+</script>
+

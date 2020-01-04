@@ -1,0 +1,76 @@
+﻿@model EBMS.Models.T_AccountantProject
+@{
+    ViewBag.Title = "ViewAccountantProjectAdd";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<style>
+    .mvctool {
+        display: table;
+        margin-bottom: 10px;
+    }
+
+    .smallBox {
+        margin-left: 20px;
+    }
+</style>
+<div class="mvctool">
+    <a id="btnSave" href="javascript:;" class="modal-btn modal-btn-save">保存</a>
+</div>
+@using (Html.BeginForm("EditForm", "Controller", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+    <table class="fromEditTable setTextWidth300">
+        <tr>
+            <td style="width: 80px;">
+                @Html.LabelFor(model => model.Code):
+            </td>
+            <td style="width: 135px;">@Html.TextBoxFor(model => model.Code, new { @style = "width:130px;" })</td>
+            <td style="width: 80px;">@Html.ValidationMessageFor(model => model.Code)</td>
+        </tr>
+        <tr>
+            <td>
+                @Html.LabelFor(model => model.Name):
+            </td>
+            <td>@Html.TextBoxFor(model => model.Name, new { @style = "width:130px;" })</td>
+            <td>@Html.ValidationMessageFor(model => model.Name)</td>
+        </tr>
+    </table>
+}
+<input id="thePid" value="@ViewData["Pid"]" type="hidden">
+<script>
+    $(function () {
+        var flag = 0
+        $("#btnSave").click(function () {
+            if ($("#EditForm").valid()) {
+                if (flag == 0) {
+                    flag++;
+                    loading(0);
+                    $.ajax({
+                        url: "AddAccountProjectSave?Pid=" + $("#thePid").val(),
+                        type: "Post",
+                        data: $("#EditForm").serialize(),
+                        success: function (data) {
+                            loading(1);
+                            if (data.State == "Success") {
+                                $.messager.alert('提示', '保存成功', "info", function () {
+                                    parent.$('#openDivNew').dialog('close');
+                                    parent.loadTreeAfterAddCom(data.ID, data.name);
+                                    parent.$("#List").datagrid("reload");
+                                    flag = 0;
+                                })
+                            } else
+                                $.messager.alert('提示', data.Message, "info")
+                            parent.$('#List').datagrid("clearSelections");
+                        },
+                        error: function (data) {
+                            //失败 
+                            loading(1);
+                            flag = 0;
+                        }
+                    });
+                }
+            }
+        })
+    })
+</script>

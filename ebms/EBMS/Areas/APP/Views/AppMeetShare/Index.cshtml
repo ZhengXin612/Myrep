@@ -1,0 +1,89 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>title</title>
+    <link href="~/Areas/App/AppContent/css/api.css" rel="stylesheet" type="text/css" />
+    <link href="~/Areas/App/AppContent/css/dropload.css" rel="stylesheet" type="text/css" />  
+</head>
+    <body>
+<style>
+    .share-box {padding:10px}
+    #ok-btn {display:table;color:#fff;width:80%;margin:40px auto 0 auto;background:#2299ee;height:45px;line-height:45px;border-radius:2px;text-align:center}
+    .share-box li {margin-bottom:10px}
+    #Score {margin-left:10px;}
+    #theScore {color:#2299ee}
+</style>
+<h2 class="header-bar">
+    <a id="back" href="" class="back-btn" ><i class="icon iconfont icon-back"></i></a>
+    <i class="icon iconfont icon-category r-trigger-list-status"></i>
+</h2>
+<div class="share-box">
+  <ul>
+        <li>分享人:@ViewData["Name"]</li>
+    <li>参与投票人数:@ViewData["Total"]</li>
+    <li>目前得分:@ViewData["Score"] <input type="hidden" name="ID" id="ID" value="@ViewData["ID"]" /></li>
+    <li>我来打分:<select id="Score">
+        <option value="">点击打分</option>
+        <option value="1">1分</option>
+          <option value="2">2分</option>
+          <option value="3">3分</option>
+          <option value="4">4分</option>
+          <option value="5">5分</option>
+          <option value="6">6分</option>
+          <option value="7">7分</option>
+          <option value="8">8分</option>
+        <option value="9">9分</option>
+        <option value="10">10分</option>
+    </select>
+        </li>
+      <li>成绩：<span id="theScore"></spa></li>
+      <li>
+    <a href="javascript:;" id="ok-btn">投票</a>
+          <li>
+  </ul>
+</div>
+<script src="~/Areas/App/AppContent/js/jquery-2.2.1.min.js"></script>
+<script src="~/Areas/App/AppContent/js/dropload.min.js"></script>
+<script>
+    var getDetail = null;
+    $(function () {
+        var $CurUser = localStorage.getItem("CurUser");
+        $("#back").attr("href", "/App/AppHome/Index?CurUser=" + $CurUser)
+        var _Total = parseInt(@ViewData["Total"])
+        var _Score = parseInt(@ViewData["Score"])
+        var theScore = parseFloat(_Score / _Total).toFixed(3);
+        $("#theScore").html(theScore)
+    });
+    var flag = 0;
+    $("#ok-btn").click(function () {
+        if ($("#Score").val() == "")
+        {
+            alert("请打分！")
+            return false
+        }
+        if (flag == 0) {
+            flag++;
+        $.ajax({
+            url: "/AppMeetShare/writeScore?ID=" + $("#ID").val() + "&Score=" + $("#Score").val() + "&CurUser=" + localStorage.getItem("CurUser"),
+            type: "post",
+            success: function (data) {
+                flag = 0;
+                alert(data.Message)
+                if (data.State == "Success")
+                {
+                    window.location.reload();
+                }
+            },
+            error: function (data) {
+                alert("error");
+                flag = 0;
+            }
+        });
+        }
+    })
+</script>
+    </body>
+</html>

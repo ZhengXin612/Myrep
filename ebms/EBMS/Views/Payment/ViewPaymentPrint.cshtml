@@ -1,0 +1,303 @@
+﻿@{
+    ViewBag.Title = "ViewPaymentPrint";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+
+<script src="~/Scripts/NumIntoChinese.js" type="text/javascript"></script>
+<script type="text/javascript">
+
+	var total = "@ViewData["total"]";
+	$(function () {
+		var id = "@ViewData["Bid"]";
+		var page = "@ViewData["page"]";
+		var PrintCount = "@ViewData["PrintCount"]";
+		bandingshuju(id, page);
+		//bandingchanp(id, page);
+
+
+
+	}
+    )
+	function guanbi() {
+		parent.$('#openDivbaoxiaodan').dialog('close');
+
+	}
+
+	function printpage(id) {
+		$.ajax({
+			url: "UpdateprintCountByID",
+			type: "Post",
+			data: { id: id },
+			dataType: "json",
+			success: function (data) {
+				if (data.State == "Success") {
+					parent.$("#List").datagrid("reload");
+					window.print();
+				}
+				else {
+					$.messager.alert("提示", data.Message, "info");
+				}
+
+			}
+		});
+
+	}
+
+	function bandingshuju(id, page) {
+
+		$.post("GetPaymentPrint", { "id": id }, function (data) {
+			var dates = formatDateBoxFullnianyueri(data.CrateDate);
+			$("#riqi").html(dates);
+			$("#bumen").html("-"+data.Department);
+			$("#postName").html(data.PostUser);
+			$("#bankAccount").html( data.Car_Number);
+			$("#ReceiverName").html(data.Reun_Name);
+
+			$("#bankName").html(data.Reun_Bank);
+			var amountMoney= "@ViewData["jine"]" ;
+			$("#UppercaseMoney").html(ChinaCost(amountMoney));
+			$("#LowercaseMoney").html(amountMoney);
+			
+			$("#reason").html(data.Reun_Reason);
+			$("#postUser").html(data.PostUser);
+			$("#postDepartment").html(data.Department);
+		});
+
+	}
+	function bandingchanp(id, page) {
+
+		$.post("GetPaymentProductPrint", { "expenseId": id, "page": page }, function (data) {
+
+
+			var htmlStr = "";
+			for (var i = 0; i < data.length; i++) {
+
+					htmlStr += "<tr class=\"b-b\">" +
+					"<td >"+((page-1)*35+i+1)+"</td> "+
+					"<td ></td> <td></td>"+
+					"<td colspan=\"2\" >" + data[i].Abstract + "</td>"+
+					"<td >" + (data[i].Price * data[i].Num).toFixed(2) + "</td> <td></td>" +
+					"</tr>";
+
+				$("#tbodyItem").html(htmlStr);
+				
+			}
+			//分页打印
+			if (page > 1 && total == page) {
+				zongjiage = (parseFloat( @ViewData["jine"]) * 100).toFixed(0);
+			}
+			$("#footPage").html("第" + page + "/" + total + "页");
+			$("#memo").html( "@ViewData["borrowCode"]");
+
+			if (page == total) {
+				$("#UppercaseMoney").html(ChinaCost(parseFloat( @ViewData["jine"])));
+				var LowercaseMoney = "￥" + @ViewData["jine"]
+            	$("#LowercaseMoney").html(LowercaseMoney);
+				$("#LowercaseMoney1").html(LowercaseMoney);
+				$("#LowercaseMoney2").html(LowercaseMoney);
+
+			}
+			else {
+				$("#tfootItem").html("");
+
+			}
+
+        });
+
+    }
+
+   
+    function baocun() {
+
+        var page = "@ViewData["page"]";
+
+		if (page == 1) {
+
+			var id = "@ViewData["Bid"]";
+		}
+	}
+
+
+	function tick(event,index)
+	{
+		var e = event || window.event;
+		console.log(e.clientX+","+e.clientY)
+		
+
+		$("#tickImg" + index).css("left", e.clientX);
+		$("#tickImg" + index).css("top", e.clientY - 22);
+	}
+	
+</script>
+<!DOCTYPE html>
+<html>
+<head>
+	<title>付款(请款)申请单</title>
+	<meta name="renderer" content="webkit">
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<link href="~/Content/Print.css" rel="stylesheet" />
+	<style>
+		#tickImg1 {
+
+
+		position:absolute  ;
+		left:163px;
+		}
+		#tickImg0 {
+
+
+		position:absolute  ;
+		left:200px;
+		}
+		select {
+			appearance:none;
+			-moz-appearance:none;
+			-webkit-appearance:none;
+
+		}
+		select option {
+    direction: ltr;
+}
+	</style>
+</head>
+<body>
+	<div class="noprint">
+		<a href="javascript:printpage(@ViewData["id"]);" class="icon-ok">打印</a>
+		@*<br />
+		分页：@Html.Raw(ViewData["pager"])*@
+	</div>
+
+	<div class="Any_single">
+		<h2>付款(请款)申请单</h2>
+		<div class="bian-hao">
+			<p>@ViewData["code"]</p>
+			@*<img src="~/Content/barCode.ashx?code=@ViewData["code"]" width="169" height="50">*@
+		</div>
+
+		<div class="Any_single_body">
+			<p class="fx-item">
+				<span class="fx-t fx-item-a">公司及部门：
+					@Html.DropDownList("Company", ViewData["CompanyList"] as List<SelectListItem>, new { @selected = Model.Company, @dir = "rtl" })
+				<b id="bumen"></b></span>
+				
+				<span class="fx-t  fx-item-b">填报日期：<b id="riqi"></b></span>
+
+			</p>
+			<table class="expense-table">
+				<tr class="b-b">
+					<td rowspan="7" width="3%">申请人填写</td>
+					<td rowspan="2" width="10%">结算方式</td>
+					<td colspan="3">
+					<span id="tickImg0" class="tickImg">✔</span> 
+					<span onclick="tick(event, 0)">□</span> 转支 &nbsp;
+					 <span onclick="tick(event, 0)">□</span>电汇  &nbsp;
+					<span onclick="tick(event, 0)">□</span>后台支付 <br />
+					<span onclick="tick(event, 0)">□</span>现金 &nbsp;
+					<span onclick="tick(event, 0)">□</span>其他&nbsp; (&nbsp;&nbsp;)</td>
+					<td colspan="2" >对方单位名称</td>
+					<td colspan="3" id="ReceiverName"></td>
+				</tr>
+				<tr class="b-b">
+					
+					<td colspan="3">
+						<span id="tickImg1" class="tickImg">✔</span> 
+					 (<span onclick="tick(event, 1)">□</span>是&nbsp; 
+					<span onclick="tick(event, 1)">□</span>否) 与合同相同</td>
+					<td colspan="2"  width="18%" >对方单位开户行</td>
+					<td colspan="3" id="bankName"></td>
+
+				</tr>
+				<tr class="b-b">
+					<td >申请部门</td>
+					<td width="10%" id="postDepartment"></td>
+					<td width="10%">合同编号</td>
+					<td width="10%"></td>
+					
+					<td colspan="2" >对方单位账号</td>
+					<td colspan="3" id="bankAccount"></td>
+				</tr>
+				
+				<tr class="b-b">
+					<td >申请人</td>
+					<td id="postUser"></td>
+					<td>工号</td>
+					<td></td>
+
+					<td colspan="2">资金计划编号</td>
+					<td width="15%"></td>
+					<td width="10%">附件张数</td>
+					<td></td>
+				</tr>
+
+
+				
+					
+					<tr class="b-b">
+						<td>
+							<p>人民币(大写)</p>
+						</td>
+						<td colspan="4"><b id="UppercaseMoney"></b></td>
+						<td colspan="2">
+							<p>人民币(小写)</p>
+						</td>
+						<td colspan="2">
+							<b id="LowercaseMoney"></b>
+						</td>
+						
+					</tr>
+					<tr class="b-b">
+						<td>资金用途及付款条件</td>
+						
+						<td colspan="8" id="reason"></td>
+
+
+					</tr>
+					<tr class="b-b">
+						<td>总经理</td>
+						<td></td>
+						
+						<td>部门负责人</td>
+						<td></td>
+						<td >部门主管</td>
+						<td width="10%"></td>
+						<td>经办人</td>
+						<td colspan="2"></td>
+					</tr>
+					<tr class="b-b">
+						<td rowspan="3">财务部填写</td>
+						<td>结算会计</td>
+						<td></td>
+						<td>财务负责人</td>
+						<td></td>
+						<td>出纳</td>
+						<td colspan="4"></td>
+
+					</tr>
+					<tr class="b-b">
+						<td>备注</td>
+						<td colspan="8" id="memo"></td>
+					</tr>
+					<tr class="b-b">
+						<td colspan="9">说明：凡2000元以上的单位款项，原则上应签订合同并对公支付。</td>
+						
+					</tr>
+				
+
+			</table>
+			<div class="table-bot">
+				<p>单据流转说明:填报人→部门主管→部门负责人→报账会计初审→财务负责人→总经理→会计记账→出纳付款</p>
+				<p id="footPage"></p>
+
+			</div>
+		</div>
+		<!--Any_single_body end-->
+
+	</div>
+	<!--Any_single end-->
+
+</body>
+</html>
+

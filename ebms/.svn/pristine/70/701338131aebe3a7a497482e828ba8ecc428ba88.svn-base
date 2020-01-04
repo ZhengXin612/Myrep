@@ -1,0 +1,84 @@
+﻿@model  EBMS.Models.T_ExpressIndemnityRecord
+@using Lib;
+@{
+    ViewBag.Title = "ExpressIndemnityJiluAdd";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<script type="text/javascript">
+    $(function () {
+        var sign = 0;
+        $("#btnSave").click(function () {
+            if ($("#EditForm").valid()) {
+                var id = "@ViewData["ID"]";
+                var selected_val = document.getElementById("TrackRecord_Situation").value;
+                if (sign == 0) {
+                    sign = 1;
+                    $.ajax({
+                        url: "../ExpressIndemnity/JiluSave?id=" + id + "&selected_val=" + selected_val,
+                        type: "Post",
+                        data: $("#EditForm").serialize(),
+                        dataType: "json",
+                        success: function (data) {
+
+                            if (data == "1") {
+                                $.messager.alert("提示", "保存成功", "info", function () {
+                                    parent.$("#openDivNew").dialog("close");
+                                    parent.$("#List").datagrid("reload");
+                                    sign = 0
+                                })
+                            }
+                            else {
+                                $.messager.alert("提示", "保存失败", "info");
+                                sign = 0
+                            }
+                            parent.$('#List').datagrid("clearSelections");
+                        },
+                        error: function (data) {
+                            sign = 0;
+                            loading(1);
+                            $.messager.alert('提示', data, "info")
+                        }
+                    });
+                }
+            }
+        });
+    });
+
+</script>
+<div class="mvctool">
+    <input id="btnSave" class="modal-btn modal-btn-save" type="submit" value="保存">
+</div>
+<div>
+    @using (Html.BeginForm("EditForm", "Controllers", null, FormMethod.Post, new { Id = "EditForm" }))
+    {
+        @Html.ValidationSummary(true)
+        <table class="fromEditTable setTextWidth300">
+            <tbody>
+
+                <tr>
+                    <td style="width: 80px; text-align: right;">
+                        情况：
+                    </td>
+                    <td>
+                        <select id="TrackRecord_Situation" name="TrackRecord_Situation">
+                            <option value="已仲裁" selected="true">已仲裁</option>
+                            <option value="已答应私了但未赔付">已答应私了但未赔付</option>
+                            <option value="已QQ发快递客服核实">已QQ发快递客服核实</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width: 80px; text-align: right;">
+                        备注：
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.TrackRecord_Remarks)
+                    </td>
+                </tr>
+
+
+            </tbody>
+        </table>
+        @Html.HiddenFor(model => model.ID)
+    }
+</div>

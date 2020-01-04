@@ -1,0 +1,147 @@
+﻿@model  EBMS.Models.T_Role
+@using Lib;
+@{
+    ViewBag.Title = "ViewRoleAdd";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+<style>
+.roles-top {margin-left:10px;display:table;}
+.roles-top div {margin-top:10px}
+.half-l {float:left;width:50%}
+.half-r {float:left;width:50%}
+#tree .tree-folder,#tree .tree-file{display:none}
+.role-box {display:table;margin:10px 0 0 70px}
+/*.tree-nav {float:left;width:40%}
+.ck-box {float:right;width:50%;}*/
+.my-tree-box{display:none}
+#ParentAccess{width:175px;height:23px;border:1px solid #ccc;}
+</style>
+@using (Html.BeginForm("EditForm", "Controllers", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+<div class="mvctool">
+     <a id="btnSave" href="javascript:;" class="modal-btn modal-btn-save">保存</a>
+</div>
+<div class="roles-top">
+    <div> 
+        @Html.LabelFor(model => model.Name)：
+       @Html.TextBoxFor(model => model.Name)</div>
+     <div >
+          @Html.LabelFor(model => model.Access)：
+                @Html.DropDownList("ParentAccess", ViewData["Power"] as List<SelectListItem>)
+     </div>
+</div>
+<div class="role-box">
+    <div id="tree" class="tree-nav"></div>
+   
+</div>
+}
+
+<script src="/Scripts/jquery.validate.min.js" type="text/javascript"></script>
+<script>
+    $(function () {
+        $("#ParentAccess option").each(function () {
+            var $optionId = $(this).val()
+            if ($optionId != "9999") {
+                $("#tree").append("<ul id=" + $optionId + " class='my-tree-box'></ul>");
+                getLeftNav($optionId)
+            }
+        })
+        //初始化 默认选择一个树
+        var $val = $("#ParentAccess option:eq(0)").val();
+        $("#" + $val).show();
+       
+        //选择一级的
+        $("#ParentAccess").change(function () {
+            var pId = $(this).val()
+            if (pId != "9999")
+            {
+                var $curUl = $("#" + pId)
+                $(".my-tree-box").not($curUl).hide()
+                $curUl.show();
+            }
+        })
+        function getChecked(pId) {
+
+            var nodes = $('#' + pId).tree('getChecked', 'indeterminate');
+            var nodes1 = $('#'+pId).tree('getChecked');
+            var s = '';
+            for (var i = 0; i < nodes.length; i++) {
+                if (s != '') { s += ',' };
+                s += nodes[i].id;
+            }
+            for (var i = 0; i < nodes1.length; i++) {
+                if (s != '') { s += ',' };
+                s += nodes1[i].id;
+            }
+            
+            return s;
+        }
+        function getLeftNav(pId) {
+            //pId是顶级导航的英文名，左侧菜单的父级名
+            
+            $.ajax({
+                url: "../System/getTreeData?pId=" + pId,
+                type: "Post",
+                contentType: "application/json",
+                dataType: "json",
+                success: function (dataTree) {
+                    var navTree = eval(dataTree);
+                    //树
+                    $("#"+pId).tree({
+                        data: navTree,
+                        checkbox: true,
+                       lines: true,                    })
+                  
+                    //$("#" + pId).tree("collapseAll");
+                    //var rootNode = $("#" + pId).tree('getRoot'); //调用expand方法 
+                    //$("#" + pId).tree('expand', rootNode.target);
+
+                },
+                error: function () {
+                    //失败 
+                }
+            });
+        }
+       var flag = 0
+       $("#btnSave").click(function () {
+            if (flag == 0) {
+                flag++;
+                loading(0);
+                var str = ""
+                $("#ParentAccess option").each(function () {
+                    var $optionId = $(this).val()
+                    if ($optionId != "9999") {
+                      //  $("#tree").append("<ul id=" + $optionId + " class='my-tree-box'></ul>");
+                        var getCheckId = getChecked($optionId)
+                        if (getCheckId != "") {
+                            str += getCheckId + ","
+                        }
+
+                    }
+                })
+                var newstr = str.substring(0, str.length - 1);
+                $.ajax({
+                    url: "../System/RoleSave?ids=" + newstr,
+                    type: "Post",
+                    data: $("#EditForm").serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        loading(1);
+                        if (data == "1") {
+                            $.messager.alert('提示', '保存成功', "info", function () {
+                                parent.$('#addDiv').dialog('close');
+                                parent.$('#List').datagrid('reload');
+                                flag = 0;
+                            });
+                        }
+                    },
+                    error: function () {
+                        flag = 0;
+                        loading(1);
+                    }
+                });
+            }
+        })
+    })
+  
+</script>

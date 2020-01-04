@@ -1,0 +1,156 @@
+﻿@model  EBMS.Models.T_MeetShare
+@using Lib;
+@{
+  
+    ViewBag.Title = "MeetShare";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+<style>
+    .season {margin:0 10px}
+    #seasonSel {margin:0 5px}
+     .btn-bar,.btn-bar a {margin-left:0}
+      .btn-bar a {
+        padding-left:5px}
+</style>
+<div class="Company-top-box">
+    <div class="search-box">
+        <input type="text" placeholder="花名.." id="txtQuery" class="icon-search-txt">
+         <span class="season">第<select id="seasonSel"></select>季</span>
+            <span>分享类型:<select id="finalsSel"><option value="">全部</option><option value="0">普通</option><option value="1">角色</option></select></span>
+         <span style="color: #808080; padding-right: 10px; font-size: 13px; margin-top: 3px; margin-left: 10px;">开始时间</span>
+        <input name="statethisdate" editable="false" style="float: left;" value="" id="statethisdate" class="easyui-datebox" data-options="sharedCalendar:'#statethisdate'">
+        <span style="color: #808080; padding-right: 10px; font-size: 13px; margin-top: 3px; margin-left: 10px;">结束时间</span>
+        <input name="Endthisdate" editable="false" style="float: left;" value="" id="Endthisdate" class="easyui-datebox" data-options="sharedCalendar:'#Endthisdate'">
+    
+            
+         <input type="button" value="查询" id="btnQuery" class="icon-search">
+    </div>
+    <input id="ID" value="@ViewData["ID"]" type="hidden">
+ <input id="seasonList" value="@ViewData["seasonList"]" type="hidden">
+        
+</div>
+<div id="userDiv" class="easyui-dialog" closed="true" modal="true" title="投票记录" style="width:500px; height:420px;" resizable="true" closable="true">
+    <iframe scrolling="yes" id='openIframeUser' frameborder="0" src="" style="width:100%;height:98%;"></iframe>
+</div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+<script type="text/javascript">
+    enterSearch("#btnQuery");
+    function op(name, url) {
+        self.parent.addTab(name, url, '');
+        getContextmenu()
+    }
+    $(function () {
+        var url = "/MeetShare/GetList";
+        $('#List').datagrid({
+            width: $(window).width() - 15,
+            method: 'post',
+            url: url,
+            height: $(window).height() - 50,
+            fitColumns: true,
+            sortName: 'id',
+            sortOrder: 'desc',
+            pageSize: 30,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                { field: 'Name', title: '花名', width: 200, align: 'center' },
+                { field: 'ShareDate', title: '分享日期', width: 200, align: 'center', formatter: function (value, row, index) { return formatDatebox(row.ShareDate) } },
+                { field: 'Score', title: '得分', width: 200, align: 'center' },
+                { field: 'Total', title: '投票人数', width: 160, align: 'center' },
+                { field: 'Season', title: '第几期', width: 160, align: 'center' },
+                {
+                    field: 'Finals', title: '分享类型', width: 160, align: 'center', formatter: function (value, row, index) {
+                        switch (row.Finals) {
+                            case 0:
+                                return "普通";
+                            case 1:
+                                return "<font color=\"#d02e2e\">决赛</font>";
+                            default:
+                                return ""
+                        }
+
+                    }
+                },
+                {
+                    field: 'IsEnd', title: '投票状态', width: 160, align: 'center', formatter: function (value, row, index) {
+                        switch (row.IsEnd) {
+                            case 0:
+                                return "投票中";
+                            case 1:
+                                return "<font color=\"#d02e2e\">投票结束</font>";
+                            default:
+                                return ""
+                        }
+
+                    }
+                },
+                {
+                    field: 'TheScore', title: '成绩', width: 160, align: 'center', formatter: function (value, row, index) {
+                        var _Score = parseInt(row.Score);
+                        var _Total = parseInt(row.Total);
+                        var TheScore = 0
+                        if (_Total != 0) {
+                            TheScore = (_Score / _Total).toFixed(3);
+                        }
+
+                        return TheScore;
+                    }
+                },
+                 {
+                     field: 'action', title: '操作', width: 200, align: 'center',
+                     formatter: function (value, row, index) {
+                         var e = ' <div class="btn-bar"><a href="javascript:;"  onclick=Show(' + row.ID + ')>投票记录</a></div>';
+                         return e;
+                     }
+                 }
+
+            ]],
+            onClickRow: function (rowIndex, rowData) {
+            },
+            onDblClickRow: function (rowIndex, rowData) {
+            },
+            onAfterEdit: function (index, rowData) {//回调函数可以直接用于操作页面
+            }
+        });
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            })
+        });
+
+        $("#btnQuery").click(function () {
+            var queryStr = $("#txtQuery").val();
+            var seasonSel = $("#seasonSel").val();
+            var statedate = $('#statethisdate').datebox('getValue');
+            var EndDate = $('#Endthisdate').datebox('getValue');
+            var finalsSel = $("#finalsSel").val()
+            $('#List').datagrid({
+                url: '../MeetShare/GetList?queryStr=' + encodeURI(queryStr) + "&seasonSel=" + encodeURI(seasonSel) + "&startSendTime=" + statedate + "&endSendTime=" + EndDate + "&finalsSel=" + finalsSel
+            });
+        });
+
+
+
+    });
+    var seasonDom = ""
+    function createSeasonList(x) {
+        seasonDom += "<option value=\"" + x.Season + "\">" + x.Season + "</option>"
+    }
+    $(function () {
+        JSON.parse($("#seasonList").val()).map(createSeasonList);
+        $("#seasonSel").append(seasonDom)
+    })
+    function Show(ID) {
+        $('#openIframeUser')[0].src = "/MeetShare/Record?ID=" + ID;
+        $('#userDiv').dialog('open');
+    }
+ 
+
+</script>
+

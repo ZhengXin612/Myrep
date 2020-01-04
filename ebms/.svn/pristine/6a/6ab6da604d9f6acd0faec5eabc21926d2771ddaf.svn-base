@@ -1,0 +1,142 @@
+﻿@model EBMS.Models.T_PersonnelInterviewConfig
+@{
+    ViewBag.Title = "ViewInterviewConfigEdit";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+
+<script type="text/javascript">
+    $(function () {
+        var flag = 0;
+        var open = 0;
+        $('#btnSave').click(function () {
+          
+            if ($('#Step').val() == null)
+            {
+                $.messager.alert("提示", "请填写步骤", "info");
+                return false;
+            }
+          
+          
+            if ($("#EditForm").valid() && flag == 0) {
+              
+                flag = 1;
+                loading(0);
+                $.ajax({
+                    url: "/Recruit/InterviewConfigEditSave",
+                    type: "Post",
+                    data: $("#EditForm").serialize(),
+                    dataType: "json",
+                    success: function (data)
+                    {
+                        if (data.State == "Success")
+                        {
+                            loading(1);
+                            parent.$('#List').datagrid('reload');
+                            parent.$('#List').datagrid("clearSelections");
+                            $.messager.alert("提示", "@Lib.MessageRes.SaveOK", "info", function () {
+                                parent.$('#EditDiv').dialog('close');
+                            })
+                        }
+                        else
+                        {
+                            loading(1)
+                            $.messager.alert("提示", data.Message, "info");
+                            flag = 0;
+                        }
+                    },
+                    error: function (data)
+                    {
+                        loading(1);
+                        flag = 0;
+                        $.messager.alert('提示', data, "info");
+                    }
+                });
+            }
+        })
+        //$('#ListUser').combobox({
+        //    multiple: true,
+        //    onBeforeLoad: function () {
+        //        var arr = $('#Name').val().split(",")
+        //        $('#ListUser').combobox('setValues', arr);
+        //    },
+        //    onChange: function (newValue, oldValue) {
+        //        if (open == 0 || open == 1) {
+        //            open += 1;
+        //        }
+        //        else {
+        //            $('#Name').val(newValue)
+        //            $('#ListUser').val(newValue)
+        //        }
+        //    }
+        //});
+    })
+</script>
+<style>
+     .lab 
+     {
+         width: 110px; 
+         text-align: right;
+
+     }
+
+</style>
+<div class="mvctool">
+    <a id="btnSave" href="javascript:;" class="modal-btn modal-btn-save">保存</a>
+    
+</div>
+
+<div>
+    @using (Html.BeginForm("EditForm", "Controllers", null, FormMethod.Post, new { Id = "EditForm" }))
+    {
+    @Html.ValidationSummary(true)
+    <table class="fromEditTable">
+       
+        <tbody>
+            <tr>
+               <td class="lab">
+                   @Html.LabelFor(model => model.Step):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model => model.Step, new { type="tel"})
+               </td>
+              <td>
+                   @Html.ValidationMessageFor(model => model.Step)
+               </td>
+           </tr>
+            <tr>
+               <td class="lab">
+                   @Html.LabelFor(model => model.Name):
+               </td>
+               <td>
+                  @* @Html.DropDownList("ListUser", ViewData["ListUser"] as List<SelectListItem>, new { style="width:200px;"})*@
+                    @Html.TextBoxFor(model=>model.Name)
+               </td>
+              <td>
+                   @Html.ValidationMessageFor(model => model.Name)
+               </td>
+           </tr>
+             <tr>
+               <td class="lab">
+                   @Html.LabelFor(model => model.isMultiple):
+               </td>
+               <td>
+                   @Html.DropDownListFor(model => model.isMultiple, ViewData["boolList"] as List<SelectListItem>)
+               </td>
+              <td>
+                   @Html.ValidationMessageFor(model => model.isMultiple)
+               </td>
+           </tr>
+           @* <tr>
+               <td class="lab">
+                   @Html.LabelFor(model => model.Type):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model => model.Type)
+               </td>
+             
+           </tr>*@
+        </tbody>
+        </table>
+        @Html.HiddenFor(model=>model.ID)
+    }
+    </div>

@@ -1,0 +1,132 @@
+﻿@model EBMS.Models.T_Freeze
+@{
+    ViewBag.Title = "ViewFundFreezeEdit";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<script type="text/javascript">
+    $(function () {
+        var sign = 0;
+        $("#shopName").change(function () {
+            var iD = $("#shopName option:selected").val();
+            if (!isNaN(iD))
+                $("#alipay option[value='" + iD + "']").attr("selected", "selected");
+            else
+                $("#alipay option[value='" + "" + "']").attr("selected", "selected");
+        });
+        $("#btnSave").click(function () {
+            if ($("#EditForm").valid()) {
+                if (sign == 0) {
+                    sign++;
+                    loading(0);
+                    $.ajax({
+                        url: "ViewFundFreezeEditSave",
+                        type: "Post",
+                        data: $("#EditForm").serialize(),
+                        dataType: "json",
+                        success: function (data) {
+                            loading(1);
+                            if (data.State == "Success") {
+                                $.messager.alert('提示', '操作成功', "info", function () {
+                                    parent.$('#editDiv').dialog('close');
+                                    parent.$("#List").datagrid("reload");
+                                    parent.$('#List').datagrid("clearSelections");
+                                    sign = 0;
+                                });
+                            }
+                            else {
+                                $.messager.alert('提示', data.Message, "info");
+                                sign = 0;
+                            }
+                            parent.$('#List').datagrid("clearSelections");
+                        },
+                        error: function () {
+                            loading(1);
+                            sign = 0;
+                        }
+                    });
+                }
+            }
+        });
+    });
+</script>
+<div class="mvctool">
+    <input id="btnSave" class="modal-btn modal-btn-save" type="button" value="保存">
+</div>
+<div>
+    @using (Html.BeginForm("EditForm", "Controllers", null, FormMethod.Post, new { Id = "EditForm" }))
+    {
+        @Html.ValidationSummary(true)
+        <table class="fromEditTable setTextWidth300">
+            <tbody>
+                <tr>
+                    <td style="text-align: right; width: 33.3%">
+                        @Html.HiddenFor(model => model.Step)
+                        @Html.HiddenFor(model => model.ID)
+                        @Html.HiddenFor(model => model.state)
+                        @Html.LabelFor(model => model.userName)：    
+                    </td>
+                    <td style="width: 33.3%">
+                        @Html.TextBoxFor(model => model.userName, new { @readonly = "readonly", @style = "width:112px;" })
+                    </td>
+                    <td style="width: 33.3%">
+                        @Html.ValidationMessageFor(model => model.userName)
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: right;">
+                        @Html.LabelFor(model => model.shopName)：    
+                    </td>
+                    <td>
+                        @Html.DropDownListFor(model => model.shopName, ViewData["shopNames"] as List<SelectListItem>, new { @style = "width:200px;" })
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.shopName)
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: right;">
+                        @Html.LabelFor(model => model.alipay)：   
+                    </td>
+                    <td>
+                        @Html.DropDownListFor(model => model.alipay, ViewData["aliPays"] as List<SelectListItem>, new { @style = "width:200px;" })
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.alipay)
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: right;">
+                        @Html.LabelFor(model => model.freezeMoney)：   
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.freezeMoney, new { @style = "width:112px;" })
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.freezeMoney)
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: right;">
+                        @Html.LabelFor(model => model.freezeReason)：   
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.freezeReason, new { @style = "width:195px;" })
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.freezeReason)
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: right;">
+                        @Html.LabelFor(model => model.remark)：   
+                    </td>
+                    <td colspan="2">
+                        @Html.TextBoxFor(model => model.remark, new { @style = "width:195px;" })
+                    </td>
+                </tr>
+                @Html.HiddenFor(model => model.ID)
+        </table>
+    }
+</div>
+

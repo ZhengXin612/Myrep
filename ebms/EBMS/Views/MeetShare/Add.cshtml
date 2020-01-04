@@ -1,0 +1,115 @@
+﻿@model EBMS.Models.T_MeetShare
+@{
+    ViewBag.Title = "ViewConfigAdd";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<style>
+    .label-80 {width:80px;text-align:right}
+    #save {padding:6px 20px;color:#fff;background:#2299ee;margin:30px;display:table;border-radius:5px}
+    h2 {margin-left:10px}
+        #save:hover {background:#2266dd}
+</style>
+   @using (Html.BeginForm("EditForm", "Controllers", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+    <table class="fromEditTable setTextWidth300">
+       
+        <tbody>
+            <tr>
+                <td colspan="3">
+                   <h2> 好护士早会分享第（@ViewData["Season"]）期</h2>
+                   <input type="hidden" id="Season" name="Season" value="@ViewData["Season"]"/>
+                </td>
+            </tr>
+            <tr>
+                
+              <td class="label-80">
+                  @Html.LabelFor(model => model.Name):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model => model.Name, new { @class="getInput",@readonly="true",@onclick="getUser()"})
+               </td>
+                  <td>
+                   @Html.ValidationMessageFor(model => model.Name)
+               </td>
+          </tr> 
+          <tr>
+              <td class="label-80">
+                  @Html.LabelFor(model => model.ShareDate):
+               </td>
+               <td>
+                  
+                      <input name="ShareDate" style="float: left;" value="" id="ShareDate" class="easyui-datebox" data-options="sharedCalendar:'#ShareDate'">
+               </td>
+               <td>
+                  @Html.ValidationMessageFor(model => model.ShareDate)
+               </td>
+          </tr> 
+            <tr>
+                <td colspan="3" style="padding-left:30px">
+                    是否决赛:
+                    <label>否</label><input type="radio" name="Finals" value="0" checked="true"/>
+                    <label>是</label><input type="radio" name="Finals" value="1"/>
+                    <input type="hidden" id="Finals" name="Finals">
+                </td>
+            </tr>
+        </tbody>
+    </table>
+           @Html.HiddenFor(model => model.ID)
+         
+}
+<a href="#" id="save" >确定</a>
+<div id="userDiv" class="easyui-dialog" closed="true" modal="true" title="分享人员" style="width:400px; height:320px;" resizable="true" closable="true">
+    <iframe scrolling="yes" id='openIframeUser' frameborder="0" src="" style="width:100%;height:98%;"></iframe>
+</div>
+<script>
+   
+    $(function () {
+        $(".datebox .combo-text").css({ "height": "15px", "line-height": "15px" })
+        var curr_time = new Date();
+        curr_time.setTime(curr_time.getTime() + 24 * 60 * 60 * 1000);
+        var strDate = curr_time.getFullYear() + "-";
+        strDate += curr_time.getMonth() + 1 + "-";
+        strDate += curr_time.getDate();
+        strDate = formatDatebox(strDate);
+        $("#ShareDate").datebox("setValue", strDate);
+    });
+    var flag = 0;
+    $("#save").click(function () {
+        if ($("#Name").val() =="") {
+            alert("请选择员工")
+            return false;
+        }
+        $("#Finals").val($("input[name='Finals']:checked").val())
+        if (flag == 0)
+        {
+            flag++;
+            $.ajax({
+                url: "/MeetShare/shareAdd",
+                type: "post",
+                data: $("#EditForm").serialize(),
+                success: function (data) {
+                    $.messager.alert('提示', data.Message, "info", function () {
+                        if (data.State == "Success") {
+                            window.location.reload();
+                        }
+                        flag = 0;
+                    });
+                },
+                error: function (data) {
+                    flag = 0;
+                    alert(data)
+                }
+            })
+
+        }
+
+
+        
+    })
+    //弹出人员输入框 
+    function getUser(_This) {
+        $('#openIframeUser')[0].src = "/MeetShare/UserTable";
+        $('#userDiv').dialog('open');
+    }
+</script>

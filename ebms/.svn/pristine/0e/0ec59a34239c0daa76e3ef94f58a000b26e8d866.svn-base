@@ -1,0 +1,93 @@
+﻿@model  EBMS.Models.T_RetreatExpressRecord
+@using Lib;
+@{
+    ViewBag.Title = "添加记录";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+    
+}
+
+<script type="text/javascript">
+    $(function () {
+        var sign = 0;
+        $("#btnSave").click(function () {
+            if ($("#EditForm").valid()) {
+                var id = "@ViewData["ID"]";
+                var selected_val = document.getElementById("TrackRecord_Situation").value;
+                if (sign == 0) {
+                    sign = 1;
+                    $.ajax({
+                        url: "../Retreat/JiluSave?id=" + id + "&selected_val=" + selected_val,
+                        type: "Post",
+                        data: $("#EditForm").serialize(),
+                        dataType: "json",
+                        success: function (data) {
+
+                            if (data == "1") {
+                                $.messager.alert("提示", "保存成功", "info", function () {
+                                    parent.$("#openDivNew").dialog("close");
+
+                                    parent.$("#List").datagrid("reload");
+                                    sign = 0
+                                })
+                            }
+                            else {
+                                $.messager.alert("提示", "保存失败", "info");
+                                sign = 0
+                            }
+                            parent.$('#List').datagrid("clearSelections");
+                        },
+                        error: function (data) {
+                        sign = 0;
+                        loading(1);
+                        $.messager.alert('提示', data, "info")
+                    }
+                    });
+                }
+            }
+        });
+    });
+
+</script>
+<div class="mvctool">
+  <input id="btnSave" class="modal-btn modal-btn-save" type="submit" value="保存">
+</div>
+<div>
+    @using (Html.BeginForm("EditForm", "Controllers", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+    <table class="fromEditTable setTextWidth300">
+        <tbody>
+           
+            <tr>
+                <td style="width: 80px; text-align: right;">
+                   情况：   
+                </td>
+                <td>
+                  <select id="TrackRecord_Situation" name="TrackRecord_Situation">
+                        <option value="未达到顾客地址" selected="true">未达到顾客地址</option>
+                        <option value="已有返回物流信息">已有返回物流信息</option>
+                      <option value="已做退回标签">已做退回标签</option>
+                      <option value="已留言">已留言</option>
+                        <option value="问题件">问题件</option>
+                        <option value="投诉仲裁">投诉仲裁</option>
+                       <option value="完成">完成</option>
+                  </select>
+                </td>            
+            </tr>
+            <tr>
+                <td style="width: 80px; text-align: right;">
+                   备注：   
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.TrackRecord_Remarks)
+                </td>
+            </tr>        
+            
+            
+        </tbody>
+    </table>
+           @Html.HiddenFor(model => model.ID)
+}
+</div>
+
+

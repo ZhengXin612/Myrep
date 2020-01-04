@@ -1,0 +1,149 @@
+﻿@model EBMS.Models.T_RulesNotice
+@{
+    ViewBag.Title = "ViewNoticeAdd";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+<script src="/Scripts/jquery.validate.min.js" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/jquery.validate.unobtrusive.min.js")" type="text/javascript"></script>
+ <script charset="utf-8" src="~/Scripts/editor/kindeditor.js"></script>
+		<script charset="utf-8" src="~/Scripts/editor/lang/zh_CN.js"></script>
+<style>
+    form 
+    {
+        margin: 0;
+    }
+    textarea
+    {
+        display: block;
+    }
+
+</style>
+<script type="text/javascript">
+    $(function () {
+
+        var editor;
+        KindEditor.ready(function (K) {
+            editor = K.create('#hideContent', {
+                allowFileManager: true,
+                resizeType: 2,
+                allowPreviewEmoticons: false,
+                allowImageUpload: false,
+                uploadMode: false,
+                height:"480px",
+                width: "60%",
+                afterBlur: function () {this.sync(); 
+                },
+                items: [
+                    'fontname', 'fontsize', '|', 'forecolor', 'hilitecolor', 'bold', 'underline',
+                    'removeformat', '|', 'justifyleft', 'justifycenter', 'justifyright', 'insertunorderedlist',
+                   '|', 'emoticons',  'link']
+            });
+        });
+        $("input[type='text']").attr("style", "width:300px")
+
+        var flag = 0;
+        $('#btnSave').click(function () {
+            if ($("#Title").val() == null || $("#Title").val().trim() == "") {
+                alert("请输入标题")
+                return;
+            }
+            if ($("#Summary").val() == null || $("#Summary").val() == "") {
+                alert("请输入摘要，若没有请输入无")
+                return;
+            }
+            var sss = escape($('#hideContent').val().toString());
+         
+            $('#Contents').val(sss)
+         
+            if ($("#EditForm").valid()&&flag==0) {
+               
+                loading(0);
+                flag += 1;
+                $.ajax({
+                    url: "/System/ViewNoticeAddSave",
+                    type: "Post",
+                    data: $("#EditForm").serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        loading(1);
+                        if (data == "1") {
+                            $.messager.alert("提示", "@Lib.MessageRes.SaveOK", "info", function () {
+                                window.location.reload();
+                            })
+                        }
+                        else {
+                            $.messager.alert("提示", "保存失败", "info");
+                            flag = 0;
+                            loading(1);
+                        }
+                    }
+                });
+            }
+            return false;
+        });
+    })
+
+</script>
+<style>
+    .lab {
+  width: 100px; 
+  text-align: right;}
+   
+</style>
+
+<div class="mvctool bgb">
+    <a id="btnSave" href="javascript:;" class="modal-btn modal-btn-save">保存</a>
+  
+</div>
+
+<div>
+    @using (Html.BeginForm("EditForm", "Controllers", null, FormMethod.Post, new { Id = "EditForm" }))
+    {
+    @Html.ValidationSummary(true)
+    <table class="fromEditTable setTextWidth300">
+       <tbody>
+            <tr>
+              <td class="lab">
+                    @Html.LabelFor(model => model.Type)：   
+                </td>
+                <td>
+                    @Html.DropDownListFor(model => model.Type, ViewData["type"] as List<SelectListItem>)
+                </td>
+
+               </tr>    
+             <tr>
+                <td class="lab">
+                    @Html.LabelFor(model => model.Title)：   
+                </td>
+                <td >
+                    @Html.TextBoxFor(model => model.Title)
+                </td>
+                
+            </tr>       
+                 <tr>
+                 <td class="lab">
+                    @Html.LabelFor(model => model.Summary)：   
+                </td>
+                <td>
+                    @Html.TextAreaFor(model => model.Summary)
+                 </td>
+                 </tr>
+          
+             <tr>
+                 <td class="lab">
+                    @Html.LabelFor(model => model.Contents)：  
+                  </td>
+                <td>
+                    <textarea name="hideContent" id="hideContent" style="visibility:hidden" ></textarea>
+                 </td>
+
+             </tr>
+
+       </tbody>
+    </table>
+           @Html.HiddenFor(model => model.ID)
+          @Html.HiddenFor(model => model.Contents)
+}
+
+</div>
+

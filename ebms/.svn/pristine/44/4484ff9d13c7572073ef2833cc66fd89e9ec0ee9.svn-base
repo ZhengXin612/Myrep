@@ -1,0 +1,375 @@
+﻿@model EBMS.Models.T_RespiratorOrder
+@{
+    ViewBag.Title = "ViewRespiratorAdd";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<script type="text/javascript">
+    var editRow = -1;//定义全局变量：当前编辑的行
+    var grid; //定义全局变量datagrid  
+    $(function () {
+        $('#OrderCode').keydown(function (e) {
+            enterSearch("#BtnQuery");
+        })//在订单号输入框按enter键的时候去查询订单信息,其他时候enter键不做这件事
+        var No = "@ViewData["SaleNumbers"]";
+        $("#SaleNumbers").val(No);
+        var saleDate = "@DateTime.Now";
+        $("#SaleDate").val(saleDate);
+        grid = $('#grid').datagrid({
+            width: $(window).width() - 10,
+            height: $(window).height() - 135,
+            fitColumns: true, showFooter: true,
+            rownumbers: true, singleSelect: true,
+            columns: [[
+                {
+                    field: 'ProductName', title: '产品名称', width: 150,
+                    editor: {
+                        type: 'text', options: { required: true }
+                    }
+                },
+                   {
+                       field: 'Company', title: '单位', align: 'center', width: 80,
+                       editor: {
+                           type: 'text', options: { required: true }
+                       }
+                   },
+                   {
+                       field: 'ProductCode', title: '产品序列号', width: 120,
+                  editor: {
+                      type: 'text', options: { required: true }
+                   }
+                 },
+                {
+                    field: 'Number', title: '数量', width: 80,
+                    editor: {
+                        type: 'numberbox'
+                    }
+                },
+                   {
+                       field: 'Price', title: '单价', width: 80,
+                       editor: {
+                           type: 'text', options: { required: true }
+                       }
+                   },
+                  {
+                      field: 'Subtotal', title: '小计', align: 'center', width: 100, editor: {
+                          type: 'text', options: { required: true }
+                      }
+                  },
+            ]],
+            onClickRow: function (rowIndex, rowData) {
+                //停止正在编辑行
+                if (editRow != rowIndex) {
+                    grid.datagrid('endEdit', editRow);
+                }
+                editRow = rowIndex;
+            },
+            onClickCell: function (index, field) {
+                editCell(index, field);
+            },
+            onAfterEdit: function (index) {
+               // var row = grid.datagrid('getRows')[index];
+              //  row.Subtotal = row.Number * row.Price;
+                saveJson();
+                grid.datagrid('refreshRow', index);
+                updateFooter();
+            }
+        });
+        //初始化空白grid 
+        grid.datagrid('loadData', { total: 0, rows: [], "footer": [{ "ProductName": "合计", "Number": 0, "Subtotal": 0.00 }] });
+
+        //查询详情得到数据传回页面
+        $('#BtnQuery').bind('click', function () {
+            var OrderCode = $("#OrderCode").val();
+            if (OrderCode != null && OrderCode.trim() != "") {
+                $.post("QueryDataByCode/", { "Ordercode": OrderCode }, function (data) {
+                     console.log(data)
+                    if (data == 0)
+                    {
+                        $.messager.alert("提示", "不存在该订单", "info");
+                    }
+                    else if (data == -1)
+                    {
+                        $.messager.alert("提示", "订单号重复", "info");
+                    }
+                    else
+                    {
+                        grid.datagrid("loadData",{ "total":"0","rows":[] });
+                        $("#CustomerName").val(data.i.CustomerName);
+                        $("#Customerphone").val(data.i.Customerphone);
+                        $("#Customeraddress").val(data.i.Customeraddress);
+                    }
+
+                    for (var z = 0; z < data.d.length; z++) {
+                        $('#grid').datagrid('appendRow', { ProductName: data.d[z].ProductName, Company: data.d[z].Company, Number: data.d[z].Number, Price: data.d[z].Price, Subtotal: data.d[z].Subtotal })//, CPCode: data.d[z].CPCode 
+                    }
+                    saveJson();
+
+                });
+            }
+            else
+            {
+                $.messager.alert("提示", "请输入订单号后再进行查询", "info");
+            }
+           
+        });
+        $(window).resize(function () {
+            $('#grid').datagrid('resize', {
+                width: $(window).width() - 10,
+                height: $(window).height() - 191
+            })
+        });
+        $("#BtnAddDetail").click(function () {
+          
+            $('#grid').datagrid('appendRow', {
+                    CPName: "",
+                    Company: "",
+                    CPCode: "",
+                    Number: "",
+                    Price: "",
+                    Subtotal: "",
+                })
+        })
+        //保存页面数据
+        var flag = 0;
+        $('#btnSave').click(function () {
+            grid.datagrid("endEdit", editRow);
+            var jsonstr = $("#jsonStr").val();
+            if (jsonstr == "") {
+                alert("无详情，无法保存！");
+                return;
+            }
+
+            var rows = $('#grid').datagrid('getRows');
+            for (var i = 0; i < rows.length; i++) {
+                if (rows[i].Number == null || rows[i].Number == undefined) {
+                    alert("请输入数量");
+                    return false;
+                }
+            }
+            if ($("#form1").valid() && flag == 0) {
+                flag = 1;
+                loading(0);
+                $.ajax({
+                    url: "/Respirator/RespiratorAddSave",
+                    type: "Post",
+                    data: $("#form1").serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.State == "Success") {
+                            loading(1)
+                            $.messager.alert("提示", "@Lib.MessageRes.SaveOK", "info", function () {
+                                window.location.reload();
+                            })
+                        }
+                        else {
+                            loading(1)
+                            $.messager.alert("提示", data.Message, "info");
+                            flag = 0;
+                        }
+                    },
+                    error: function (data) {
+                        loading(1);
+                        flag = 0;
+                        $.messager.alert('提示', data, "info");
+                    }
+                });
+            }
+        })
+       
+
+        //删除明细
+        $('#btnRemove').bind('click', function () {
+
+            if (editRow != -1) {
+                grid.datagrid('cancelEdit', editRow)
+                grid.datagrid('deleteRow', editRow);
+                editRow = -1;
+                updateFooter()
+
+            }
+            else {
+                $.messager.alert("提示", '删除失败', "error");
+            }
+        });
+    });
+  
+    function editrow(index) {
+        editRow = index;
+        grid.datagrid('selectRow', index);
+        grid.datagrid('beginEdit', index);
+
+        var editors = grid.datagrid('getEditors', index);
+        var qty = editors[0].target;
+        var price = editors[1].target;
+        // var total = editors[2].target;
+        var memo = editors[2];
+        qty.focus();
+       
+        var q = 1;
+        var p = 0;
+        var t = 0;
+      
+        memo.target.bind('keyup', function () {
+            if (window.event.keyCode == 13) {
+                $('#grid').datagrid('endEdit', index);
+                editRow = -1;
+            }
+        });
+    }
+   
+    function editCell(index, field) {
+
+        //if (editRow != index) { }
+        grid.datagrid('endEdit', editRow);
+        editRow = index;
+        grid.datagrid('selectRow', index);
+        grid.datagrid('beginEdit', index);
+        var editor = grid.datagrid('getEditor', { index: index, field: field });
+        //numberbox 特殊处理
+        setTimeout(function () {
+            editor.target.focus();
+        }, 0);
+
+        var editors = grid.datagrid('getEditors', index);
+        for (var i = 0; i < editors.length; i++) {
+            editors[i].target.bind('keydown', { field: editors[i].field }, function (e) {
+                if (e.keyCode == 13) {
+                    grid.datagrid('endEdit', index);
+                    editRow = -1;;
+                } else if (e.keyCode == 38) {	// up
+
+                    if (editRow > 0) {
+                        editCell(editRow - 1, e.data.field);
+                    }
+                } else if (e.keyCode == 40) {	// down
+
+                    if (editRow < grid.datagrid('getRows').length - 1) {
+                        editCell(parseInt(editRow) + 1, e.data.field);
+                    }
+                }
+                if (i < 2) {
+                    if (!(event.keyCode == 46) && !(event.keyCode == 9) && !(event.keyCode == 8) && !(event.keyCode == 37) && !(event.keyCode == 39))
+                        if (!((event.keyCode >= 48 && event.keyCode <= 57) || (event.keyCode >= 96 && event.keyCode <= 105)))
+                            event.returnValue = false;
+                }
+            });
+        }
+
+    }
+    function updateFooter() {
+        var billCount = 0, billCost = 0;
+        var rows = grid.datagrid('getRows');
+        for (var i = 0; i < rows.length; i++) {
+            var row = rows[i];
+            if (row.Number) {
+                billCount += parseInt(row.Number);
+            }
+            if (row.Subtotal) {
+                billCost += parseFloat(row.Subtotal);
+            }
+        }
+
+        grid.datagrid('reloadFooter', [{ "ProductName": "合计", "Number": billCount, "Subtotal": billCost }]);
+    }
+    function saveJson() {
+
+        JsonText = "[";
+        var rows = $('#grid').datagrid('getChanges');
+
+        for (var i = 0; i < rows.length; i++) {
+            var Pcode = "";
+            if (rows[i].ProductCode != null && rows[i].ProductCode != undefined)
+            {
+                Pcode = rows[i].ProductCode;
+            }
+            JsonText += '{';
+            JsonText += '"ProductName":' + '"' + rows[i].ProductName + '",';
+            JsonText += '"Company":' + '"' + rows[i].Company + '",';
+            JsonText += '"ProductCode":' + '"' + Pcode + '",';
+           // JsonText += '"Company":' + '"' + rows[i].Company + '",';
+            JsonText += '"Number":' + '"' + rows[i].Number + '",';
+            JsonText += '"Price":' + '"' + rows[i].Price + '",';
+            JsonText += '"Subtotal":' + '"' + rows[i].Subtotal + '"';
+            JsonText += '},';
+        }
+        JsonText = JsonText.substring(0, JsonText.length - 1);
+        JsonText += "]";
+
+        $("#jsonStr").val(JsonText);
+    }
+  
+    $(document).not(grid).on("click", function () {
+        grid.datagrid("endEdit", editRow);
+        grid.datagrid('unselectAll');
+    });
+
+</script>
+<div class="btn-bar">
+    <a id="btnSave" href="javascript:;" class="modal-btn modal-btn-save">保存</a>
+     <a id="BtnAddDetail" href="javascript:;" class="icon-add">增加详情</a>
+     <a id="btnRemove" href="javascript:;" class="icon-remove">删除商品</a>
+    
+</div>
+@using (Html.BeginForm("ViewAdd", "Respirator", FormMethod.Post, new { name = "form1", id = "form1" }))
+{
+  
+    @Html.ValidationSummary(true)
+    <table class="fromEditTable setTextWidth300">
+        <tr>
+            <td style="width: 120px;">
+                @Html.LabelFor(model => model.OrderCode)：    
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.OrderCode)
+                <a href="#" plain="true" class="easyui-linkbuttorn" data-options="iconCls:'icon-save'" id="BtnQuery" title="查询">查询</a>
+            </td>
+            <td style="width: 80px;">
+                @Html.LabelFor(model => model.CustomerName)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.CustomerName)
+            </td>
+             <td style="width: 80px;">
+                @Html.LabelFor(model => model.Customerphone)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.Customerphone)
+            </td>
+        </tr>
+        <tr>
+             <td>
+                @Html.LabelFor(model => model.SaleNumbers)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.SaleNumbers, new { @readonly = true })
+            </td>
+            <td>
+                @Html.LabelFor(model => model.SaleDate)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.SaleDate, new { @readonly = true })
+            </td>
+            <td>
+                @Html.LabelFor(model => model.Customeraddress)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.Customeraddress)
+            </td>
+        </tr>
+          <tr>
+            <td>
+                @Html.LabelFor(model => model.Remarks)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.Remarks)
+            </td>
+              <td colspan="4" >注：销售清单<span style="color:red;font-size:14px;">第一条</span>填写<span style="color:red;font-size:14px;">主机</span>信息，<span style="color:red;font-size:14px;">第二条</span>填写<span style="color:red;font-size:14px;">湿化器</span>信息,填错会影响销售单和保证书的打印</td>
+        </tr>
+    </table>
+    @Html.Hidden("jsonStr")
+  }
+<div style="margin:5px 0 0 0">
+<table id="grid">
+</table>
+</div>

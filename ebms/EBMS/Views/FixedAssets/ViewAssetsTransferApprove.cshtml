@@ -1,0 +1,99 @@
+﻿@model EBMS.Models.T_AssetsApprove
+@{
+    ViewBag.Title = "ViewAssetsTransferApprove";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+<script src="/Scripts/jquery.validate.min.js" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/jquery.validate.unobtrusive.min.js")" type="text/javascript"></script>
+<script type="text/javascript">
+   
+    $(function () {
+        $('#ID').val(@ViewData["ID"])
+        var flag = 0;
+        $("#btnSave").click(function () {
+           
+            if ($('#State').val() != "1" && $('#State').val() != "2")
+            {
+                $.messager.alert("提示", "请选择审核状态", "info");
+                return false;
+            }
+            if ($("#EditForm").valid() && flag == 0) {
+                flag = 1;
+                loading(0);
+                $.ajax({
+                    url: "/FixedAssets/AssetsTransferApproveSave",
+                    type: "Post",
+                    data: $("#EditForm").serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        if (data > 0) {
+                            loading(1)
+                            $.messager.alert("提示", "保存成功", "info", function () {
+                                parent.$('#List').datagrid('reload');
+                                parent.$('#CheckDiv').dialog('close');
+                            });
+                        }
+                        else {
+                            loading(1)
+                            $.messager.alert("提示", "保存失败", "info");
+                            flag = 0;
+                           
+                        }
+                        parent.$('#List').datagrid("clearSelections");
+                    },
+                    error: function (data) {
+                       loading(1);
+                        $.messager.alert('提示', data, "info");
+                    }
+                });
+
+            }
+        })
+    })
+   
+  
+</script>
+<style>
+    .lab {
+  width: 110px; 
+  text-align: right;}
+</style>
+@using (Html.BeginForm("EditForm", "Controllers", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+<div class="mvctool">
+     <a id="btnSave" href="javascript:;" class="modal-btn modal-btn-save">保存</a>
+</div>
+ @Html.ValidationSummary(true)
+    <table class="fromEditTable setTextWidth300">
+       
+        <tbody>
+            <tr>
+                <td></td>
+                <td>
+                    @Html.RadioButtonFor(model => model.State, "1")
+                    同意&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                
+                    @Html.RadioButtonFor(model => model.State, "2")
+                    不同意
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model=>model.State)
+                </td>
+            </tr>
+               <tr>
+                <td>
+                    @Html.LabelFor(model=>model.Memo)：
+                </td>
+                <td>
+                    @Html.TextAreaFor(model=>model.Memo)
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model=>model.Memo)
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    @Html.HiddenFor(model => model.ID)
+     @Html.HiddenFor(model => model.ApplyID)
+}
+

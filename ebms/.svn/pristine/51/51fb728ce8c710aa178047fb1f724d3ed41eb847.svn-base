@@ -1,0 +1,293 @@
+﻿@model EBMS.Models.T_Borrow
+@{
+    ViewBag.Title = "ViewBorrowPrint";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<script type="text/javascript">
+    function DX(num) {
+        var strOutput = "";
+        var strUnit = '仟佰拾亿仟佰拾万仟佰拾元角分';
+        num += "00";
+        var intPos = num.indexOf('.');
+        if (intPos >= 0)
+            num = num.substring(0, intPos) + num.substr(intPos + 1, 2);
+        strUnit = strUnit.substr(strUnit.length - num.length);
+        for (var i = 0; i < num.length; i++)
+            strOutput += '零壹贰叁肆伍陆柒捌玖'.substr(num.substr(i, 1), 1) + strUnit.substr(i, 1);
+        return strOutput.replace(/零角零分$/, '整').replace(/零[仟佰拾]/g, '零').replace(/零{2,}/g, '零').replace(/零([亿|万])/g, '$1').replace(/零+元/, '元').replace(/亿零{0,3}万/, '亿').replace(/^元/, "零元");
+    };
+    function printpage(id) {
+        $.ajax({
+            url: "UpdateprintCountByID",
+            type: "Post",
+            data: { id: id },
+            dataType: "json",
+            success: function (data) {
+                if (data.State == "Success") {
+                    parent.$("#List").datagrid("reload");
+                    window.print();
+                }
+                else {
+                    $.messager.alert("提示", data.Message, "info");
+                }
+
+            }
+        });
+
+    }
+</script>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>借支单</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+    <style type="text/css">
+        * {
+            margin: 0;
+            padding: 0;
+            border: 0;
+            outline: 0;
+            font-family: "宋体";
+        }
+
+        body {
+            font-size: 12px;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: normal;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        li {
+            list-style: none;
+        }
+
+        .Any_single {
+            width: 100%;
+            position: relative;
+        }
+
+            .Any_single h2 {
+                text-align: center;
+                width: 50%;
+                margin: 0 auto;
+                font-size: 18px;
+                height: 35px;
+                line-height: 35px;
+            }
+
+                .Any_single h2 span {
+                    padding: 0 10px;
+                }
+
+        .h2-double-line {
+            border: 1px solid #000;
+            width: 50%;
+            height: 5px;
+            margin: 0 auto;
+            border-left: 0;
+            border-right: 0;
+        }
+
+        .Any_single_body {
+            width: 95%;
+            margin: 0 auto;
+        }
+
+        .fx-item {
+            text-align: center;
+            margin-top: 5px;
+        }
+
+            .fx-item b {
+                padding: 0 5px;
+                font-weight: normal;
+            }
+
+        .fx-item-fl {
+            float: left;
+        }
+
+        .Any_single_table {
+            border: 1px solid #000;
+            border-collapse: collapse;
+            border-spacing: 0;
+            width: 100%;
+            margin-top: 10px;
+            text-align: center;
+            font-size: 12px;
+        }
+
+            .Any_single_table tr {
+                border-bottom: 1px solid #000;
+                height: 26px;
+            }
+
+            .Any_single_table .tr2 {
+                height: 74px;
+            }
+
+                .Any_single_table .tr2 td {
+                    overflow: hidden;
+                }
+
+        .r-border {
+            border-right: 1px solid #000;
+        }
+
+        .Any_single_table tr .txt {
+            text-indent: 2em;
+            text-align: left;
+        }
+
+        .tr2 dl {
+            float: left;
+            width: 25%;
+            border-right: 1px solid #000;
+            box-sizing: border-box;
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            -ms-box-sizing: border-box;
+            -o-box-sizing: border-box;
+        }
+
+            .tr2 dl:last-child {
+                border-right: 0;
+            }
+
+            .tr2 dl dd, .tr2 dl dt {
+                float: left;
+            }
+
+            .tr2 dl dt {
+                width: 15%;
+                height: 74px;
+                vertical-align: middle;
+                text-align: left;
+                padding-left: 5px;
+                display: table-cell;
+                padding-top: 4px;
+                border-right: 1px solid #000;
+                box-sizing: border-box;
+                -webkit-box-sizing: border-box;
+                -moz-box-sizing: border-box;
+                -ms-box-sizing: border-box;
+                -o-box-sizing: border-box;
+            }
+
+            .tr2 dl dd {
+                width: 85%;
+                line-height: 70px;
+            }
+
+        .get-code {
+            position: absolute;
+            right: 10px;
+            z-index: 2;
+            top: -20px;
+        }
+
+        @@media print {
+            .noprint {
+                display: none;
+                color: green;
+            }
+        }
+
+        .Batch-number {
+            float: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="noprint">
+        <a href="javascript:printpage(@Model.ID);" class="icon-ok">打印</a>
+
+    </div>
+    <div class="Any_single">
+        <h2>借<span></span>支<span></span>单</h2>
+        <div class="get-code">
+            <img src="~/Content/barCode.ashx?code=@Model.BorrowCode"  id ="qrcode" width="169" height="60">
+        </div>
+        <div class="h2-double-line"></div>
+        <div class="Any_single_body">
+            <p class="fx-item"><span class="fx-item-fl">部门：<b id="bumen">电商-@Model.BorrowerDep</b></span><b id="riqi"></b></p>
+            <table class="Any_single_table">
+                <tbody>
+                    <tr>
+                        <td width="20%" class="r-border">借支人姓名</td>
+                        <td width="45%" class="r-border">
+                            <h3 id="user">@Model.BorrowName</h3>
+                        </td>
+                        <td width="10%" class="r-border">来源</td>
+                        <td>
+                            <h3 id="zhiwu">@Model.BorrowerFrom </h3>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="20%" class="r-border">打款帐号</td>
+                        <td colspan="3" class="txt">
+                            <h3 id="BorrowYHK">@Model.BorrowAccountID (开户行： @Model.BorrowBank  ) (收款人： @Model.BorrowAccountName)</h3>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="20%" class="r-border">借支事由</td>
+                        <td colspan="3" class="txt">
+                            <h3 id="jiezhishiyou">@Model.BorrowReason</h3>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="20%" class="r-border">需款时间</td>
+                        <td colspan="3" class="txt">
+                            <h3 id="Borrowxukuandate">@Convert.ToDateTime(Model.BorrowNeedDate).ToString("yyyy-MM-dd")</h3>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="20%" class="r-border">人民币<br />
+                            (大写)</td>
+                        <td colspan="3" class="txt">
+                            <h3 id="daxjine">
+                                <script>document.write(DX(@Model.BorrowMoney));</script>
+                                (￥@Model.BorrowMoney 元）</h3>
+                        </td>
+                    </tr>
+                    <tr class="tr2">
+                        <td width="100%" colspan="4" class="body">
+                            <dl>
+                                <dt>核<br />
+                                    准</dt>
+                                <dd></dd>
+                            </dl>
+                            <dl>
+                                <dt>会<br />
+                                    计</dt>
+                                <dd></dd>
+                            </dl>
+                            <dl>
+                                <dt>出<br />
+                                    纳</dt>
+                                <dd></dd>
+                            </dl>
+                            <dl>
+                                <dt>借<br />
+                                    支<br />
+                                    人</dt>
+                                <dd></dd>
+                            </dl>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</body>
+</html>

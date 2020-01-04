@@ -1,0 +1,153 @@
+﻿@{
+	ViewBag.Title = "ViewPrintRecord";
+	Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<div class="Company-top-box">
+	<div class="search-box">
+		<input type="text" placeholder="打印单号/分拣人" id="txtQuery" class="icon-search-txt">
+		<select id="ISqualified"  class="sel-box">
+			<option value="">==全部==</option>
+			<option value="合格"> 合格</option>
+			<option value="不合格"> 不合格</option>
+		</select>
+
+		<input type="button" value="查询" id="btnQuery" class="icon-search">
+		<a href="#" class="easyui-linkbutton" plain="true" iconcls="icon-print" id="btnPrint">打印</a>
+	</div>
+</div>
+
+<table id="List"></table>
+<table id="Details"></table>
+<script type="text/javascript">
+    enterSearch("#btnQuery");
+    $(function () {
+        var url = "GetPrintRecord";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height()*0.7 - 50,
+            fitColumns: true,
+            sortName: 'ID',
+            sortOrder: 'desc',
+            idField: 'ID',
+            pageSize: 20,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            columns: [[
+				{ field: 'ID', title: '', width: 80, align: 'center',checkbox:true },
+                { field: 'PrintNO', title: '打印编号', width: 80, align: 'center' },
+                { field: 'PostUser', title: '分拣人', width: 80, align: 'center' },
+                { field: 'PostTime', title: '时间', width: 80, align: 'center', formatter: formatDateBoxFull },
+				 //{ field: 'PrintType', title: '产品类型', width: 80, align: 'center' },
+				{ field: 'OutWarehouse', title: '仓库', width: 80, align: 'center' },
+				{ field: 'InGoodsAllocation', title: '货位', width: 80, align: 'center' },
+
+
+            ]],
+            onClickRow: function (rowIndex, rowData) {
+            	console.log(rowData)
+            	$('#Details').datagrid({
+            		url: 'RePrint?printNO=' + rowData.PrintNO
+            	});
+            }
+        });
+
+    
+    	$('#Details').datagrid({
+    		
+    		width: $(window).width() - 15,
+    		method: 'post',
+    		height: $(window).height()*0.7 - 50,
+    		fitColumns: true,
+    		sortName: 'ID',
+    		sortOrder: 'desc',
+    		idField: 'ID',
+    		pageSize: 20,
+    		pagination: false,
+    		striped: true, //奇偶行是否区分
+    		singleSelect: false,//单选模式
+    		columns: [[
+                 { field: 'ProductCode', title: '产品代码', width: 80, align: 'center' },
+                { field: 'ProductName', title: '产品名称', width: 80, align: 'center' },
+                { field: 'Qty', title: '数量', width: 80, align: 'center' },
+				{ field: 'UnitName', title: '单位', width: 80, align: 'center' },
+                { field: 'SpectName', title: '规格', width: 80, align: 'center' },
+				
+
+
+    		]],
+            @*onlClickRow: function (rowIndex, rowData) {
+            	parent.addshop(rowData, "@ViewData["index"]");
+            	// myfunction();
+            }*@
+            });
+
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            });
+        });
+
+      
+    });
+	$("#btnQuery").click(function () {
+		
+		var queryStr = $("#txtQuery").val().trim();
+		var ISqualified = $("#ISqualified").val().trim();
+
+	
+		$('#List').datagrid({
+			url: 'GetPrintRecord?queryStr=' + queryStr + "&ISqualified=" + ISqualified
+		});
+
+	});
+</script>
+
+
+<script>
+	$("#btnPrint").click(function () {
+		var row = $('#List').datagrid('getSelected');
+		if (row == null) {
+			$.messager.alert('提示', '请选择所需要的数据', "info");
+			return false;
+		}
+		else {
+			$.ajax({
+				url: "/Print/RePrint?PrintNO=" + row.PrintNO,
+				type: "Post",
+
+				success: function (data) {
+
+
+					var printStr = "<html><head><meta http-equiv='Content-Type' content='text/html; charset=utf-8'></head><body> ";
+					//data.printInfo
+					printStr += "<h4>" + data.printInfo.PrintNO + "(" + data.printInfo.OutWarehouse + "," + data.printInfo.InGoodsAllocation + ")</h4>";
+					//printStr += "<p>分拣人:"+ data.printInfo.PostUser +"</p><p>"+ formatDateBoxFull( new Date()) +"</p>";
+					printStr += "<table border=\"1px  \"    cellpadding=\"3px\" cellspacing=\"3px\"  style=\"border:1px solid #FFF; border-collapse: collapse\"><thead><tr><td>代码</td><td>名称</td><td>规格</td><td>单位</td><td>数量</td></tr></thead>"
+					var content = "";
+					for (var i = 0; i < data.rows.length; i++) {
+						var item = data.rows[i];
+						content += "<tr style=\"border-bottom:1px solid\"><td>" + item.ProductCode + "</td><td>" + item.ProductName + "</td><td>" + item.SpecName + "</td><td>" + item.UnitName + "</td><td>" + item.Qty + "</td></tr>"
+					//	content += "<tr><td>" + item.ProductName + "</td><td>" + item.Qty + "</td><td>" + item.UnitName + "</td><td>" + item.SpecName + "</td></tr>"
+					}
+
+					printStr = printStr + content + "<tr><td colspan=\"5\">分拣人:" + data.printInfo.PostUser + "</td></tr><tr><td colspan=\"5\">" + formatDateBoxFull(new Date()) + "</td></tr></table></body></html>";
+					var pwin = window.open("Print.html", "print"); //如果是本地测试，需要先新建Print.htm，如果是在域中使用，则不需要
+					pwin.document.write(printStr);
+					pwin.document.close(); //这句很重要，没有就无法实现
+					pwin.print();
+
+				}
+			});
+		}
+	
+	})
+</script>

@@ -1,0 +1,6 @@
+﻿@{
+    ViewBag.Title = "ViewGrnrralizeApproveDetail";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+@Html.Raw(ViewData["history"])

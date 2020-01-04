@@ -1,0 +1,105 @@
+﻿@model EBMS.Models.T_HTExchangeRate
+@{
+    ViewBag.Title = "ViewLazadaConfigAdd";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+
+<script type="text/javascript">
+
+    $(function () {
+        var flag = 0;
+        $('#btnSave').click(function () {
+            var TypeName = $("#selStatus").val();
+            if ($("#EditForm").valid() && flag == 0) {
+                flag = 1;
+                loading(0);
+                $.ajax({
+                    url: "/AliExpressOrder/HTExchangeRateAddSave?TypeName=" + TypeName,
+                    type: "Post",
+                    data: $("#EditForm").serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.State == "Success") {
+                            $.messager.alert("提示", "@Lib.MessageRes.SaveOK", "info", function () {
+                                loading(1)
+                                parent.$('#AddDiv').dialog('close')
+                                parent.$('#List').datagrid('reload');
+                                flag = 0;
+                            })
+                        }
+                        else {
+                            loading(1)
+                            $.messager.alert("提示", data.Message, "info");
+                            flag = 0;
+
+                        }
+                        parent.$('#List').datagrid("clearSelections");
+                    },
+                    error: function (data) {
+                        loading(1);
+                        flag = 0;
+                        $.messager.alert('提示', data, "info");
+                    }
+                });
+            }
+        })
+    })
+
+
+</script>
+<div class="mvctool">
+    <a id="btnSave" href="javascript:;" class="modal-btn modal-btn-save">保存</a>
+
+</div>
+
+<div>
+    @using (Html.BeginForm("EditForm", "Controllers", null, FormMethod.Post, new { Id = "EditForm" }))
+    {
+        @Html.ValidationSummary(true)
+        <table class="fromEditTable setTextWidth300">
+
+            <tbody>
+                <tr>
+                    <td class="lab" style="text-align: right">
+                        平台:
+                    </td>
+                    <td>
+                 
+                        <select id="selStatus" name="selStatus" class="sel-box">
+                            <option value="Shopee">Shopee</option>
+                            <option value="Ebay">Ebay</option>
+                            <option value="LAZADA">LAZADA</option>
+                        </select>
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.TypeName)
+                    </td>
+                </tr>
+                <tr>
+                    <td class="lab" style="width: 20%; text-align: right">
+                      币种:
+                    </td>
+                    <td style="width: 40%;">
+                        @Html.TextBoxFor(model => model.Code, new { @style = "width:200px" })
+                    </td>
+                    <td style="width: 40%;">
+                        @Html.ValidationMessageFor(model => model.Code)
+                    </td>
+                </tr>
+                <tr>
+                    <td class="lab" style="text-align: right">
+                        汇率:
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.ExchangeRate, new { @style = "width:200px" })
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.ExchangeRate)
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    }
+
+</div>
+

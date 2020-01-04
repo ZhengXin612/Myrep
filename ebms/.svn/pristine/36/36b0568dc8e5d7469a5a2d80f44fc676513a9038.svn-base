@@ -1,0 +1,644 @@
+﻿@model EBMS.Models.T_ManualBilling
+@using Lib
+@{
+    ViewBag.Title = "ManualBillingAdd";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+@*退货退款新增
+2016-10-12 刘明*@
+<script type="text/javascript">
+    var grid; //定义全局变量datagrid
+    var editRow = -1;
+ 
+    //加载数据
+    $(function () {
+        //创建一个新的Grid
+        grid = $('#List').datagrid({
+            width: $(window).width() - 10,
+            height: $(window).height() - 300,
+            fitColumns: true,
+            showFooter: true,
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                {
+                    field: 'Code', title: '产品编码', width: 80
+                },
+                      {
+                          field: 'Name', title: '产品名称', width: 80
+                      },
+                        
+                {
+                    field: 'qty', title: '数量', width: 80, editor: {
+                        type: 'text', options: { required: true }
+                    }
+                },
+                   { field: 'Remarks', title: '备注', width: 100, align: 'center', editor: { type: 'validatebox' } },
+
+                    {
+                        field: 'action', title: '操作', width: 120, align: 'center', formatter: function (value, row, index) {
+                            return '<div class="btn-bar"><a onclick="removeRow(' + index + ')" class="icon-remove">删除</a></div>';
+                        }
+                    },
+            ]],
+            onClickCell: function (index, field) {
+                if (field == "Code" || field == "Name") {
+
+                    $('#openIframeGoodsGY')[0].src = "ViewGoodsGY?index=" + index;
+                    $('#GoodsGYDiv').dialog('open');
+                }
+                else if (field != 'action') {
+                    editCell(index, field);
+                }
+            },
+            onAfterEdit: function (index) {
+                grid.datagrid('refreshRow', index);
+                updateFooter()
+                saveJson();
+            }
+        });
+        grid.datagrid('loadData', { total: 0, rows: [], "footer": [{ "Unit": "合计", "UnitPrice": 0.00, "Qty": 0 }] });
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 10,
+                height: $(window).height() - 191
+            })
+        });
+  
+        //提交后台方法
+        var sign = 0;
+        $("#btnSave").click(function () {
+            var province = $("#province").val();
+            var city = $("#city").val();
+            var area = $("#area").val();
+            if ($.trim(province) == null || $.trim(province) == "") {
+                alert("请选择省份/直辖市");
+                return false
+            }
+            if ($.trim(city) == null || $.trim(city) == "") {
+                alert("请选择城市");
+                return false
+            }
+            p_c_a = province + "-" + city;
+            if ($.trim(area) != null && $.trim(area) != "") {
+                p_c_a += "-" + area;
+            }
+
+            if ($("#DeliverGoodsWarehouse").val() == "") {
+                $.messager.alert('提示', "请选择发货仓库", "info")
+                loading(1);
+                return
+            }
+            if ($("#ExpressCode").val() == "") {
+                $.messager.alert('提示', "请选择快递", "info")
+                loading(1);
+                return
+            }
+            if ($("#ExpressFee").val() == "") {
+                $.messager.alert('提示', "请填写快递费", "info")
+                loading(1);
+                return
+            }
+            if ($("#PaymentAmount").val() == "") {
+                $.messager.alert('提示', "请填写支付金额", "info")
+                loading(1);
+                return
+            }
+            if ($("#ShopName").val() == "") {
+                $.messager.alert('提示', "请选择店铺", "info")
+                loading(1);
+                return
+            }
+            if ($("#PaymentMethod").val() == "") {
+                $.messager.alert('提示', "请填写支付方式", "info")
+                loading(1);
+                return
+            }
+            if ($("#GoodsReceiptName").val() == "") {
+                $.messager.alert('提示', "收货人姓名必须填写", "info")
+                loading(1);
+                return
+            }
+            if ($("#GoodsReceiptAddress").val() == "") {
+                $.messager.alert('提示', "收货地址必须填写", "info")
+                loading(1);
+                return
+            }
+            if ($("#GoodsReceiptPhone").val() == "") {
+                $.messager.alert('提示', "收货人电话必须填写", "info")
+                loading(1);
+                return
+            }
+            loading(0);
+           
+            grid.datagrid("endEdit", editRow);
+            grid.datagrid('clearSelections');
+            var rows = $('#List').datagrid("getRows");
+            if (rows == "") {
+                $.messager.alert('提示', "请添加详情", "info")
+                loading(1);
+                return
+            }
+            //循环验证数据
+            for (var i = 0; i < rows.length; i++) {
+                if (rows[i].Code == undefined || rows[i].Code == "") {
+                    $.messager.alert('提示', "请选择产品", "info")
+                    loading(1);
+                    return false;
+                }
+                if (rows[i].qty == undefined || rows[i].qty == "") {
+                    $.messager.alert('提示', "数量不允许为0或空", "info")
+                    loading(1);
+                    return false;
+                }
+               
+            }
+            //var ischongfu = $("#chongfu").val();;
+           
+            if ($("#EditForm").valid()) {
+                if (sign == 0) {
+                    sign = 1;
+                    $.ajax({
+                        url: "ViewManualBillingAdd?p_c_a=" + p_c_a,
+                        type: "Post",
+                        data: $("#EditForm").serialize(),
+                        success: function (data) {
+                            if (data.State == "Success") {
+                                loading(1);
+                                $.messager.alert('提示', '保存成功', "info", function () {
+                                    window.location.reload();
+                                    sign = 0;
+                                });
+                            } else {
+                                loading(1);
+                                $.messager.alert('提示', data.Message, "info", function () {
+                                    sign = 0;
+                                });
+                            }
+                        }
+                    });
+                }
+            }
+        });
+        addCompany("@ViewData["code"]");
+    });
+
+
+
+    //添加一行空的数据
+    function addRow() {
+        $('#List').datagrid('appendRow', {
+            Code: "",
+            Name: "",
+            qty: "",
+            Remarks: "",
+        })
+    }
+    //删除某一行数据
+    function removeRow(index) {
+        editCell(index, "Qty")
+        var rows = $('#List').datagrid("getRows");
+        $('#List').datagrid('deleteRow', index);
+        $('#List').datagrid("loadData", rows);
+        saveJson();
+        updateFooter()
+    }
+    //底部统计
+    function updateFooter() {
+        var billCount = 0;
+        var Total = 0;
+        var rows = grid.datagrid('getRows');
+        for (var i = 0; i < rows.length; i++) {
+            var row = rows[i];
+            if (row.Qty) {
+                billCount += parseInt(row.Qty);
+
+            }
+            if (row.UnitPrice) {
+                Total += parseFloat(row.UnitPrice)
+            }
+        }
+        grid.datagrid('reloadFooter', [{ "Unit": "合计", "UnitPrice": Total.toFixed(2), "Qty": billCount }]);
+    }
+    //序列化数据
+    function saveJson() {
+        JsonText = "[";
+        var rows = $('#List').datagrid('getRows');
+        for (var i = 0; i < rows.length; i++) {
+            JsonText += '{';
+            JsonText += '"Code":' + '"' + rows[i].Code + '",';
+            JsonText += '"Name":' + '"' + rows[i].Name + '",';
+            JsonText += '"qty":' + '"' + rows[i].qty + '",';
+            JsonText += '"Remarks":' + '"' + rows[i].Remarks + '"},';
+        }
+        JsonText = JsonText.substring(0, JsonText.length - 1);
+        JsonText += "]";
+        $("#jsonStr").val(JsonText);
+    }
+    //编辑触发的方法
+    function editCell(index, field) {
+
+        //给时间控件默认值
+        //var rows = $('#List').datagrid('getRows');
+        //if (rows[index].RequirementDate == null || rows[index].RequirementDate == "") {
+        //    rows[index].RequirementDate = formatDatebox(new Date())
+        //}
+        grid.datagrid('endEdit', editRow);
+        editRow = index;
+        grid.datagrid('selectRow', index);
+        grid.datagrid('beginEdit', index);
+        var editor = grid.datagrid('getEditor', { index: index, field: field });
+        setTimeout(function () {
+            editor.target.focus();
+        }, 0);
+
+        var editors = grid.datagrid('getEditors', index);
+        for (var i = 0; i < editors.length; i++) {
+            editors[i].target.bind('keydown', { field: editors[i].field }, function (e) {
+                if (e.keyCode == 13) {
+                    grid.datagrid('endEdit', index);
+                    editRow = -1;;
+                } else if (e.keyCode == 38) {	// up
+
+                    if (editRow > 0) {
+                        editCell(editRow - 1, e.data.field);
+                    }
+                } else if (e.keyCode == 40) {	// down
+
+                    if (editRow < grid.datagrid('getRows').length - 1) {
+                        editCell(parseInt(editRow) + 1, e.data.field);
+                    }
+                }
+                if (i < 2) {
+                    if (!(event.keyCode == 46) && !(event.keyCode == 9) && !(event.keyCode == 8) && !(event.keyCode == 37) && !(event.keyCode == 39))
+                        if (!((event.keyCode >= 48 && event.keyCode <= 57) || (event.keyCode >= 96 && event.keyCode <= 105)))
+                            event.returnValue = false;
+                }
+            });
+        }
+
+    }
+    //选择其他地方取消编辑
+    $(document).not(grid).on("click", function () {
+        grid.datagrid("endEdit", editRow);
+        grid.datagrid('unselectAll');
+    });
+
+    //关闭当前页面
+    function closeCurTab(name) {
+        var parentTab = parent.$('#mainTab').tabs('select', name);
+        var curTab = self.parent.$('#mainTab').tabs('getSelected');// 当前tab
+        var index = self.parent.$('#mainTab').tabs('getTabIndex', curTab);
+        self.parent.$('#mainTab').tabs('close', index);
+    }
+    function addshop(rows, index) {
+        var costPrice = rows[0].cost_price;
+        if (costPrice == null || costPrice == "") {
+            costPrice = 0;
+        }
+        $('#GoodsGYDiv').dialog('close');
+        $('#List').datagrid('updateRow', {
+            index: index,
+            row: {
+                Code: rows[0].code,
+                Name: rows[0].name,
+                qty: 0
+            }
+        });
+    }
+
+
+
+</script>
+<div class="mvctool">
+    <input id="btnSave" class="modal-btn modal-btn-save" type="submit" value="保存">
+    <a href="#" class="easyui-linkbutton" plain="true" iconcls="icon-add" id="BtnAdd" onclick="addRow()">添加商品</a>
+
+</div>
+@using (Html.BeginForm("EditForm", "Controller", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+    <table class="fromEditTable setTextWidth300">
+        <tr>
+              <td style="width: 120px;">
+                @Html.LabelFor(model => model.ShopName)：    
+            </td>
+            <td>
+                 @Html.DropDownListFor(model => model.ShopName, ViewData["ShopNameList"] as List<SelectListItem>)
+            </td>
+            <td>
+                @Html.LabelFor(model => model.OrderNumber)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.OrderNumber)
+            </td>
+        </tr>
+        <tr>
+               <td style="width: 120px;">
+                @Html.LabelFor(model => model.PaymentMethod)：    
+            </td>
+            <td>
+                 @Html.DropDownListFor(model => model.PaymentMethod, ViewData["PaymentMethodList"] as List<SelectListItem>)
+            </td>
+           @* <td style="width: 120px;">
+                @Html.LabelFor(model => model.PaymentMethod)：    
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.PaymentMethod)
+            </td>*@
+
+            <td>
+                @Html.LabelFor(model => model.DeliverGoodsReason)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.DeliverGoodsReason)
+            </td>
+        </tr>
+        <tr>
+          
+            <td style="width: 120px;">
+                @Html.LabelFor(model => model.GoodsReceiptName)：    
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.GoodsReceiptName)
+            </td>
+              <td>
+                @Html.LabelFor(model => model.GoodsReceiptPhone)：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.GoodsReceiptPhone)
+            </td>
+        </tr>
+        <tr>
+          
+            <td style="width: 120px;">
+               快递费：    
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.ExpressFee)
+            </td>
+              <td>
+               支付金额：   
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.PaymentAmount)
+            </td>
+        </tr>
+        <tr>
+          
+                 <td>地址</td>
+            <td>
+             <div id="city_china_val">
+      <select class="province other" data-first-title="选择省" id="province">
+        <option value="">请选择</option>
+      
+      </select>
+      <select class="city" data-first-title="选择市" id="city">
+        <option value="">请选择</option>
+    
+      </select>
+      <select class="area" data-first-title="选择地区" id="area">
+        <option value="">请选择</option>
+     
+      </select>    </div>
+              <td style="width: 120px;">
+                @Html.LabelFor(model => model.GoodsReceiptAddress)：    
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.GoodsReceiptAddress)
+            </td>
+        </tr>
+         <tr>
+            <td>
+                @Html.LabelFor(model => model.DeliverGoodsWarehouse)：   
+            </td>
+            <td>
+                  @Html.DropDownListFor(model => model.DeliverGoodsWarehouse, ViewData["DeliverGoodsWarehouseList"] as List<SelectListItem>)
+            </td>
+                  <td>
+                @Html.LabelFor(model => model.ExpressCode)：   
+            </td>
+            <td>
+                  @Html.DropDownListFor(model => model.ExpressCode, ViewData["ExpressCodeList"] as List<SelectListItem>)
+            </td>
+        </tr>
+        <tr>
+                <td style="width: 120px;">
+                @Html.LabelFor(model => model.ApplyRemarks)：    
+            </td>
+            <td>
+                @Html.TextBoxFor(model => model.ApplyRemarks)
+            </td>
+        </tr>
+        <input type="hidden" id="jsonStr" name="jsonStr" />
+    </table>
+}
+<div class="detail-list">
+    <table id="List"></table>
+</div>
+<div id="GoodsGYDiv" class="easyui-dialog" closed="true" modal="true" title="选择产品" style="width: 500px; height: 420px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIframeGoodsGY' frameborder="0" src="" style="width: 98%; height: 98%;"></iframe>
+</div>
+<script src="@Url.Content("~/Scripts/jquery.cxselect.min.js")" ></script>
+    <script>
+        (function () {
+            var urlChina = '/Scripts/cityData2.js';
+            // var urlGlobal =  '/Scripts/globalData.js';
+            var dataCustom = [
+              {
+                  'v': '1', 'n': '第一级 >', 's': [
+                   {
+                       'v': '2', 'n': '第二级 >', 's': [
+                        {
+                            'v': '3', 'n': '第三级 >', 's': [
+                             {
+                                 'v': '4', 'n': '第四级 >', 's': [
+                                  {
+                                      'v': '5', 'n': '第五级 >', 's': [
+                                       { 'v': '6', 'n': '第六级 >' }
+                                      ]
+                                  }
+                                 ]
+                             }
+                            ]
+                        }
+                       ]
+                   }
+                  ]
+              },
+              {
+                  'v': 'test number', 'n': '测试数字', 's': [
+                   {
+                       'v': 'text', 'n': '文本类型', 's': [
+                        { 'v': '4', 'n': '4' },
+                        { 'v': '5', 'n': '5' },
+                        { 'v': '6', 'n': '6' },
+                        { 'v': '7', 'n': '7' },
+                        { 'v': '8', 'n': '8' },
+                        { 'v': '9', 'n': '9' },
+                        { 'v': '10', 'n': '10' }
+                       ]
+                   },
+                   {
+                       'v': 'number', 'n': '数值类型', 's': [
+                        { 'v': 11, 'n': 11 },
+                        { 'v': 12, 'n': 12 },
+                        { 'v': 13, 'n': 13 },
+                        { 'v': 14, 'n': 14 },
+                        { 'v': 15, 'n': 15 },
+                        { 'v': 16, 'n': 16 },
+                        { 'v': 17, 'n': 17 }
+                       ]
+                   }
+                  ]
+              },
+              {
+                  'v': 'test boolean', 'n': '测试 Boolean 类型', 's': [
+                   { 'v': true, 'n': true },
+                   { 'v': false, 'n': false }
+                  ]
+              },
+              {
+                  v: 'test quotes', n: '测试属性不加引号', s: [
+                   { v: 'quotes', n: '引号' }
+                  ]
+              },
+              {
+                  v: 'test other', n: '测试奇怪的值', s: [
+                   { v: '[]', n: '数组（空）' },
+                   { v: [1, 2, 3], n: '数组（数值）' },
+                   { v: ['a', 'b', 'c'], n: '数组（文字）' },
+                   { v: new Date(), n: '日期' },
+                   { v: new RegExp('\\d+'), n: '正则对象' },
+                   { v: /\d+/, n: '正则直接量' },
+                   { v: {}, n: '对象' },
+                   { v: document.getElementById('custom_data'), n: 'DOM' },
+                   { v: null, n: 'Null' },
+                   { n: '未设置 value' }
+                  ]
+              },
+              { 'v': '', 'n': '无子级' }
+            ];
+
+            $.cxSelect.defaults.url = urlChina;
+
+            // 默认
+            $('#city_china').cxSelect({
+                selects: ['province', 'city', 'area']
+            });
+
+            // 设置默认值及选项标题
+            $('#city_china_val').cxSelect({
+                selects: ['province', 'city', 'area'],
+                emptyStyle: 'none'
+            });
+
+            // 全球主要国家城市联动
+            //$('#global_location').cxSelect({
+            //    url: urlGlobal,
+            //    selects: ['country', 'state', 'city', 'region'],
+            //    emptyStyle: 'none'
+            //});
+
+            // 自定义选项
+            $('#custom_data').cxSelect({
+                selects: ['first', 'second', 'third', 'fourth', 'fifth'],
+                // required: true,
+                jsonValue: 'v',
+                data: dataCustom
+            });
+
+            // API 接口
+            var apiBox = $('#api_data');
+            var cxSelectApi;
+
+            apiBox.cxSelect({
+                selects: ['province', 'city', 'area']
+            }, function (api) {
+                cxSelectApi = api;
+            });
+
+            // cxSelectApi = $.cxSelect(apiBox, {
+            //   selects: ['province', 'city', 'area']
+            // });
+
+            $('body').on('click', 'button', function () {
+                var _name = this.name;
+                var _value = this.value;
+
+                switch (_name) {
+                    case 'attach':
+                        cxSelectApi.attach();
+                        break;
+
+                    case 'detach':
+                        cxSelectApi.detach();
+                        break;
+
+                    case 'clear':
+                        cxSelectApi.clear();
+                        break;
+
+                    case 'required':
+                        cxSelectApi.setOptions({
+                            required: _value == 1 ? false : true
+                        });
+                        this.value = _value == 1 ? 0 : 1;
+                        break;
+
+                    case 'emptyStyle':
+                        if (_value === 'none') {
+                            _value = 'hidden';
+                        } else if (_value === 'hidden') {
+                            _value = '';
+                        } else {
+                            _value = 'none';
+                        };
+                        cxSelectApi.setOptions({
+                            emptyStyle: _value
+                        });
+                        this.value = _value;
+                        break;
+
+                    case 'firstTitle':
+                        _value = _value === '请选择' ? '选择吧' : '请选择';
+                        cxSelectApi.setOptions({
+                            firstTitle: _value
+                        });
+                        this.value = _value;
+                        break;
+
+                    case 'setSelect':
+                        cxSelectApi.setOptions({
+                            selects: _value === 'a' ? ['province', 'city', 'area'] : ['first', 'second', 'third', 'fourth', 'fifth']
+                        });
+                        this.value = _value === 'a' ? 'b' : 'a';
+                        break;
+
+                    case 'setData':
+                        if (_value === 'china' || _value === 'global') {
+                            // $.ajax({
+                            //   url: this.value === 'china' ? urlChina : urlGlobal,
+                            //   type: 'GET',
+                            //   dataType: 'json'
+                            // }).done(function(data, textStatus, jqXHR) {
+                            //cxSelectApi.setOptions({
+                            //    url: this.value === 'china' ? urlChina : urlGlobal,
+                            //    // data: data
+                            //});
+                            // }).fail(function(jqXHR, textStatus, errorThrown) {
+                            // });
+
+                        } else if (this.value === 'custom') {
+                            cxSelectApi.setOptions({
+                                data: dataCustom
+                            });
+                        };
+                        break;
+
+                        // not default
+                };
+            });
+        })();
+</script>
+

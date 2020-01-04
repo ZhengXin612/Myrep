@@ -1,0 +1,151 @@
+﻿@model EBMS.Models.T_BusinessTravel
+@{
+    ViewBag.Title = "ViewApply";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+
+
+<script src="/Scripts/jquery.validate.min.js" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/jquery.validate.unobtrusive.min.js")" type="text/javascript"></script>
+
+<script type="text/javascript">
+    $(function () {
+        var flag = 0;
+        $('#btnSave').click(function () {
+            if ($("#EditForm").valid() && flag == 0) {
+                loading(0)
+                flag += 1;
+                $.ajax({
+                    url: "/BusinessTravel/ApplySave",
+                    type: "Post",
+                    data: $("#EditForm").serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        loading(1);
+                        if (data.State == "Success") {
+                          
+                            $.messager.alert("提示", "@Lib.MessageRes.SaveOK", "info", function () {
+                                window.location.reload();
+                            })
+                        }
+                        else {
+                            $.messager.alert("提示", data.Message, "info");
+                            flag = 0;
+                           
+                        }
+                    },
+                    error: function (data)
+                    {
+                        flag = 0;
+                        $.messager.alert("提示", data, "info");
+                    }
+                });
+            }
+            return false;
+
+        });
+
+    })
+   
+
+
+</script>
+<style>
+    .lab {
+  width: 110px; 
+  text-align: right;}
+</style>
+<div class="mvctool">
+    <a id="btnSave" href="javascript:;" class="modal-btn modal-btn-save">保存</a>
+    
+</div>
+
+<div>
+    @using (Html.BeginForm("EditForm", "Controllers", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+    <table class="fromEditTable setTextWidth300">
+       
+        <tbody>
+             <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.Address):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model => model.Address)
+               </td>
+                  <td>
+                   @Html.ValidationMessageFor(model => model.Address)
+               </td>
+              </tr> 
+
+             <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.Reason):
+               </td>
+               <td>
+                   @Html.TextAreaFor(model => model.Reason, new { placeholder="必填..."})
+               </td>
+                   <td>
+                   @Html.ValidationMessageFor(model => model.Reason)
+               </td>
+          </tr> 
+             <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.Transport):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model => model.Transport)
+               </td>
+                  <td>
+                   @Html.ValidationMessageFor(model => model.Transport)
+               </td>
+          </tr> 
+             <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.Money):
+               </td>
+               <td>
+                   @Html.TextBoxFor(model => model.Money)
+               </td>
+                  <td>
+                   @Html.ValidationMessageFor(model => model.Money)
+               </td>
+          </tr> 
+            <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.StartTime):
+               </td>
+               <td>
+                      @Html.TextBoxFor(model => model.StartTime, new { @class="easyui-datetimebox"})
+                  —— @Html.TextBoxFor(model => model.EndTime, new { @class="easyui-datetimebox"})
+               </td>
+                  <td>
+                   @Html.ValidationMessageFor(model => model.StartTime)
+                       @Html.ValidationMessageFor(model => model.EndTime)
+               </td>
+          </tr> 
+            
+            
+             <tr>
+              <td class="lab">
+                  @Html.LabelFor(model => model.CurrentApprove):
+               </td>
+               <td>
+                   @Html.DropDownListFor(model => model.CurrentApprove, ViewData["approveList"] as List<SelectListItem>)
+               </td>
+                  <td>
+                   @Html.ValidationMessageFor(model => model.CurrentApprove)
+               </td>
+              </tr> 
+        </tbody>
+    </table>
+           @Html.HiddenFor(model => model.ID)
+       
+}
+
+</div>
+
+
+
+

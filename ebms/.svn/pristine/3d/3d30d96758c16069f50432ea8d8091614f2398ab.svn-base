@@ -1,0 +1,184 @@
+﻿@model  EBMS.Models.T_LossReport
+@{
+   
+    ViewBag.Title = "我的采购";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+<div class="Company-top-box">
+    <div class="search-box">
+        <input type="text" placeholder="订单号/顾客名称/旺旺号/物流单号.." id="txtQuery" class="icon-search-txt">
+           退款原因:
+        @Html.DropDownList("RetreatReason", ViewData["RetreatReason"] as List<SelectListItem>)
+        <span style="color: #808080; padding-right: 10px; font-size: 13px; margin-top: 3px; margin-left: 10px;">开始时间</span>
+        <input name="statethisdate" editable="false" style="float: left;" value="" id="statethisdate" class="easyui-datebox" data-options="sharedCalendar:'#statethisdate'">
+        <span style="color: #808080; padding-right: 10px; font-size: 13px; margin-top: 3px; margin-left: 10px;">结束时间</span>
+        <input name="Endthisdate" editable="false" style="float: left;" value="" id="Endthisdate" class="easyui-datebox" data-options="sharedCalendar:'#Endthisdate'">
+        <input type="button" value="查询" id="btnQuery" class="icon-search">
+    </div>
+    <div class="btn-bar">
+        <a href="#" rel="external" ajax-data="false" class="icon-edit" onclick="getExcel(this)">导出Excel</a>
+    </div>
+    <div class="btn-bar">
+        <p class="showBar">查看退货详情 : 请双击需要查看的数据</p>
+    </div>
+</div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+<script type="text/javascript">
+    enterSearch("#btnQuery");
+    function op(name, url) {
+        self.parent.addTab(name, url, '');
+        getContextmenu()
+    }    $(function () {
+        var url = "../Retreat/GetRetreatCheckenList";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() - 50,
+
+            sortName: 'ID',
+            sortOrder: 'desc',
+            idField: 'ID',
+            pageSize: 20,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            frozenColumns: [[
+             { field: 'Retreat_date', title: '申请时间', width: 130, align: 'center' },
+               { field: 'Retreat_OrderNumber', title: '订单号', width: 150, align: 'center' },
+                 { field: 'Retreat_dianpName', title: '店铺名称', width: 150, align: 'center' },
+                 { field: 'Retreat_ApplyName', title: '操作人', width: 80, align: 'center' },
+                 { field: 'Retreat_PaymentAccounts', title: '支出账号', width: 80, align: 'center' },
+            ]],
+            columns: [[
+                 { field: 'Retreat_wangwang', title: '旺旺号', width: 200, align: 'center' },
+                 { field: 'Retreat_CustomerName', title: '顾客名称', width: 150, align: 'center' },
+                 { field: 'Retreat_Shouldjine', title: '申请退款金额', width: 130, align: 'center' },
+                 { field: 'Retreat_Actualjine', title: '实际退款金额', width: 130, align: 'center' },
+                 { field: 'Retreat_expressName', title: '退回快递公司', width: 130, align: 'center' },
+                 { field: 'Retreat_expressNumber', title: '退回快递单号', width: 180, align: 'center' },
+                 { field: 'Retreat_GoodsSituation', title: '货物情况', width: 200, align: 'center' },
+                 { field: 'Retreat_Warehouse', title: '退回仓库', width: 200, align: 'center' },
+                 { field: 'Retreat_Reason', title: '申请原因', width: 300, align: 'center' },
+                 { field: 'OrderMoney', title: '订单金额', width: 150, align: 'center' },
+                 { field: 'OrderpaymentMoney', title: '支付金额', width: 150, align: 'center' },
+                 { field: 'CollectName', title: '原收货人', width: 230, align: 'center' },
+                 { field: 'CollectAddress', title: '原收货地址', width: 300, align: 'center' },
+                 { field: 'Retreat_Remarks', title: '备注', width: 100, align: 'center' },
+                 { field: 'OpenPieceName', title: '仓库收件人', width: 100, align: 'center' },
+                 { field: 'OpenPieceDate', title: '仓库收件时间', width: 100, align: 'center' },
+                 {
+                     field: 'Status', title: '状态', width: 100, align: 'center', formatter: function (value, row, index) {
+                         switch (row.Status) {
+                             case -1:
+                                 return "<font color=#d02e2e>未审核</font>";
+                                 break;
+                             case 0:
+                                 return "<font color=#2967c9>审核中</font>";
+                                 break;
+                             case 1:
+                                 return "<font color=#1fc73a>已同意</font>";
+                                 break;
+                             case 2:
+                                 return "<font color=#d02e2e>不同意</font>";
+                                 break;
+                             case 3:
+                                 return "<font color=#d02e2e>已作废</font>";
+                                 break;
+
+                         }
+                     }
+                 },
+            {
+                field: 'action', title: '退货详情', width: 100, align: 'center',
+                formatter: function (value, row, index) {
+                    var e = ' <div class="btn-bar"><a href="#" class="icon-edit" onclick=Show(' + row.ID + ')>退货详情</a></div>';
+                    return e;
+                }
+            }
+            ]],
+            onDblClickRow: function (rowIndex, rowData) {
+                var url = "../Retreat/ViewRetreatDetail?tid=" + rowData.ID
+                window.open(url, "_blank", "height=" + (window.screen.availHeight * 0.7) + ",width=" + (window.screen.availWidth * 0.7) + ",scrollbars=yes,resizable=1,modal=false,alwaysRaised=yes");
+            },            onAfterEdit: function (index, rowData) {//回调函数可以直接用于操作页面
+            }
+        });
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            });
+        });
+    });
+
+
+
+    //得到选中行集合的id
+    function getSelections() {
+        var ss = [];
+        var rows = $('#List').datagrid('getSelections');
+        for (var i = 0; i < rows.length; i++) {
+            var row = rows[i];
+            ss.push(row.Id);
+        }
+        return ss;
+    }
+    $("#btnQuery").click(function () {
+
+        var queryStr = $("#txtQuery").val();
+        var RetreatReason = $("#RetreatReason").val();
+        //如果查询条件为空默认查询全部
+        if (queryStr == null) {
+            queryStr = "%";
+        }
+        var val = $("#selStatus").val();        var statedate = $('#statethisdate').datebox('getValue');
+        var EndDate = $('#Endthisdate').datebox('getValue');
+        $('#List').datagrid({
+            url: '../Retreat/GetRetreatCheckenList?queryStr=' + encodeURI(queryStr) + "&status=" + val + '&statedate=' + statedate + '&EndDate=' + EndDate + "&RetreatReason=" + RetreatReason
+        });
+    });
+    function getExcel(_this) {
+        var queryStr = $("#txtQuery").val();
+        var statedate = $('#statethisdate').datebox('getValue');
+        var EndDate = $('#Endthisdate').datebox('getValue');
+        var RetreatReason = $("#RetreatReason").val();
+        if (statedate == null || statedate == "")
+        {
+            alert("请选择一个开始时间");
+            return
+        }
+        if (EndDate == null || EndDate == "")
+        {
+            alert("请选择一个结束时间");
+            return
+        }
+        _this.href = '../Retreat/getExcel?queryStr=' + queryStr + '&statedate=' + statedate + '&EndDate=' + EndDate + "&RetreatReason=" + RetreatReason;
+    }
+    $("#btnCheck").click(function () {
+        var row = $('#List').datagrid('getSelected');
+
+
+        if (row == null) {
+            $.messager.alert('提示', '请选择一条记录', "info");
+        }
+        else {
+            $('#openIframeCheck')[0].src = "../Retreat/ViewRetreatReportCheck?ID=" + row.ID;
+            $('#checkDiv').dialog('open');
+        }
+
+    });
+
+    function Show(id) {
+        var url = "../Retreat/ViewRetreatDetail?tid=" + id
+        window.open(url, "_blank", "height=" + (window.screen.availHeight * 0.7) + ",width=" + (window.screen.availWidth * 0.7) + ",scrollbars=yes,resizable=1,modal=false,alwaysRaised=yes");
+
+    }
+
+</script>
+

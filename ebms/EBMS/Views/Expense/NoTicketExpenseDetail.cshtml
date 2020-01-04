@@ -1,0 +1,66 @@
+﻿@model EBMS.Models.T_NoTicketExpense
+
+@{
+    ViewBag.Title = "NoTicketExpenseDetail";
+}
+<style>
+    .detail-list {padding:10px}
+     .detail-list h2 {line-height:40px;color:#0094ff;font-size:14px;}
+        .detail-list li p {color:#666;}
+</style>
+<ul class="detail-list">
+     <li>
+        <h2>@Html.LabelFor(a=>a.Code)</h2>
+<p>@Html.DisplayFor(a=>a.Code)</p>
+    </li>
+      <li>
+        <h2>@Html.LabelFor(a=>a.Total)</h2>
+<p>@Html.DisplayFor(a=>a.Total)元</p>
+    </li>
+ <li>
+<h2>@Html.LabelFor(a=>a.TheContent):</h2>
+<p>@Html.DisplayFor(a=>a.TheContent)</p>
+    </li>
+    <li>
+        <h2>@Html.LabelFor(a=>a.Note):</h2>
+            <p>@Html.DisplayFor(a=>a.Note)</p>
+    </li>
+     <li>
+         <h2>@Html.LabelFor(a=>a.PostTime):</h2>
+            <p>@Html.DisplayFor(a=>a.PostTime)</p>
+     </li>
+    <li>
+        <h2>@Html.LabelFor(a=>a.PostUser):</h2>
+<p>@Html.DisplayFor(a=>a.PostUser)</p>
+    </li>
+    <li>
+        <h2>@Html.LabelFor(a=>a.Status):</h2>
+
+    @if (Model.Status == 0)
+    { 
+       <p>未审核</p>
+    }else{
+        <p>已审核</p>
+    }
+    </li>
+    <li>
+        <h2>@Html.LabelFor(a=>a.PostAccountInfo):</h2>
+        <p>@Html.DisplayFor(a=>a.PostAccountInfo)</p>
+    </li>
+     <li>
+        <h2>@Html.LabelFor(a=>a.PayAccount):</h2>
+        <p>@Html.DisplayFor(a=>a.PayAccount)</p>
+    </li>
+     <li>
+        <h2>@Html.LabelFor(a=>a.ApproveTime):</h2>
+        <p>@Html.DisplayFor(a=>a.ApproveTime)</p>
+    </li>
+  
+</ul>
+
+
+
+
+
+
+

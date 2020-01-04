@@ -1,0 +1,116 @@
+﻿@{
+    ViewBag.Title = "ViewWaitInterview";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+
+<div class="Company-top-box">
+   
+     <div class="search-box">
+         <input type="text" placeholder="姓名.." id="txtQuery"  class="icon-search-txt">
+     
+         <input type="button" value="查询" id="btnQuery" class="icon-search">
+    </div>
+     <div class="btn-bar">
+        <a href="#" id="btnCheck" class="icon-check">审核</a>
+        
+    </div>
+</div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+
+<script type="text/javascript">
+    function op(name, url) {
+        self.parent.addTab(name, url, '');
+        getContextmenu()
+    }
+    enterSearch("#btnQuery");
+    $(function () {
+        var url = "/Recruit/GetInterviewList/?isWait=1";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width()-15,
+            method: 'post',
+            height: $(window).height() - 45,
+            fitColumns: true,
+           // sortName: 'ID',
+            sortOrder: 'desc',
+            idField: 'ID',
+            pageSize: 20,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                
+                { field: 'TrueName', title: '姓名', width: 60, align: 'center' },
+                { field: 'Sex', title: '性别', width: 80, align: 'center' },
+                { field: 'Edu', title: '学历', width: 80, align: 'center' },
+                {field: 'ApplyJob', title: '应聘岗位', width: 40, align: 'center'},
+                { field: 'ApplyDate', title: '申请时间', width: 60, align: 'center' },
+                { field: 'ExpectedSalary', title: '期望薪水', width: 110, align: 'center' },
+
+            ]],
+            onDblClickRow: function (rowIndex, rowData) {
+                Detail()
+            },
+
+
+        })
+
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 40
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 40
+            });
+        });
+
+
+    })
+
+ function Query()
+    {
+     var queryStr = $("#txtQuery").val();
+     //var State = $("#State").val();
+     $('#List').datagrid({
+         url: '/Recruit/GetInterviewList?isWait=1&queryStr=' + encodeURI(queryStr) //+ '&State=' + State// + '&EndDate=' + EndDate + '&dianming=' + dianming
+
+        });
+        $("#txtQuery").focus().select();
+    }
+    $('#btnQuery').click(function () {
+
+        Query();
+
+    });
+    $("#btnCheck").click(function () {
+        var row = $('#List').datagrid('getSelected');
+        if (row != null) {
+            $('#IframeCheck')[0].src = "/Recruit/ViewWaitInterviewCheck?PID=" + row.ID;
+            $('#CheckDiv').dialog('open');
+        }
+        else { $.messager.alert('提示', '@Lib.MessageRes.PleaseSelect', "info"); }
+    });
+
+    function Detail() {
+        var row = $('#List').datagrid('getSelected');
+        if (row != null) {
+            //$("#DetailDiv").prev(".panel-header").find(".panel-title").html("详情")
+            //$('#IframeDetail')[0].src = "ViewInterviewCheckDetail?DID=" +row.ID;
+            //$('#DetailDiv').dialog('open');
+            var url = "/Recruit/ViewInterviewCheckDetail?DID=" + row.ID
+            window.open(url, "_blank", "height=" + (window.screen.availHeight * 0.7) + ",width=" + (window.screen.availWidth * 0.7) + ", top=" + (window.screen.availHeight * 0.15) + ", left=" + (window.screen.availWidth * 0.15) + ",scrollbars=yes,resizable=1,modal=false,alwaysRaised=yes");
+        }
+        else { $.messager.alert('提示', '@Lib.MessageRes.PleaseSelect', "info"); }
+    }
+
+</script>
+<div id="DetailDiv" class="easyui-dialog" closed="true" modal="true" title="详情" style="width:50%; height:50%;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='IframeDetail' frameborder="0" src="" style="width:100%;height:98%;"></iframe>
+</div>
+<div id="CheckDiv" class="easyui-dialog" closed="true" modal="true" title="审核" style="width:500px; height:300px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='IframeCheck' frameborder="0" src="" style="width:100%;height:98%;"></iframe>
+</div>

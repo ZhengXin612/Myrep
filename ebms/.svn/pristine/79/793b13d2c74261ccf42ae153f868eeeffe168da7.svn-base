@@ -1,0 +1,197 @@
+﻿@model EBMS.Models.T_Borrow
+@{
+    ViewBag.Title = "ViewBorrowApprove";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<style>
+    #SpendingNumber, #SpendingCompany {
+        margin-left: 15px;
+    }
+</style>
+<script type="text/javascript">
+    $(function () {
+        $("#SpendingCompany").change(function () {
+            var comIn = $(this).val();
+            $.ajax({
+                url: '../Expense/GetExpenseAcount',
+                type: 'POST',
+                data: JSON.stringify({ type: comIn }),
+                dataType: 'json',
+                contentType: 'application/json',
+                success: function (data) {
+                    $('select#SpendingNumber').empty();
+                    $.each(data, function (key, value) {
+                        $('select#SpendingNumber').append(
+                            '<option value="' + value.Key + '">'
+                            + value.Value +
+                            '</option>');
+                    });
+                }
+            });
+        });
+        $("#btnAgree").click(function () {
+            $.messager.confirm("操作提示", "您确定要执行操作吗？", function (data) {
+                if (data) {
+                    post(1);
+                }
+            });
+        });
+        $("#btnUnAgree").click(function () {
+            $.messager.confirm("操作提示", "您确定要执行操作吗？", function (data) {
+                if (data) {
+                    post(2);
+                }
+            });
+        });
+    });
+    var sign = 0;
+    function post(status) {
+        var next = $("#BorrowNextApprove").find("option:selected").text().trim();
+        var company = $("#SpendingCompany").find("option:selected").text().trim();
+        var number = $("#SpendingNumber").find("option:selected").text().trim();
+        var BorrowerFrom = $('select#BorrowerFrom').val();
+        var memo = $("#Memo").val();
+        var para = { "approveID": "@ViewData["approveid"]", "status": status, "memo": memo, "nextapprove": next, "BorrowerFrom": BorrowerFrom, "company": company, "number": number };
+        if (sign == 0) {
+            sign++;
+            loading(0);
+            $.ajax({
+                url: "Check",
+                type: "Post",
+                data: para,
+                success: function (data) {
+                    loading(1);
+                    if (data.State == "Success") {
+                        $.messager.alert('提示', '操作成功', "info", function () {
+                            parent.$('#approveDiv').dialog('close');
+                            parent.$("#List").datagrid("reload");
+                            parent.$('#List').datagrid("clearSelections");
+                            sign = 0
+                        });
+                    } else {
+                        $.messager.alert('提示', data.Message, "info", function () {
+                            parent.$("#List").datagrid("reload");
+                            sign = 0
+                        });
+                    }
+                },
+                error: function () {
+                    loading(1);
+                    sign = 0;
+                }
+            });
+        }
+    }
+</script>
+<table class="fromEditTable setTextWidth300">
+    @if (Model.BorrowStep == Convert.ToInt32(ViewData["Step"]) - 1)
+    {
+        <tr>
+            <td style="width: 60%">@Html.LabelFor(model => model.SpendingCompany)@Html.DropDownList("SpendingCompany", ViewData["comPanyIn"] as List<SelectListItem>)</td>
+            <td>@Html.LabelFor(model => model.SpendingNumber)
+                <select id="SpendingNumber" name="SpendingNumber">
+                </select>
+            </td>
+        </tr>
+    }
+    <tr>
+        <td>审核备注：
+            <input type="text" id="Memo" /></td>
+        <td>
+            <div class="approve-btn-box">
+                <div class="btn-bar">
+                    <a href="#" id="btnAgree" class="icon-agree">同意</a>
+                    <a href="#" id="btnUnAgree" class="icon-disagree">不同意</a>
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+<table class="fromEditTable setTextWidth300">
+    <tbody>
+        <tr>
+            <td style="width: 80px; text-align: right;">
+                @Html.LabelFor(model => model.BorrowName)：    
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.BorrowName)
+            </td>
+            <td style="width: 80px; text-align: right;">
+                @Html.LabelFor(model => model.BorrowerDep)：   
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.BorrowerDep)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 80px; text-align: right;">
+                @Html.LabelFor(model => model.BorrowAccountID)：   
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.BorrowAccountID)
+            </td>
+            <td style="width: 80px; text-align: right;">
+                @Html.LabelFor(model => model.BorrowBank)：   
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.BorrowBank)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 80px; text-align: right;">
+                @Html.LabelFor(model => model.BorrowAccountName)：   
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.BorrowAccountName)
+            </td>
+            <td style="width: 100px; text-align: right;">
+                @Html.LabelFor(model => model.BorrowNeedDate)：
+            </td>
+            <td>
+                @Model.BorrowNeedDate.Value.ToString("yyyy-MM-dd")
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 80px; text-align: right;">
+                @Html.LabelFor(model => model.BorrowMoney)：   
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.BorrowMoney, new { style = "width:50px;" })
+            </td>
+            <td style="width: 80px; text-align: right;">
+                @Html.LabelFor(model => model.BorrowReason)：   
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.BorrowReason)
+            </td>
+        </tr>
+        @if (Model.BorrowStep != Convert.ToInt32(ViewData["Step"]) - 1 && Model.BorrowStep != Convert.ToInt32(ViewData["Step"]) - 2)
+        {//如果不是倒数第1 步，就显示选择下拉框
+            <tr>
+                <td style="width: 80px; text-align: right;">
+                    @Html.LabelFor(model => model.BorrowNextApprove)：   
+                </td>
+                <td>@Html.DropDownList("BorrowNextApprove", ViewData["NextList"] as List<SelectListItem>)
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.BorrowNextApprove)
+                </td>
+            </tr>
+        }
+        @if (Model.BorrowStep == Convert.ToInt32(ViewData["total"]) - 3)
+        {
+            //如果是罗瑶，显示付款来源
+            <tr>
+                <td style="width: 80px; text-align: right;">
+                    @Html.LabelFor(model => model.BorrowerFrom)：   
+                </td>
+                <td>@Html.DropDownList("BorrowerFrom", ViewData["MoneyFrom"] as List<SelectListItem>)
+                </td>
+                <td></td>
+            </tr>
+        }
+    </tbody>
+</table>
+<hr style="height: 1px; border: none; border-top: 1px dashed #0066CC;" />
+@Html.Raw(ViewData["history"])
+

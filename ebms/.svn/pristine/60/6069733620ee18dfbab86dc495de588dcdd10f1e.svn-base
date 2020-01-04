@@ -1,0 +1,503 @@
+﻿@model EBMS.Controllers.PersonnelController.PersonnelDetail
+@{
+    ViewBag.Title = "ViewDetail";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+
+<script type="text/javascript">
+    $(function () {
+        document.title = "档案详情";
+        var id=@ViewData["id"]
+        $.post("/Personnel/GetPicById/", { "id": '@Model.perInfo.ID' }, function (data) {
+              if (data.id != "") {
+                  $("#pic").attr("src", data.pic);
+                 
+            }
+        });
+      
+        for (var n = 0; n < $('.getDate').length; n++)
+        {
+          
+            if ($('.getDate')[n].textContent.length == 36 || $('.getDate')[n].textContent == null || $('.getDate')[n].textContent == "") {
+                $('.getDate')[n].innerHTML = "";
+            }
+            else { $('.getDate')[n].innerHTML = formatDatebox($('.getDate')[n].textContent); }
+           
+        }
+    });
+</script>
+<style>
+     .lab {
+  width: 90px; 
+  text-align: right;
+
+     }
+      .centerLab{
+         text-align:center;
+
+      }
+    .otherTable {
+        border-collapse:collapse;
+       width:760px;
+       margin-left:20%;
+    }
+     .otherTable tr {
+         height:30px; 
+        
+        }
+  .otherTable tbody td {
+       border: solid 1px #000000;
+       text-align:center;
+    }
+   .otherTable input {
+       outline:none;
+    height:100%;
+ width:95%;
+  border-style:none;
+    }
+    .otherTable  textarea {
+    height:100%;
+    border-style:none;
+    width:98%;
+    outline:none;
+    }
+       .otherTable  select {
+    height:100%;
+    border-style:none;
+    width:99%;
+     -moz-appearance:none;
+     -webkit-appearance:none;
+     -ms-appearance:none;
+    }
+    option {
+    text-align:center;
+    }
+    .firstTD {
+   
+    font-size:14px;
+    text-align:center;
+    }
+    .firstTR {
+    height:28px;
+    font-size:14px;
+    
+    }
+    thead td {
+    text-align:center;
+    font-size:1.4em;
+    font-weight:600;
+    }
+</style>
+
+<div>
+  
+    @using (Html.BeginForm("EditForm", "Controllers", null, FormMethod.Post, new { Id = "EditForm" }))
+    {
+    @Html.ValidationSummary(true)
+    <table class="otherTable">
+       <thead><tr><td colspan="8">员工档案</td></tr></thead>
+        <tbody>
+            <tr>
+               <td class="lab">
+                   @Html.LabelFor(model => model.perInfo.Job):
+               </td>
+               <td>
+                   @Html.DisplayFor(model => model.perInfo.Job)
+               </td>
+              <td class="lab">
+                   @Html.LabelFor(model => model.perInfo.TrueName)
+               </td>
+               <td>
+                   @Html.DisplayFor(model => model.perInfo.TrueName)
+               </td>
+                 <td class="lab">
+                   @Html.LabelFor(model => model.perInfo.Tel)
+               </td>
+               <td>
+                   @Html.DisplayFor(model => model.perInfo.Tel)
+               </td>
+                 <td class="lab">
+                   @Html.LabelFor(model => model.perInfo.Sex)
+               </td>
+               <td>
+                   @Html.DisplayFor(model => model.perInfo.Sex)
+               </td>
+           </tr>
+              <tr>
+              
+                  
+                   <td class="lab">
+                   @Html.LabelFor(model => model.perInfo.Birthday)
+               </td>
+               <td class="getDate">
+                   @Html.DisplayFor(model => model.perInfo.Birthday)
+               </td>
+             
+                   <td class="lab">
+                   @Html.LabelFor(model => model.perInfo.Edu)
+               </td>
+               <td>
+                   @Html.DisplayFor(model => model.perInfo.Edu)
+               </td>
+               <td class="lab">
+                   @Html.LabelFor(model => model.perInfo.HealthState)
+               </td>
+               <td>
+                   @Html.DisplayFor(model => model.perInfo.HealthState, new { placeholder = "健康,一般" })
+               </td>
+                   <td class="lab">
+                   @Html.LabelFor(model => model.perInfo.MaritalStatus)
+               </td>
+               <td>
+                   @Html.DisplayFor(model => model.perInfo.MaritalStatus)
+               </td>
+             
+           </tr>
+             <tr>
+                   <td class="lab">
+                   @Html.LabelFor(model => model.perInfo.IDnum)
+               </td>
+               <td colspan="3">
+                   @Html.DisplayFor(model => model.perInfo.IDnum)
+               </td> 
+               <td class="lab">
+                   @Html.LabelFor(model => model.perInfo.PoliticsStatus)
+               </td>
+               <td>
+                   @Html.DisplayFor(model => model.perInfo.PoliticsStatus)
+               </td>
+             
+                 
+                   <td class="lab">
+                   @Html.LabelFor(model => model.perInfo.CanBusinessTravel)
+               </td>
+               <td>
+                   @Html.DisplayFor(model => model.perInfo.CanBusinessTravel)
+               </td>
+                
+                 
+
+                
+            
+           </tr>
+             <tr>
+                 <td class="lab">
+                   @Html.LabelFor(model => model.perInfo.CET)
+               </td>
+               <td>
+                   @Html.DisplayFor(model => model.perInfo.CET)
+               </td>
+                   <td class="lab">
+                   @Html.LabelFor(model => model.perInfo.NCRE)
+               </td>
+               <td>
+                   @Html.DisplayFor(model => model.perInfo.NCRE)
+               </td>
+                 <td class="lab">
+                   @Html.LabelFor(model => model.perInfo.OtherCertificate)
+               </td>
+                  <td colspan="3">
+                   @Html.DisplayFor(model => model.perInfo.OtherCertificate)
+               </td> 
+              
+             
+           </tr>
+            <tr>
+               <td class="lab">
+                   @Html.LabelFor(model => model.perInfo.HouseholdRegister)
+               </td>
+               <td colspan="3">
+                   @Html.DisplayFor(model => model.perInfo.HouseholdRegister)
+               </td>
+                <td class="lab">
+                   @Html.LabelFor(model => model.perInfo.PresentAddress)
+               </td>
+               <td colspan="3">
+                   @Html.DisplayFor(model => model.perInfo.PresentAddress)
+               </td>
+                </tr>
+              <tr>
+                  <td class="lab">
+                   @Html.LabelFor(model => model.perInfo.CanEntryTime)
+               </td>
+               <td class="getDate">
+                   @Html.DisplayFor(model => model.perInfo.CanEntryTime)
+               </td>
+               <td class="lab">
+                   @Html.LabelFor(model => model.perInfo.ExpectedSalary)
+               </td>
+               <td>
+                   @Html.DisplayFor(model => model.perInfo.ExpectedSalary)
+               </td>
+             <td class="lab" rowspan="2">
+                   @Html.LabelFor(model => model.perInfo.Character)
+               </td>
+               <td rowspan="2" colspan="3">
+                   @Html.TextAreaFor(model => model.perInfo.Character, new { style = "height:60px;" })
+               </td>
+           </tr>
+            
+              <tr>
+                  <td class="lab">
+                   @Html.LabelFor(model => model.perInfo.EmergencyContactName)
+               </td>
+               <td>
+                   @Html.DisplayFor(model => model.perInfo.EmergencyContactName)
+               </td>
+             
+
+                  <td class="lab">
+                   @Html.LabelFor(model => model.perInfo.EmergencyContactTel)
+               </td>
+               <td>
+                   @Html.DisplayFor(model => model.perInfo.EmergencyContactTel)
+               </td>
+                  </tr>
+             @*   //教育背景table*@
+            
+           <tr class="firstTR">
+               <td class="firstTD lab" rowspan="4"> 教<br/>育<br/>背<br/>景</td>
+               <td colspan="2"> @Html.LabelFor(model => model.EduBackgroud[0].StartFinishTime)</td>
+               <td colspan="3"> @Html.LabelFor(model => model.EduBackgroud[0].School)</td>
+               <td colspan="2">  @Html.LabelFor(model => model.EduBackgroud[0].Specialty)</td>
+
+           </tr>
+           @for (int i = 0; i < 3; i++)
+           {
+               if (i < Model.EduBackgroud.Count)
+               { 
+               <tr>
+                   <td colspan="2">
+                   @Html.DisplayFor(model => Model.EduBackgroud[i].StartFinishTime)
+               </td>
+                   <td colspan="3">
+                   @Html.DisplayFor(model => Model.EduBackgroud[i].School)
+
+                   </td>
+                   <td colspan="2">
+                   @Html.DisplayFor(model => Model.EduBackgroud[i].Specialty)
+
+                   </td>
+                   
+                </tr>
+               }
+               else
+               {
+               <tr>
+                   <td colspan="2">
+                  
+               </td>
+                   <td colspan="3">
+                  
+
+                   </td>
+                   <td colspan="2">
+                 
+
+                   </td>
+                   
+                </tr>
+               }
+           }
+              
+           
+               
+       @* 家庭成员*@
+            <tr class="firstTR">
+                <td class="firstTD lab" rowspan="6"> 家<br/>庭<br/>成<br/>员</td>
+                    <td > @Html.LabelFor(model => model.Family[0].Name)</td>
+                     <td>@Html.LabelFor(model => model.Family[0].Relation)</td>
+                     <td colspan="3">@Html.LabelFor(model => model.Family[0].WorkUnit)</td>
+                     <td colspan="2">@Html.LabelFor(model => model.Family[0].Job)</td>
+                    
+                </tr>
+              @for (int i = 0; i < 5; i++)
+              {
+                  if (i < Model.Family.Count())
+                  {
+              <tr>
+                  <td >
+                  @Html.DisplayFor(model => Model.Family[i].Name)
+
+                  </td>
+                  <td >
+                  @Html.DisplayFor(model => Model.Family[i].Relation)
+
+                  </td>
+                  <td colspan="3">
+                   @Html.DisplayFor(model => Model.Family[i].WorkUnit)
+               </td>
+                  <td colspan="2">
+                  @Html.DisplayFor(model => Model.Family[i].Job)
+
+                     </td>
+
+              </tr>
+                  }
+                  else
+                  {
+                  <tr>
+                  <td >
+               
+
+                  </td>
+                  <td >
+                 
+
+                  </td>
+                  <td colspan="3">
+                 
+               </td>
+                  <td colspan="2">
+                 
+
+                     </td>
+
+              </tr>
+                  }
+              }
+                 
+             
+         
+        
+      @*  //工作经历table*@
+
+                <tr class="firstTR">
+                    <td class="firstTD lab" rowspan="6"> 工<br/>作<br/>经<br/>历</td>
+                    <td > @Html.LabelFor(model => model.WorkExperience[0].StartFinishTime)</td>
+                     <td >@Html.LabelFor(model => model.WorkExperience[0].Job)</td>
+                     <td >@Html.LabelFor(model => model.WorkExperience[0].Company)</td>
+                     <td >@Html.LabelFor(model => model.WorkExperience[0].QuitReason)</td>
+                     <td >@Html.LabelFor(model => model.WorkExperience[0].Winter)</td>
+                     <td >@Html.LabelFor(model => model.WorkExperience[0].WinterJob)</td>
+                     <td>@Html.LabelFor(model => model.WorkExperience[0].WinterTel)</td>
+                </tr>
+           @for (int i = 0; i < 5; i++)
+           {
+               if (i < Model.WorkExperience.Count)
+               { 
+                 <tr>
+                     <td>
+                  @Html.DisplayFor(model => Model.WorkExperience[i].StartFinishTime)
+
+                     </td>
+                     <td>
+                  @Html.DisplayFor(model => Model.WorkExperience[i].Job)
+
+                     </td>
+                     <td>
+                   @Html.DisplayFor(model => Model.WorkExperience[i].Company)
+               </td>
+              
+                     <td>
+                  @Html.DisplayFor(model => Model.WorkExperience[i].QuitReason)
+
+                     </td>
+                     <td >
+                   @Html.DisplayFor(model => Model.WorkExperience[i].Winter)
+
+                     </td>
+                     <td>
+                   @Html.DisplayFor(model => Model.WorkExperience[i].WinterJob)
+               </td>
+                      <td>
+                   @Html.DisplayFor(model => Model.WorkExperience[i].WinterTel)
+               </td>
+                </tr>
+               }
+               else
+               {
+                <tr>
+                     <td>
+                 
+
+                     </td>
+                     <td>
+                
+
+                     </td>
+                     <td>
+                  
+               </td>
+              
+                     <td>
+                 
+
+                     </td>
+                     <td >
+                  
+
+                     </td>
+                     <td>
+                  
+               </td>
+                      <td>
+                 
+               </td>
+                </tr>
+               }
+           }
+          
+        
+              @* 绩效*@
+          @if (Model.Performance.Count() > 0)
+          {
+                <tr class="firstTR">
+                    <td class="firstTD lab" rowspan="@Convert.ToInt32(Model.Performance.Count() + 1)"> 绩<br/>效<br/>记<br/>录</td>
+                    <td > @Html.LabelFor(model => model.Performance[0].PerformanceDate)</td>
+                     <td>@Html.LabelFor(model => model.Performance[0].PerformanceDetails)</td>
+                     
+                    
+                </tr>
+               
+              foreach (var item in Model.Performance)
+              { 
+              <tr>
+                     <td >
+                  @Html.DisplayFor(model => item.PerformanceDate)
+
+                     </td>
+                     <td colspan="6">
+                  @Html.DisplayFor(model => item.PerformanceDetails)
+
+                     </td>
+
+              </tr>
+              }
+
+          }
+               @* 奖惩*@
+          @if (Model.Performance.Count() > 0)
+          {
+                <tr class="firstTR">
+                    <td class="firstTD lab" rowspan="@Convert.ToInt32(Model.Reward.Count() + 1)"> 奖<br/>惩<br/>记<br/>录</td>
+                    <td > @Html.LabelFor(model => model.Reward[0].RewardPunishDate)</td>
+                     <td>@Html.LabelFor(model => model.Reward[0].RewardPunishiDetails)</td>
+                     
+                    
+                </tr>
+               
+              foreach (var item in Model.Reward)
+              { 
+              <tr>
+                     <td >
+                  @Html.DisplayFor(model => item.RewardPunishDate)
+
+                     </td>
+                     <td colspan="6">
+                  @Html.DisplayFor(model => item.RewardPunishiDetails)
+
+                     </td>
+
+              </tr>
+              }
+
+          }
+            </tbody>
+        </table>
+       
+           @Html.HiddenFor(model => model.perInfo.ID)
+       
+    }
+
+</div>

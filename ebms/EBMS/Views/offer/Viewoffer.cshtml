@@ -1,0 +1,115 @@
+﻿@{
+    ViewBag.Title = "ViewSupplier";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<div class="Company-top-box">
+    <div class="search-box">
+        <input type="text" placeholder="客户名称/申请人名称" id="txtQuery" class="icon-search-txt">
+        <input type="button" value="查询" id="btnQuery" class="icon-search">
+         <p class="showBar">查看详情 : 请双击需要查看的数据</p>
+      @*  <a href="#" class="easyui-linkbutton" plain="true" iconcls="icon-add" id="btnOk">添加</a>*@
+    </div>
+</div>
+<table id="List"></table>
+<script type="text/javascript">
+    enterSearch("#btnQuery");
+    $(function () {
+
+        var url = "Geoffer";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() - 50,
+            fitColumns: true,
+            sortName: 'ID',
+            sortOrder: 'desc',
+            idField: 'ID',
+            pageSize: 20,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            columns: [[
+                 { field: 'offerName', title: '报价申请人', width: 80, align: 'center' },
+                  { field: 'inquirerName', title: '客户名称', width: 80, align: 'center' },
+                   {
+                       field: 'Status', title: '审核状态', width: 80, align: 'center', formatter: function (value, row, index) {
+                           switch (row.Status) {
+                               case -1:
+                                   return "<font color=#d02e2e>未审核</font>";
+                                   break;
+                               case 0:
+                                   return "<font color=#2967c9>审核中</font>";
+                                   break;
+                               case 1:
+                                   return "<font color=#1fc73a>已同意</font>";
+                                   break;
+                               case 2:
+                                   return "<font color=#d02e2e>不同意</font>";
+                                   break;
+                               case 3:
+                                   return "<font color=#d02e2e>已作废</font>";
+                                   break;
+
+                           }
+                       }
+                   },
+                { field: 'costTotal', title: '成本总价', width: 80, align: 'center' },
+                { field: 'offerTotal', title: '客户报价总价', width: 80, align: 'center' },
+                { field: 'offerDate', title: '申请时间', width: 80, align: 'center', formatter: formatDatebox },
+             
+            ]],
+            onDblClickRow: function () {
+                myfunction();
+            },
+            onDblClickRow: function (value, row, index) {
+                $('#openIframedetail')[0].src = "ViewofferDetails?pId=" + row.ID;
+                $("#detailDiv").dialog({
+                    onClose: function () {
+                        $("#List").datagrid("reload");//刷新列表 
+                    }
+                });
+                $('#detailDiv').dialog('open');
+            }
+        });
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            });
+        });
+
+        function myfunction() {
+            var rows = $('#List').datagrid('getSelections');
+
+            parent.addCompany(rows, "@ViewData["index"]");
+        }
+        $("#btnOk").click(function () {
+            myfunction();
+        });
+
+        $("#btnQuery").click(function () {
+
+            var queryStr = $("#txtQuery").val().trim();
+            //如果查询条件为空默认查询全部
+            if (queryStr == null) {
+                queryStr = "%";
+            }
+
+            $('#List').datagrid({
+                url: 'Geoffer?name=' + encodeURI(queryStr)
+            });
+
+        });
+
+    });
+
+</script>
+<div id="detailDiv" class="easyui-dialog" closed="true" modal="true" title="详情" style="width: 630px; height: 450px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIframedetail' frameborder="0" src="" style="width: 98%; height: 98%;"></iframe>
+</div>

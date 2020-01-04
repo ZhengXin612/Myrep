@@ -1,0 +1,50 @@
+﻿@{
+    ViewBag.Title = "ViewCheckDetail";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+
+<table id="List"></table>
+
+<script type="text/javascript">
+    enterSearch("#btnQuery");
+  
+    $(function () {
+        var url = "/PersonnelPayRaise/GetCheckDetailList/?ID=" + "@ViewData["ID"]";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width()-15,
+            method: 'post',
+            height: $(window).height() - 45,
+            fitColumns: true,
+           // sortName: 'Code',
+            sortOrder: 'desc',
+            idField: 'ID',
+            pageSize: 20,
+            pagination: false,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                { field: 'ApproveName', title: '审核人', width: 120, align: 'center' },
+                { field: 'ApproveTime', title: '审核时间', width: 100, align: 'center' },
+                { field: 'Memo', title: '备注', width: 100, align: 'center' },
+               
+                 { field: 'Status', title: '状态', width: 100, align: 'center', formatter: state},
+            ]],
+        })
+
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 40
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 40
+            });
+        });
+
+       
+    })
+
+</script>

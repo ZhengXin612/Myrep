@@ -1,0 +1,125 @@
+﻿@{
+    Layout = null;
+  
+}
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>EBMS退回件新增</title>
+    <meta name="renderer" content="webkit">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1 ,user-scalable=no">
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        body {
+            padding: 0;
+            margin: 0;
+            color: #666;
+            position: relative;
+            font-family: "微软雅黑";
+        }
+
+        #video {
+            display: block;
+            margin: 1em auto;
+            width: 180px;
+            height: 180px;
+        }
+
+        .video {
+            display: none;
+            background: rgba(255,255,255,1);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #StockName, #Materiel_Name, #Box_Num {
+            padding: 1px;
+            border: 1px solid #999;
+            margin-bottom: 2px;
+            height: 22px;
+            padding: 2px;
+        }
+
+        .getPhoto {
+            margin-left: 25px;
+            color: #3499DA;
+            text-decoration: none;
+        }
+
+        .fromEditTable {
+            width: 95%;
+            margin: 5px auto;
+        }
+
+            .fromEditTable tr {
+                line-height: 30px;
+            }
+
+                .fromEditTable tr td input {
+                    height: 22px;
+                }
+
+        .form-table {
+            overflow: hidden;
+        }
+
+        .close {
+            text-decoration: none;
+            border: 1px solid #333;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: block;
+            line-height: 30px;
+            text-align: center;
+            font-size: 30px;
+            margin: 0 auto;
+            color: #333;
+        }
+
+        .saveBtn {
+            margin: 20px auto 0 auto;
+            width: 80%;
+            height: 40px;
+            line-height: 40px;
+            background: #2298ef;
+            text-decoration: none;
+            color: #fff;
+            display: block;
+            border-radius: 2px;
+            text-align: center;
+        }
+
+            .saveBtn:hover {
+                background: #3499DA;
+            }
+
+        #mask {
+            width: 100%;
+            background: rgba(0,0,0,0.6);
+            position: absolute;
+            z-index: 9999;
+            display: none;
+        }
+        /*  .form-table {font-size:12px}*/
+    </style>
+</head>
+<body>
+    <h2>请扫描或点击二维码下载APP进行扫描入库</h2>
+    <a href="http://downloadpkg.apicloud.com/app/download?path=http://7ydmpw.com1.z0.glb.clouddn.com/d0bad06a4b7bbd61ded0351bae1c03e9_d" download>
+        <img src="../Content/apkQR.png" />
+    </a>
+</body>
+
+
+</html>

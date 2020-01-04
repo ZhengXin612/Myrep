@@ -1,0 +1,239 @@
+﻿@model EBMS.Models.T_Deliver
+@{
+    ViewBag.Title = "ViewEmployeeDemandAdd";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<style>
+.item{margin:10px;height:30px;line-height:30px}
+.clear{clear:both}
+ #Note{width:400px}
+.padLeft {margin-left:20px}
+.save-btn {color:#666;margin-left:5px}
+.save-btn .icon {font-size:14px;margin-right:2px}
+.save-btn:hover {color:#2299ee}
+</style>
+@using (Html.BeginForm("EditForm", "Controller", null, FormMethod.Post, new { Id = "EditForm", onsubmit = "return false;" }))
+{
+    @Html.ValidationSummary(true)
+    <tr>
+         <td>
+         <div class="item">
+            
+             <span> @Html.LabelFor(model => model.MailNo)：</span>
+             <span>@Html.TextBoxFor(model => model.MailNo)</span>
+             <input type="hidden" id="jsonStr" name="jsonStr">
+             <input type="button" value="查询" id="btnQuery" class="icon-search"> 
+              <span> @Html.LabelFor(model => model.WarehouseCode)：</span>
+           @*   @Html.DropDownListFor(model => model.WarehouseCode, ViewData["WarehouseCode"] as List<SelectListItem>)*@
+                 @Html.TextBoxFor(model => model.WarehouseCode, new { @readonly = true})
+              <span class="padLeft"> @Html.LabelFor(model => model.Note)：</span>
+              <span>@Html.TextBoxFor(model => model.Note)</span>
+              @Html.HiddenFor(Model=>Model.OrderNum)
+            
+             <a id="btnSave" href="javascript:;" class="save-btn"><i class="icon iconfont icon-rfq"></i>确认发货</a>
+                 
+          </div>  
+             </td>
+        </tr>
+        <tr>
+              <td>
+                  <label>条码</label>:
+                 <textarea name="TiaoMa" id="TiaoMa" style="width:200px;height:80px;"></textarea>
+              </td>
+
+             </tr>
+    <input type="hidden" id="TiaoMaList" />
+       
+}
+<div id="List"></div>
+<script type="text/javascript">
+    $("#MailNo").focus();
+    enterSearch("#btnQuery");
+    $("body").css({ "margin-left": "8px", "overflow": "hidden" })
+   //清除
+    function clearHml() {
+        $("#OrderNum,#MailNo,#jsonStr,#WarehouseCode").val("")
+        $("#TiaoMa").val("");
+     
+        //$("#WarehouseCode option").each(function () {
+        //    if ($.trim($(this).text()) == "") {
+        //        $(this).attr("selected", true);
+        //    }
+        //})
+        $("#MailNo").focus();
+        $("#List").datagrid('loadData', {total:0,rows:[]});
+    }
+    /*
+      根据订单号查询后台的功能
+      返回订单详情
+    */
+    var sign = 0;
+    function getOrderDetail() {
+        if (sign == 0) {
+            sign++;
+            var orderNum = $("#MailNo").val();
+            if (!$.trim(orderNum) == "") {
+                $.ajax({
+                    type: "post",
+                    url: "getOrderDetail?num=" + orderNum,
+                    success: function (data) {
+                        if (data.State != "Faile") {
+                            var json = eval("(" + data.result + ")")
+                            $("#List").datagrid('loadData', { rows: json.rows });
+                            $("#jsonStr").val(JSON.stringify(json.rows));
+                            $("#OrderNum").val(json.OrderNum);
+                            $("#WarehouseCode").val(json.Warehouse)
+                            $("#tiaoma").val(json.tiaoma)
+                            //$("#WarehouseCode option").each(function () {
+                            //    if ($(this).text() == json.Warehouse) {
+                            //        $(this).attr("selected", true);
+                            //    }
+                            //})
+                        } else {
+                            $.messager.alert('提示', data.Message, "info", function () {
+                                clearHml();
+                            });
+                        }
+                        sign = 0;
+                    }, error: function (data) {
+                        $.messager.alert('提示', data, "info", function () {
+                            clearHml();
+                        });
+                        sign = 0;
+                    }
+                })
+            }
+            else {
+                sign = 0;
+            }
+        }
+    }
+    //初始化
+    $(function () {
+        var grid; //定义全局变量datagrid
+        var editRow = -1;
+        //点击查询
+        $("#btnQuery").click(function () {
+            getOrderDetail();
+        });
+        grid = $('#List').datagrid({
+            width: $(window).width() - 150,
+            height: $(window).height() - 200,
+            fitColumns: true,
+            sortOrder: 'desc',
+            singleSelect: false,
+            selectOnCheck: false,
+            checkOnSelect:false,
+            columns: [[
+                  { field: 'tiaoma', title: '产品条码', width: 100, align: 'center' },
+                  {field: 'item_name', title: '产品名称', width: 140, align: 'center'},
+                  { field: 'item_code', title: '产品编码', width: 60, align: 'center'},
+                  { field: 'sku_name', title: '规格名称', width: 80, align: 'center' },
+                  { field: 'qty', title: '订单数量', width: 100, align: 'center' },
+                  
+            ]]
+        });
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            });
+        });
+    })
+   var flag = 0
+   $("#btnSave").click(function () {
+  
+       var s = $("#TiaoMa").val().split('\n');
+      
+    
+     
+        if ($.trim($("#OrderNum").val()) == "") {
+            $.messager.alert('提示',"请输入物流单号", "info", function () {});
+            return false;
+        }
+        if ($.trim($("#jsonStr").val()) == "") {
+            $.messager.alert('提示', "订单详情为空", "info", function () { });
+            return false;
+        }
+        //if ($.trim($("#WarehouseCode").val()) == "") {
+        //    $.messager.alert('提示', "请选择发货仓库", "info", function () { });
+        //    return false;
+        //}
+        
+      
+
+      
+      
+        if (flag == 0) {
+            flag = 1;
+            $.ajax({
+                url: "Save?type=1",
+                type: "post",
+                data: $("#EditForm").serialize(),
+                success: function (data) {
+                    var msg = "发货成功"
+                   
+                    if (data.State != "Success"&&data.stype == "0")
+                    {
+                        $.messager.alert('提示', data.Message, "info", function () {
+                     
+                        $.messager.confirm('提示', '@Lib.MessageRes.FaHuoConfirm', function (r) {
+                            msg = data.Message;
+                        
+                            flag = 0
+                            if (r) {
+                                $.ajax({
+                                    url: "Save",
+                                    type: "post",
+                                    data: $("#EditForm").serialize(),
+                                    success: function (data) {
+                                        var msg = "发货成功"
+                                        if (data.State != "Success") {
+                                            msg = data.Message;
+                                        }
+                                        $.messager.alert('提示', msg, "info", function () {
+                                            clearHml();
+                                        });
+                                        flag = 0
+                                    }, error: function (data) {
+                                        $.messager.alert('提示', data.Message, "info", function () {
+                                            clearHml();
+                                        });
+                                        flag = 0
+                                    }
+                                })
+                            }
+                            else {
+                                //msg = data.Message;
+                                //$.messager.alert('提示', msg, "info", function () {
+                                  //  clearHml();
+                                //});
+                                flag = 0
+                            }
+                        })
+                        });
+                    }
+                    else if (data.State != "Success") {
+                        msg = data.Message;
+                        $.messager.alert('提示', msg, "info", function () {
+                            clearHml();
+                        });
+                        flag = 0
+                    } else {
+                        $.messager.alert('提示', msg, "info", function () {
+                            clearHml();
+                        });
+                        flag = 0
+                    }
+                
+                }, error: function (data) {
+                    $.messager.alert('提示', data.Message, "info", function () {
+                        clearHml();
+                    });
+                    flag = 0
+                }
+            })
+        }
+        
+    });
+</script>

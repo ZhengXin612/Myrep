@@ -1,0 +1,77 @@
+﻿@{
+    ViewBag.Title = "ViewAlloptPzSubject";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<div class="Company-top-box">
+    <div class="search-box">
+        <input type="text" placeholder="科目名称" id="txtQuery" class="icon-search-txt">
+        <input type="button" value="查询" id="btnQuery" class="icon-search">
+        <a href="#" class="easyui-linkbutton" plain="true" iconcls="icon-add" id="btnOk">添加</a>
+    </div>
+</div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+<script type="text/javascript">
+    $(function () {
+        //回车触发查询
+        enterSearch("#btnQuery");
+        var url = "../Expense/GetPzSubject";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() - 50,
+            fitColumns: true,
+            sortName: 'ID',
+            sortOrder: 'desc',
+            pageSize: 10,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                { field: 'Code', title: '科目编码', width: 80, align: 'center' },
+                { field: 'Name', title: '科目名称', width: 80, align: 'center' },
+            ]],
+            onDblClickRow: function () {
+                myfunction();
+            }
+        });
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            });
+        });
+
+        function myfunction() {
+            var row = $('#List').datagrid('getSelected');
+
+            parent.addPzSubject(row);
+        }
+        $("#btnOk").click(function () {
+            myfunction();
+        });
+
+        $("#btnQuery").click(function () {
+
+            var queryStr = $("#txtQuery").val().trim();
+            //如果查询条件为空默认查询全部
+            if (queryStr == null) {
+                queryStr = "%";
+            }
+
+            $('#List').datagrid({
+                url: '../Expense/GetPzSubject?name=' + encodeURI(queryStr)
+            });
+
+        });
+
+    });
+
+</script>

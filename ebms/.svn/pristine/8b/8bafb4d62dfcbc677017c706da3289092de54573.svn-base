@@ -1,0 +1,6 @@
+﻿@{
+    ViewBag.Title = "查看审核历史";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<div class="history-box">@Html.Raw( ViewData["history"])</div>
+

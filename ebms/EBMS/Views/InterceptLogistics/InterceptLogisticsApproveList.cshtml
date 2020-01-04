@@ -1,0 +1,269 @@
+﻿@{
+    ViewBag.Title = "InterceptLogisticsList";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<style>
+    .icon-add::before {
+        content:"";
+    }
+    .icon-edit::before {
+        content:"";
+    }
+</style>
+<script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+<div class="Company-top-box">
+    <div class="search-box">
+        @if (@ViewData["Who"].ToString().Contains("财务")|| @ViewData["Who"].ToString().Contains("快递组")|| @ViewData["Who"].ToString().Contains("仓库"))
+        {
+            <select id="selStatus" name="selStatus" class="sel-box">
+                <option value="-2" selected>状态</option>
+                <option value="2">不同意</option>
+                <option value="1">已同意</option>
+                <option value="0">审核中</option>
+                <option value="-1">未审核</option>
+            </select>
+        }
+        <input type="text" placeholder="订单号/快递单号/申请/审批人" id="txtQuery" class="icon-search-txt">
+        <input type="button" value="查询" id="btnQuery" class="icon-search">
+    </div>
+    @if (@ViewData["Who"].ToString().Contains("售后"))
+    {
+        <div class="btn-bar" style="margin-left: 10px;">
+            <a href="javascript:;" id="btnAdd" class="icon-add">新建</a>
+        </div>
+        <div class="btn-bar" style="margin-left: 5px;">
+            <a href="javascript:;" id="btnDel" class="icon-edit">删除</a>
+        </div>
+    }
+    @if (@ViewData["Who"].ToString().Contains("财务"))
+    {
+        <div class="btn-bar">
+            <a href="javascript:;" id="Approve" class="icon-edit">财务审核</a>
+        </div>
+    }
+    @if (@ViewData["Who"].ToString().Contains("快递组"))
+    {
+        <div class="btn-bar">
+            <a href="javascript:;" id="Approve" class="icon-edit">快递组审核</a>
+        </div>
+    }
+    @if (@ViewData["Who"].ToString().Contains("仓库"))
+    {
+        <div class="btn-bar">
+            <a href="javascript:;" id="Approve" class="icon-edit">仓库复核</a>
+        </div>
+    }
+    @if (@ViewData["Who"].ToString().Contains("财务")|| @ViewData["Who"].ToString().Contains("快递组"))
+    {
+    <div class="btn-bar">
+        <a href="#" rel="external" ajax-data="false" class="icon-edit" onclick="getExcel(this)">导出Excel</a>
+    </div>
+    }
+    <div class="btn-bar">
+        <p class="showBar">查看审核详情 : 请双击需要查看的数据</p>
+    </div>
+</div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+<script type="text/javascript">
+    enterSearch("#btnQuery");
+    $(function () {
+        $("body").css({ "padding": "5px 0 0 7px", "overflow": "hidden" });
+        $(".search-box .combo-arrow").css("margin-top", "4px")
+        $('#List').datagrid({
+            url: "InterceptLogistics?who="+"@ViewData["Who"]",
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() - 50,
+            fitColumns: false,
+            //sortName: 'id',
+            ////sortOrder: 'desc',
+            //idField: 'id',
+            pageSize: 20,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            frozenColumns: [[
+               { field: 'ID', title: 'ID', width: 60, align: 'center', hidden: true },
+               { field: 'CreateTime', title: '申请时间', width: 125, align: 'center', formatter: formatDateBoxFull },
+               { field: 'OrderNumber', title: '订单号', width: 140, align: 'center' },
+               { field: 'ExpressName', title: '快递公司', width: 105, align: 'center' },
+               { field: 'ExpressNumber', title: '快递单号', width: 140, align: 'center' },
+               { field: 'OrderMoney', title: '订单金额', width: 60, align: 'right' },
+               { field: 'Creator', title: '申请人', width: 55, align: 'center' },
+            ]],
+            columns: [[
+               {
+                   field: 'FinanceApproveStatus', title: '财务审批', width: 70, align: 'center', formatter: function (value, row, index) {
+                       switch (value) {
+                           case -1:
+                               return "<font color=#d02e2e>未审核</font>";
+                               break;
+                           case 0:
+                               return "<font color=#2967c9>审核中</font>";
+                               break;
+                           case 1:
+                               return "<font color=#1fc73a>已同意</font>";
+                               break;
+                           case 2:
+                               return "<font color=#d02e2e>不同意</font>";
+                               break;
+                       }
+                   }
+               },
+               { field: 'FinanceApproveUser', title: '审批人', width: 55, align: 'center' },
+               { field: 'FinanceApproveTime', title: '审批时间', width: 125, align: 'center', formatter: formatDateBoxFull },
+               {
+                   field: 'ExpressApproveStatus', title: '快递组审批', width: 70, align: 'center', formatter: function (value, row, index) {
+                       switch (value) {
+                           case -1:
+                               return "<font color=#d02e2e>未审核</font>";
+                               break;
+                           case 0:
+                               return "<font color=#2967c9>审核中</font>";
+                               break;
+                           case 1:
+                               return "<font color=#1fc73a>已同意</font>";
+                               break;
+                           case 2:
+                               return "<font color=#d02e2e>不同意</font>";
+                               break;
+                       }
+                   }
+               },
+               { field: 'ExpressApproveUser', title: '审批人', width: 55, align: 'center' },
+               { field: 'ExpressApproveTime', title: '审批时间', width: 125, align: 'center', formatter: formatDateBoxFull },
+               {
+                   field: 'WarehouseApproveStatus', title: '仓库复核', width: 70, align: 'center', formatter: function (value, row, index) {
+                       switch (value) {
+                           case -1:
+                               return "<font color=#d02e2e>未复核</font>";
+                               break;
+                           case 0:
+                               return "<font color=#2967c9>复核中</font>";
+                               break;
+                           case 1:
+                               return "<font color=#1fc73a>已收货</font>";
+                               break;
+                           case 2:
+                               return "<font color=#d02e2e>未收货</font>";
+                               break;
+                       }
+                   }
+               },
+               { field: 'WarehouseApproveUser', title: '复核人', width: 55, align: 'center' },
+               { field: 'WarehouseApproveTime', title: '复核时间', width: 125, align: 'center', formatter: formatDateBoxFull },
+            ]],
+            onClickRow: function (rowIndex, rowData) {
+            },
+            onDblClickRow: function (rowIndex, rowData) {
+                $('#openIframeDetail')[0].src = "ApproveDetail?ID=" + rowData.ID;
+                $('#DetailDiv').dialog('open');
+            },
+            onAfterEdit: function (index, rowData) {//回调函数可以直接用于操作页面
+            }
+        });
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            });
+        });
+    });
+    $("#btnQuery").click(function () {
+        var queryStr = $("#txtQuery").val();
+        var Status = $("#selStatus").val();
+        if("@ViewData["Who"]"=="售后")
+        {
+            Status=-1;
+        }
+        $('#List').datagrid({
+            url: 'InterceptLogistics?queryStr=' + encodeURI(queryStr) + '&who=' + "@ViewData["Who"]" + '&Status=' + Status
+        });
+    });
+    $("#btnAdd").click(function () {
+        $('#openIframeAdd')[0].src = "InterceptLogisticsAdd";
+        $('#addDialog').dialog('open');
+    });
+    $("#btnDel").click(function () {
+        var row = $('#List').datagrid('getSelected');
+        if (row != null) {
+            if (row.FinanceApproveStatus != -1) {
+                $.messager.alert('提示', '财务已处理，无法删除！', "info");
+                return;
+            }
+            else {
+                var r = confirm("确认删除？");
+                if (r) {
+                    $.ajax({
+                        url: "InterceptLogisticsDel?ID="+row.ID,
+                        type: "post",
+                        dataType: "json",
+                        success: function (data) {
+                            //alert(data.Msg);
+                            if (data.State == "Success") {
+                                $('#List').datagrid('reload');
+                            }
+                            else {
+                                alert(data.Msg);
+                            }
+                        },
+                        error: function (err) {
+                            console.log(err);
+                        }
+                    })
+                }
+            }
+        }
+        else {
+            $.messager.alert('提示', '请选择一条记录', "info");
+        }
+    });
+    $('#Approve').click(function () {
+        var row = $('#List').datagrid('getSelected');
+        if (row != null) {
+            if ("@ViewData["Who"]" == "财务") {
+                if (row.FinanceApproveStatus == 1)
+                {
+                    $.messager.alert('提示', '已同意，请不要重复审批', "info");
+                    return;
+                }
+            }
+            if ("@ViewData["Who"]" == "快递组") {
+                if (row.ExpressApproveStatus == 1) {
+                    $.messager.alert('提示', '已同意，请不要重复审批', "info");
+                    return;
+                }
+            }
+            if ("@ViewData["Who"]" == "仓库") {
+                if (row.WarehouseApproveStatus == 1) {
+                    $.messager.alert('提示', '已同意，请不要重复审批', "info");
+                    return;
+                }
+            }
+            $('#openIframeCheck')[0].src = "InterceptLogisticsApprove?ID=" + row.ID;
+            $('#checkDiv').dialog('open');
+        } else {
+            $.messager.alert('提示', '请选择一条记录', "info");
+        }
+    })
+    function getExcel(_this) {
+        //var OrderNumber = $("#txtQuery").val();
+        var Status = $("#selStatus").val();
+        _this.href = '../InterceptLogistics/ExportExcel?Status=' + Status+ '&who=' + "@ViewData["Who"]" +"&flag=1";//flag=1从审批页面导出
+    }
+</script>
+
+<div id="addDialog" class="easyui-dialog" closed="true" modal="true" title="新增" style="width: 550px; height: 210px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIframeAdd' frameborder="0" src="" style="width: 98%; height: 98%;"></iframe>
+</div>
+<div id="checkDiv" class="easyui-dialog" closed="true" modal="true" title="审核" style="width:520px; height:300px;" resizable="true" closable="true">
+    <iframe scrolling="yes" id='openIframeCheck' frameborder="0" src="" style="width:100%;height:98%;"></iframe>
+</div>
+<div id="DetailDiv" class="easyui-dialog" closed="true" modal="true" title="审核详情" style="width:520px; height:322px;" resizable="true" closable="true">
+    <iframe scrolling="yes" id='openIframeDetail' frameborder="0" src="" style="width:100%;height:98%;"></iframe>
+</div>

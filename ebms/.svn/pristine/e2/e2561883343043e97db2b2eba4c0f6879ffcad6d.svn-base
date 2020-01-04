@@ -1,0 +1,79 @@
+﻿@model  EBMS.Models.T_LossReportDetail
+@using Lib;
+@{
+  
+    ViewBag.Title = "Materiel_Info";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+<script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+<div class="Company-top-box">
+    <div class="search-box">
+         <input type="text" placeholder="查询产品名称.." id="txtQuery"  class="icon-search-txt">
+         <input type="button" value="查询" id="btnQuery" class="icon-search">
+    </div>
+    <input id="ID" value="@ViewData["ID"]" type="hidden">
+        <div class="btn-bar">
+            <p>采购编码：@ViewData["LossReportCode"] </p>
+        </div>
+</div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+<div class="history-box">@Html.Raw( ViewData["history"])</div>
+<script type="text/javascript">
+    enterSearch("#btnQuery");
+    $(function () {
+
+        var ID = $("#ID").val();
+        var url = "../Purchase/GetPurchaseFinanceListDetail?ID=" + ID;
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() * 0.7,
+            fitColumns: true,
+            sortName: 'id',
+            sortOrder: 'desc',
+            pageSize: 20,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                { field: 'ProductName', title: '产品名称', width: 120, align: 'center' },
+                { field: 'PlanNum', title: '采购数量', width: 120, align: 'center' },
+                { field: 'Specifications', title: '规格', width: 200, align: 'center' },
+                { field: 'UnitPrice', title: '产品单价', width: 200, align: 'center' },
+                { field: 'Remarks', title: '采购备注', width: 200, align: 'center' },
+                { field: 'Supplier', title: '供应商', width: 200, align: 'center' },
+                { field: 'ActualNum', title: '实际到货数量', width: 200, align: 'center' },
+                { field: 'Company', title: '单位', width: 200, align: 'center' },
+                { field: 'offer', title: '报价', width: 200, align: 'center' },
+                { field: 'EstimateDate', title: '预计到货时间', width: 200, align: 'center' },
+                { field: 'RequirementDate', title: '需货时间', width: 200, align: 'center', formatter: formatDatebox }
+            ]],
+            onClickRow: function (rowIndex, rowData) {
+            },
+            onAfterEdit: function (index, rowData) {//回调函数可以直接用于操作页面
+            }
+        });
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() * 0.7
+            })
+        });
+    });
+    $("#btnQuery").click(function () {
+        var queryStr = $("#txtQuery").val();
+        var $Id = $("#ID").val();
+        //如果查询条件为空默认查询全部
+        if (queryStr == null) {
+            queryStr = "%";
+        }
+        $('#List').datagrid({
+            url: '../Purchase/GetPurchaseDetailList?queryStr=' + encodeURI(queryStr) + "&ID=" + $Id
+        });
+    });
+</script>
+

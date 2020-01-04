@@ -1,0 +1,173 @@
+﻿@{
+    //商品列表
+    ViewBag.Title = "返现未审核";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+<div class="Company-top-box">
+    <div class="search-box">
+         <input type="text" placeholder="返现编码.." id="txtQuery"  class="icon-search-txt">
+         店铺： @Html.DropDownList("RetreatShop", ViewData["RetreatShop"] as List<SelectListItem>)
+         支付帐号： @Html.DropDownList("RetreatBackFrom", ViewData["RetreatBackFrom"] as List<SelectListItem>)
+         <span style="color: #808080; padding-right: 10px; font-size: 13px; margin-top: 3px; margin-left: 10px;">开始时间</span>
+         <input name="statethisdate"  style="float: left;" value="" id="statethisdate" class="easyui-datetimebox" data-options="onShowPanel:function(){  $(this).datetimebox('spinner').timespinner('setValue','00:00:00'); }">
+         <span style="color: #808080; padding-right: 10px; font-size: 13px; margin-top: 3px; margin-left: 10px;">结束时间</span>
+         <input name="Endthisdate"  style="float: left;" value="" id="Endthisdate" class="easyui-datetimebox" data-options="onShowPanel:function(){  $(this).datetimebox('spinner').timespinner('setValue','00:00:00'); }">
+
+         <select id="FiveDollars" name="FiveDollars">
+            <option value="">==请选择==</option>
+            <option value="大5">大于5块</option>
+            <option value="小5">小于5块</option>
+        </select>
+
+         <input type="button" value="查询" id="btnQuery" class="icon-search">
+    </div>
+    <div class="btn-bar">
+         <a href="#" id="btnCheck" class="icon-edit">审核</a>
+    </div>
+</div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+<script type="text/javascript">
+    enterSearch("#btnQuery");
+    function op(name, url) {
+        self.parent.addTab(name, url, '');
+        getContextmenu()
+    }    var statusVal = $("#selStatus").val();
+    $(function () {
+        $("body").css({ "padding": "5px 0 0 7px", "overflow": "hidden" });
+        $(".search-box .combo-arrow").css("margin-top","4px")
+        var url = "../CashBack/GetUnCheckList?Status=" + statusVal;
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() - 50,
+            fitColumns: true,
+            sortName: 'id',
+            sortOrder: 'desc',
+            idField: 'id',
+            pageSize: 20,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            columns: [[
+                 { field: 'OrderNum', title: '订单号', width:140, align: 'center' },
+                 { field: 'PostUser', title: '申请人', width: 100, align: 'center' },
+                 { field: 'VipName', title: '会员名称', width: 100, align: 'center' },
+                  { field: 'Repeat', title: '系统备注', width: 100, align: 'center' },
+                 { field: 'ShopName', title: '返现店铺', width: 100, align: 'center' },
+                 { field: 'WangWang', title: '旺旺帐号', width: 100, align: 'center' },
+                 { field: 'Reason', title: '返现理由', width: 100, align: 'center' },
+                      {
+                          field: 'BackMoney', title: '返现金额', width: 100, align: 'center', formatter: function (value, row, index) {
+                              return changeTwoDecimal(row.BackMoney);
+                          }
+                      },
+                 {
+                     field: 'Status', title: '状态', width: 100, align: 'center', formatter: function (value, row, index) {
+                         switch (row.Status) {
+                             case -1:
+                                 return "<font color=#d02e2e>未审核</font>";
+                                 break;
+                             case 0:
+                                 return "<font color=#2967c9>审核中</font>";
+                                 break;
+                             case 1:
+                                 return "<font color=#1fc73a>已同意</font>";
+                                 break;
+                             case 2:
+                                 return "<font color=#d02e2e>不同意</font>";
+                                 break;
+                             case 3:
+                                 return "<font color=#d02e2e>已作废</font>";
+                                 break;
+                         }
+                     }
+                 },
+                 { field: 'PostTime', title: '申请时间', width: 150, align: 'center', formatter: formatDateBoxFull },
+                 {
+                     field: 'OrderMoney', title: '订单实付金额', width: 100, align: 'center', formatter: function (value, row, index) {
+                         return changeTwoDecimal(row.OrderMoney);
+                     }
+                 },
+             
+            {
+                field: 'action', title: '操作', width:100, align: 'center',
+                 formatter: function (value, row, index) {
+                     var e = ' <div class="btn-bar"><a href="#" class="icon-edit" onclick=Show(' + row.ID + ')>查看详情</a></div>';
+                   return e;
+             }
+    }
+            ]],
+            onClickRow: function (rowIndex, rowData) {
+            },
+            onDblClickRow: function (rowIndex, rowData) {
+                Show(rowData.ID)
+            },            onAfterEdit: function (index, rowData) {//回调函数可以直接用于操作页面
+            }
+        });
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            });
+        });
+    });
+    $("#btnCheck").click(function () {
+        var row = $('#List').datagrid('getSelected');
+        if (row != null) {
+            $('#openIframeCheck')[0].src = "../CashBack/Check?ID=" + row.ID;
+            $('#checkDiv').dialog('open');
+        } else {
+            $.messager.alert('提示', '请选择一条记录', "info");
+        }
+    });
+    $("#btnQuery").click(function () {
+        var queryStr = $("#txtQuery").val();
+        var statedate = $('#statethisdate').datebox('getValue');
+       
+        var EndDate = $('#Endthisdate').datebox('getValue');
+        var RetreatShop = $('#RetreatShop').val();
+        var RetreatBackFrom = $('#RetreatBackFrom').val();
+        var FiveDollars = $('#FiveDollars').val();
+     
+        //如果查询条件为空默认查询全部
+        if (queryStr == null) {
+            queryStr = "%";
+        }
+        $('#List').datagrid({
+            url: '../CashBack/GetUnCheckList?queryStr=' + encodeURI(queryStr) + "&startSendTime=" + statedate + "&endSendTime=" + EndDate + "&RetreatShop=" + RetreatShop + "&RetreatBackFrom=" + RetreatBackFrom+"&FiveDollars="+FiveDollars
+        });
+
+    });
+    function changeTwoDecimal(floatvar) {
+        var f_x = parseFloat(floatvar);
+        if (isNaN(f_x)) {
+            return '0.00';
+        }
+
+        var f_x = Math.round(f_x * 100) / 100;
+        var s_x = f_x.toString();
+        var pos_decimal = s_x.indexOf('.');
+        if (pos_decimal < 0) {
+            pos_decimal = s_x.length;
+            s_x += '.';
+        }
+        while (s_x.length <= pos_decimal + 2) {
+            s_x += '0';
+        }
+        return s_x;
+    }
+    function Show(id) {
+        var url = "../CashBack/Detail?ID=" + id
+        window.open(url, "_blank", "height=" + (window.screen.availHeight - 30) + ",width=" + (window.screen.availWidth - 10) + ",scrollbars=yes,resizable=1,modal=false,alwaysRaised=yes");
+    }
+</script>
+<div id="checkDiv" class="easyui-dialog" closed="true" modal="true" title="审核详情" style="width:520px; height:520px;" resizable="true" closable="true">
+    <iframe scrolling="yes" id='openIframeCheck' frameborder="0" src="" style="width:100%;height:98%;"></iframe>
+</div>

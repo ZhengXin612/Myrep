@@ -1,0 +1,188 @@
+﻿@{
+    ViewBag.Title = "ViewGeneralizeForMyList";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+
+<script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+<div class="Company-top-box">
+    <div class="search-box">
+        <select id="selStatus" name="selStatus" class="sel-box">
+            <option value="-2" selected>状态</option>
+            <option value="2">不同意</option>
+            <option value="1">已同意</option>
+            <option value="0">审核中</option>
+            <option value="-1">未审核</option>
+            <option value="3">驳回</option>
+        </select>
+        <input type="text" id="txtQuery" style="width: 180px;" placeholder="负责人/平台/店铺/宝贝/借支" />
+        <input type="button" value="查询" id="btnQuery" class="icon-search">
+    </div>
+    <div class="btn-bar">
+        <a href="#" onclick="Edit()" class="icon-edit">编辑</a>
+        <a href="#" onclick="Delete()" class="icon-remove">删除</a>
+        <p class="showBar">查看审核详情 : 请双击需要查看的数据</p>
+    </div>
+</div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+<script type="text/javascript">
+    //回车触发查询
+    enterSearch("#btnQuery");
+    $(function () {
+        var url = "GetGeneralizeForMyList";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() * 0.95,
+            sortName: 'ID',
+            sortOrder: 'desc',
+            idField: 'ID',
+            pageSize: 30,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: false,//单选模式
+            rownumbers: false,//行号
+            showFooter: true,
+            frozenColumns: [[
+                 { field: 'ID', title: 'ID', width: 60, checkbox: true },
+                    { field: 'CreateDate', title: '时间', width: 100, align: 'center', formatter: formatDatebox },
+                  { field: 'ResponsibleName', title: '负责人', width: 60, align: 'center' },
+                { field: 'PlatformCode', title: '平台', width: 100, align: 'center' },
+                { field: 'StoreName', title: '店铺名称', width: 120, align: 'center' },
+                { field: 'PostUser', title: '操作人', width: 80, align: 'center' },
+                { field: 'Memo', title: '备注', width: 140, align: 'center' },
+            ]],
+            columns: [[
+                { field: 'OrderNumber', title: '订单号', width: 140, align: 'center' },
+                { field: 'ProductName', title: '宝贝名称', width: 120, align: 'center' },
+                 { field: 'OrderType', title: '订单类型', width: 80, align: 'center' },
+                 { field: 'BankNumber', title: '银行卡', width: 100, align: 'center' },
+                { field: 'Cost', title: '金额', width: 70, align: 'center' },
+                { field: 'CommissionCost', title: '佣金', width: 70, align: 'center' },
+                { field: 'DKUserMessage', title: '刷手信息', width: 120, align: 'center' },
+                { field: 'AliNumber', title: '旺旺号', width: 120, align: 'center' },
+            { field: 'TenPay', title: '财付通', width: 100, align: 'center' },
+            { field: 'BorrowCode', title: '借支批号', width: 150, align: 'center' },
+                              {
+                                  field: 'Status', title: '状态', width: 60, align: 'center', formatter: function (value, row, index) {
+                                      switch (value) {
+                                          case -1:
+                                              return "<font color=blue>未审核</font>"
+                                              break;
+                                          case 0:
+                                              return "<font color=blue>审批中</font>"
+                                              break;
+                                          case 1:
+                                              return "<font color=green>已同意</font>"
+                                              break;
+                                          case 2:
+                                              return "<font color=red>不同意</font>"
+                                              break;
+                                          case 3:
+                                              return "<font color=red>被驳回</font>"
+                                              break;
+                                          default:
+                                              return "<font color=red>NULL</font>"
+                                      }
+                                  }
+                              }
+            ]],
+            onDblClickRow: function (value, row, index) {
+                $('#openIframedetail')[0].src = "ViewGrnrralizeApproveDetail?pid=" + row.Guid;
+                $('#detailDiv').dialog('open');
+            }
+        });
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            });
+        });
+    });
+
+    //编辑
+    function Edit() {
+        var row = $('#List').datagrid("getSelected");
+        if (row == null) {
+            $.messager.alert('提示', "请选中需要操作的数据", "info");
+            return false;
+        }
+        if (row.Status == -1 || row.Status == 3) {
+            $('#openIframeEdit')[0].src = "ViewGeneralizeEdit?id=" + row.ID;
+            $("#editDiv").dialog({
+                onClose: function () {
+                    $("#List").datagrid("reload");//刷新列表 
+                }
+            });
+            $('#editDiv').dialog('open');
+        } else {
+            $.messager.alert('提示', "只有未审批/驳回才可编辑", "info");
+            $("#List").datagrid("reload");
+        }
+    }
+
+
+    function Delete() {
+        var rows = $('#List').datagrid('getSelections');
+        if (rows.length == 0) {
+            $.messager.alert('提示', "请选中需要操作的数据", "info");
+            return false;
+        }
+        var ids = "";
+        for (var i = 0; i < rows.length; i++) {
+            ids += rows[i].ID + ","
+        }
+        ids = ids.substr(0, ids.length - 1);
+        $.messager.confirm('提示', '是否删除该记录?', function (r) {
+            if (r) {
+                loading(0);
+                $.ajax({
+                    url: "GeneralizeDelete?ids=" + ids,
+                    type: "Post",
+                    contentType: "application/json",
+                    dataType: "json",
+                    success: function (data) {
+                        loading(1);
+                        if (data.State == "Success") {
+                            $.messager.alert('提示', '操作成功', "info", function () {
+                                $('#List').datagrid('reload');
+                            });
+                        }
+                        else {
+                            $.messager.alert('提示', data.Message, "info", function () {
+                                $('#List').datagrid('reload');
+                            });
+                        }
+                        $('#List').datagrid("clearSelections");
+                    },
+                    error: function () {
+                        loading(1);
+                    }
+                });
+            }
+        });
+    }
+
+    $("#btnQuery").click(function () {
+
+        var queryStr = $("#txtQuery").val().trim();
+        var status = $("#selStatus").val();
+        $('#List').datagrid({
+            url: 'GetGeneralizeForMyList?query=' + queryStr + "&status=" + status
+        });
+
+    });
+
+</script>
+<div id="editDiv" class="easyui-dialog" closed="true" modal="true" title="编辑" style="width: 1000px; height: 350px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIframeEdit' frameborder="0" src="" style="width: 98%; height: 98%;"></iframe>
+</div>
+<div id="detailDiv" class="easyui-dialog" closed="true" modal="true" title="审核详情" style="width: 800px; height: 300px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIframedetail' frameborder="0" src="" style="width: 98%; height: 98%;"></iframe>
+</div>

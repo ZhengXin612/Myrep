@@ -1,0 +1,143 @@
+﻿@model EBMS.Models.T_RespiratorOrder
+@{
+   
+    ViewBag.Title = "销售单打印";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>打印</title>
+	<link rel="stylesheet" type="text/css" href="~/Content/RespiratorPrint.css">
+</head>
+    <script type="text/javascript">
+        $(function () {
+           
+            var ID = "@ViewData["ID"]"
+            $("#xsrq").html(formatDateBoxFullnianyueri("@Model.SaleDate"));
+            $.post("../QueryOrderDetailsByID/", { "ID": ID }, function (data) {
+
+                for (var z = 0; z < data.length; z++) {
+                
+                    if (z <= 6)
+                    {
+                        var xax = "<td></td><td>" + data[z].ProductName + "</td><td>" + data[z].ProductCode + "</td><td>" + data[z].Company + "</td><td>" + data[z].Number + "</td><td>" + data[z].Price + "</td><td>" + data[z].Subtotal + "</td>";
+                        $("#zz" + z + "").html(xax);
+                    }
+                }
+            });
+        });
+        </script>
+<body>
+    
+<a href="javascript:window.print();" class="print-btn noprint">打印</a>
+  <h1><b>呼吸机系列产品销售出货单</b></h1>
+  <div class="table-1-top">
+       <p><span>客户名称：</span><span class="line line-a">@Model.CustomerName</span><span class="left-area">客户电话：</span><span class="line line-b">@Model.Customerphone</span><span  class="left-area">出货单号：</span><span class="red-code">@Model.SaleNumbers</span></p>
+       <p><span >客户地址：</span><span class="line line-a" style="letter-spacing:0px;">@Model.Customeraddress</span><span class="left-area-289">日期：</span><span class="line line-b" id="xsrq">@Model.SaleDate</span></p>
+  </div>
+   <table class="table-2">
+   	<tr>
+           <td align="center">编  号</td>  
+           <td align="center">产品名称</td>  
+           <td align="center">产品序列号</td>  
+           <td align="center">单 位</td>  
+           <td align="center">数 量</td>  
+           <td align="center">单  价</td>  
+           <td align="center">小  计</td>  
+      </tr>
+         <tr id="zz0">
+           <td></td>  
+           <td></td>  
+           <td></td>  
+           <td></td>  
+           <td></td>  
+           <td></td>  
+           <td></td>  
+      </tr>
+       <tr  id="zz1">
+           <td></td>  
+           <td></td>  
+           <td></td>  
+           <td></td>  
+           <td></td>  
+           <td></td>  
+           <td></td>  
+      </tr>
+       <tr  id="zz2">
+           <td></td>  
+           <td></td>  
+           <td></td>  
+           <td></td>  
+           <td></td>  
+           <td></td>  
+           <td></td>  
+      </tr>
+       <tr  id="zz3">
+           <td></td>  
+           <td></td>  
+           <td></td>  
+           <td></td>  
+           <td></td>  
+           <td></td>  
+           <td></td>  
+      </tr>
+       <tr  id="zz4">
+           <td></td>  
+           <td></td>  
+           <td></td>  
+           <td></td>  
+           <td></td>  
+           <td></td>  
+           <td></td>  
+      </tr>
+       <tr  id="zz5">
+           <td></td>  
+           <td></td>  
+           <td></td>  
+           <td></td>  
+           <td></td>  
+           <td></td>  
+           <td></td>  
+      </tr>
+       <tr>
+           <td colspan="7">备  注：@Model.Remarks</td>  
+      </tr>
+   </table>
+   <table class="table-mix">
+      <tr>
+          <td width="96" align="center">货位</td>
+          <td width="96"></td>
+          <td width="96" align="center">出库方式</td>
+          <td>  □销售  □调出   □其它：</td>
+          <td width="96" align="center">质保单号</td>
+          <td width="120" ></td>
+      </tr>
+      <tr>
+          <td width="96" align="center">付款方式</td>
+          <td colspan="3"> □现金  □POS机  □支票  □转账  □其它：</td>
+          <td width="96" align="center">金  额</td>
+          <td> </td>
+      </tr>
+        <tr>
+          <td width="96" align="center">付款方式</td>
+          <td colspan="3">大写人民币：&nbsp;&nbsp;&nbsp;&nbsp;拾&nbsp;&nbsp;&nbsp;&nbsp;万&nbsp;&nbsp;&nbsp;&nbsp;千&nbsp;&nbsp;&nbsp;&nbsp;佰&nbsp;&nbsp;&nbsp;&nbsp;拾&nbsp;&nbsp;&nbsp;&nbsp;元&nbsp;&nbsp;&nbsp;&nbsp;角&nbsp;&nbsp;&nbsp;&nbsp;分</td>
+          <td width="96" align="center">总  价</td>
+          <td> </td>
+      </tr>
+
+   </table>
+   <table class="approve">
+      <tr>
+          <td>审批：</td>
+          <td>复核：</td>
+          <td>库管员：</td>
+          <td>制单：</td>
+          <td width="205">经手人：</td>
+      </tr>
+   </table>
+   <p class="foot-word">买方货款付清前，本单所列货品系属卖方所有：价格及付款方式经双方同意如表。</p>
+   <p class="user-name"> <span>客&nbsp户：</span><span class="line line-a"></span></p>
+</body>
+</html>

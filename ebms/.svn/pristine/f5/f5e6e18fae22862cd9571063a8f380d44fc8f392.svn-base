@@ -1,0 +1,905 @@
+﻿@model EBMS.Controllers.BackupsRecruitController.EmploymentRegistration
+@{
+    ViewBag.Title = "BackupsEmploymentRegistration";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+<script type="text/javascript">
+    $(function () {
+        var flag = 0;
+        $('#btnSave').click(function () {
+          
+            if ($('#Basics_NickName').val() == null || $('#Basics_NickName').val() == undefined || $('#Basics_NickName').val() == "") {
+                $.messager.alert("提示", "请填写花名", "info");
+                return false;
+            }
+            //if ($('#Basics_JobNumber').val() == null || $('#Basics_JobNumber').val() == undefined || $('#Basics_JobNumber').val() == "") {
+            //    $.messager.alert("提示", "请填写工号", "info");
+            //    return false;
+            //}
+            if ($('#Basics_Name').val() == null || $('#Basics_Name').val() == undefined || $('#Basics_Name').val() == "") {
+                $.messager.alert("提示", "请填写姓名", "info");
+                return false;
+            }
+            if ($('#Basics_Department').val() == null || $('#Basics_Department').val() == undefined || $('#Basics_Department').val() == "") {
+                $.messager.alert("提示", "请填写部门", "info");
+                return false;
+            }
+            if ($('#Basics_Post').val() == null || $('#Basics_Post').val() == undefined || $('#Basics_Post').val() == "") {
+                $.messager.alert("提示", "请填写岗位", "info");
+                return false;
+            }
+            if ($('#Basics_TimeOfEntry').val() == null || $('#Basics_TimeOfEntry').val() == undefined || $('#Basics_TimeOfEntry').val() == "") {
+                $.messager.alert("提示", "请填写入职时间", "info");
+                return false;
+            }
+            if ($('#Basics_PhoneNumber').val() == null || $('#Basics_PhoneNumber').val() == undefined || $('#Basics_PhoneNumber').val() == "") {
+                $.messager.alert("提示", "请填写手机号码", "info");
+                return false;
+            }
+            if ($('#Basics_IDCardNo').val() == null || $('#Basics_IDCardNo').val() == undefined || $('#Basics_IDCardNo').val() == "") {
+                $.messager.alert("提示", "请填写身份证号码", "info");
+                return false;
+            }
+            if ($('#Basics_DateofBirthDate').val() == null || $('#Basics_DateofBirthDate').val() == undefined || $('#Basics_DateofBirthDate').val() == "") {
+                $.messager.alert("提示", "请填写出生年月", "info");
+                return false;
+            }
+            if ($('#Basics_BirthdayType').val() == null || $('#Basics_BirthdayType').val() == undefined || $('#Basics_BirthdayType').val() == "") {
+                $.messager.alert("提示", "请选择出生年月类型", "info");
+                return false;
+            }
+            if ($('#Basics_HouseholdRegister').val() == null || $('#Basics_HouseholdRegister').val() == undefined || $('#Basics_HouseholdRegister').val() == "") {
+                $.messager.alert("提示", "请填写籍贯", "info");
+                return false;
+            }
+            if ($('#Basics_Nation').val() == null || $('#Basics_Nation').val() == undefined || $('#Basics_Nation').val() == "") {
+                $.messager.alert("提示", "请填写民族", "info");
+                return false;
+            }
+            if ($('#Basics_JTAddress').val() == null || $('#Basics_JTAddress').val() == undefined || $('#Basics_JTAddress').val() == "") {
+                $.messager.alert("提示", "请填写家庭地址", "info");
+                return false;
+            }
+            if ($('#Basics_UrgentName').val() == null || $('#Basics_UrgentName').val() == undefined || $('#Basics_UrgentName').val() == "") {
+                $.messager.alert("提示", "请填写紧急联系人", "info");
+                return false;
+            }
+            if ($('#Basics_UrgentTelephone').val() == null || $('#Basics_UrgentTelephone').val() == undefined || $('#Basics_UrgentTelephone').val() == "") {
+                $.messager.alert("提示", "请填写紧急联系人电话", "info");
+                return false;
+            }
+        
+            if ($("#EditForm").valid() && flag == 0) {
+              
+                flag = 1;
+                loading(0);
+                $.ajax({
+                    url: "/BackupsRecruit/BackupsEmploymentRegistrationAddSave",
+                    type: "Post",
+                    data: $("#EditForm").serialize(),
+                    dataType: "json",
+                    success: function (data)
+                    {
+                        if (data.State == "Success")
+                        {
+                            loading(1)
+                            $.messager.alert("提示", "@Lib.MessageRes.SaveOK", "info", function () {
+                                window.location.reload();
+                            })
+                        }
+                        else
+                        {
+                            loading(1)
+                            $.messager.alert("提示", data.Message, "info");
+                            flag = 0;
+                        }
+                    },
+                    error: function (data)
+                    {
+                        loading(1);
+                        flag = 0;
+                        $.messager.alert('提示', data, "info");
+                    }
+                });
+            }
+        })
+    })
+    function openUpload() {
+
+        $('#Iframeupload')[0].src = "ViewUploadPic";
+        $('#uploadDiv').dialog('open');
+
+    }
+</script>
+<style>
+    * {
+        padding: 0;
+        margin: 0;
+        letter-spacing: 1px;
+    }
+
+    .table-box {
+        width: 794px;
+        display: table;
+        box-sizing: border-box;
+        margin: 0 auto;
+        font-size: 12px;
+        position: relative;
+    }
+
+    .lab {
+        width: 90px;
+        text-align: right;
+    }
+
+    .centerLab {
+        text-align: center;
+    }
+
+    .otherTable {
+        border-collapse: collapse;
+        width: 760px;
+    }
+
+        .otherTable tr {
+            height: 32px;
+        }
+
+        .otherTable tbody td {
+            border: solid 1px #000000;
+            text-align: center;
+        }
+
+        .otherTable input {
+            outline: none;
+            height: 95%;
+            width: 90%;
+            border-style: none;
+        }
+
+        .otherTable textarea {
+            height: 90%;
+            border-style: none;
+            width: 95%;
+            outline: none;
+        }
+
+        .otherTable select {
+            height: 92%;
+            border-style: none;
+            width: 95%;
+            -moz-appearance: none;
+            -webkit-appearance: none;
+            -ms-appearance: none;
+        }
+
+    option {
+        text-align: center;
+    }
+
+    .firstTD {
+        font-size: 14px;
+        text-align: center;
+    }
+
+    .firstTR {
+        height: 28px;
+        font-size: 14px;
+    }
+
+    thead td {
+        text-align: center;
+        font-size: 1.4em;
+        font-weight: 600;
+    }
+
+    @@media print {
+        .noprint {
+            display: none;
+            color: green;
+        }
+    }
+    /*.table-1 .theInput {border:0}*/
+</style>
+
+
+<div class="table-box">
+    <div class="mvctool">
+        <a id="btnSave" href="javascript:;" class="modal-btn modal-btn-save noprint">保存</a>
+    </div>
+    @using (Html.BeginForm("EditForm", "Controllers", null, FormMethod.Post, new { Id = "EditForm" }))
+    {
+        @Html.ValidationSummary(true)
+        <table class="otherTable">
+            <thead><tr><td colspan="8">员工资料登记表</td></tr></thead>
+            <tbody>
+                <tr>
+                    <td> <div style="float:right;"><a onclick="openUpload()" href="#">上传寸照</a> </div> </td>
+                    <td colspan="3"> @Html.TextBoxFor(model => model.Basics.Pic, new { @readonly = "readonly", onclick = "openUpload()" })</td>
+                    <td>
+                        花名
+                    </td>
+                    <td colspan="3">
+                        @Html.TextBoxFor(model => model.Basics.NickName, new { @onblur = "checkUser()" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="lab">
+                        工号
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Basics.JobNumber)
+                    </td>
+                    <td class="lab">
+                        姓名
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Basics.Name)
+                    </td>
+                    <td class="lab">
+                        部门
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Basics.Department)
+                    </td>
+                    <td class="lab">
+                        岗位
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Basics.Post)
+                    </td>
+                </tr>
+                <tr>
+                    <td class="lab">
+                        入职时间
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Basics.TimeOfEntry, new { type = "date" })
+                    </td>
+                    <td class="lab">
+                        手机号码
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Basics.PhoneNumber)
+                    </td>
+                    <td class="lab">
+                        微信号码
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Basics.VXNumber)
+                    </td>
+                    <td class="lab">
+                        电子邮箱
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Basics.Email)
+                    </td>
+                </tr>
+                <tr>
+                   
+                    <td class="lab">
+                        身份证号码
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Basics.IDCardNo)
+                    </td>
+                     <td class="lab">
+                        性别
+                    </td>
+                    <td>
+                        @Html.DropDownListFor(model => model.Basics.Sex, ViewData["SexList"] as List<SelectListItem>)
+                    </td>
+                    <td class="lab">
+                        出生年月
+                    </td>
+                    <td>
+                        @Html.DropDownListFor(model => model.Basics.BirthdayType, ViewData["DateType"] as List<SelectListItem>)
+                    </td>
+                    <td colspan="2">
+                        @Html.TextBoxFor(model => model.Basics.DateofBirthDate, new { type = "date" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="lab">
+                        健康状态
+                    </td>
+                    <td>
+                        @Html.DropDownListFor(model => model.Basics.HealthState, ViewData["HealthStateList"] as List<SelectListItem>)
+                    </td>
+                    <td class="lab">
+                        最高学历
+                    </td>
+                    <td>
+                        @Html.DropDownListFor(model => model.Basics.Education, ViewData["EducationList"] as List<SelectListItem>)
+                    </td>
+                    <td class="lab">
+                        政治面貌
+                    </td>
+                    <td>
+                        @Html.DropDownListFor(model => model.Basics.PoliticsStatus, ViewData["PoliticsStatusList"] as List<SelectListItem>)
+                    </td>
+                    <td class="lab">
+                        婚姻状况
+                    </td>
+                    <td>
+                        @Html.DropDownListFor(model => model.Basics.MaritalStatus, ViewData["MarryStateList"] as List<SelectListItem>)
+                    </td>
+                </tr>
+                <tr>
+                    <td class="lab">
+                        血型
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Basics.BloodType)
+                    </td>
+                    <td class="lab">
+                        身高（厘米）
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Basics.HeightS)
+                    </td>
+                    <td class="lab">
+                        懂何外语
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Basics.ISLanguages)
+                    </td>
+                    <td class="lab">
+                        外语等级
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Basics.LanguagesGrade)
+                    </td>
+                </tr>
+                <tr>
+                    <td class="lab">
+                        民族
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Basics.Nation)
+                    </td>
+                    <td class="lab">
+                        籍贯（省/市/区/县）
+                    </td>
+                    <td colspan="5">
+                        @Html.TextBoxFor(model => model.Basics.HouseholdRegister)
+                    </td>
+                </tr>
+                <tr>
+                    <td class="lab">
+                        户口性质
+                    </td>
+                    <td>
+                        @Html.DropDownListFor(model => model.Basics.HukouBookType, ViewData["HukouBookTypeList"] as List<SelectListItem>)
+                    </td>
+                    <td class="lab">
+                        户口地址
+                    </td>
+                    <td colspan="5">
+                        @Html.TextBoxFor(model => model.Basics.HukouBookAddress)
+                    </td>
+                </tr>
+                <tr>
+                    <td class="lab">
+                        家庭地址
+                    </td>
+                    <td colspan="3">
+                        @Html.TextBoxFor(model => model.Basics.JTAddress)
+                    </td>
+                    <td class="lab">
+                        爱好特长
+                    </td>
+                    <td colspan="3">
+                        @Html.TextBoxFor(model => model.Basics.Hobby)
+                    </td>
+                </tr>
+                <tr>
+                    <td class="lab">
+                        计算机等级
+                    </td>
+                    <td >
+                        @Html.TextBoxFor(model => model.Basics.ComputerGrade)
+                    </td>
+                    <td class="lab">
+                        紧急联系人
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Basics.UrgentName)
+                    </td>
+                    <td class="lab">
+                        紧急联系电话
+                    </td>
+                    <td >
+                        @Html.TextBoxFor(model => model.Basics.UrgentTelephone)
+                    </td>
+                    <td class="lab">
+                        与本人关系
+                    </td>
+                    <td >
+                        @Html.TextBoxFor(model => model.Basics.RelativeRelation)
+                    </td>
+                </tr>
+                @*   //教育背景table*@
+
+                <tr class="firstTR">
+                    <td class="firstTD lab" rowspan="5"> 教<br />育<br />背<br />景</td>
+                    <td colspan="2"> 起止时间</td>
+                    <td colspan="2"> 学校</td>
+                    <td colspan="1"> 专业</td>
+                    <td colspan="1"> 学历/学位</td>
+                    <td colspan="1"> 学习形式</td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        @Html.TextBoxFor(model => model.Education[0].StartDate, new { type = "date" })
+                        @Html.TextBoxFor(model => model.Education[0].EndDate, new { type = "date" })
+                    </td>
+                    <td colspan="2">
+                        @Html.TextBoxFor(model => model.Education[0].School)
+                    </td>
+                    <td colspan="1">
+                        @Html.TextBoxFor(model => model.Education[0].Major)
+                    </td>
+                    <td colspan="1">
+                        @Html.TextBoxFor(model => model.Education[0].Education)
+                    </td>
+                    <td colspan="1">
+                        @Html.DropDownListFor(model => model.Education[0].StudyType, ViewData["StudyTypeList"] as List<SelectListItem>)
+                    </td>
+                    
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        @Html.TextBoxFor(model => model.Education[1].StartDate, new { type = "date" })
+                        @Html.TextBoxFor(model => model.Education[1].EndDate, new { type = "date" })
+                    </td>
+                    <td colspan="2">
+                        @Html.TextBoxFor(model => model.Education[1].School)
+                    </td>
+                    <td colspan="1">
+                        @Html.TextBoxFor(model => model.Education[1].Major)
+                    </td>
+                    <td colspan="1">
+                        @Html.TextBoxFor(model => model.Education[1].Education)
+                    </td>
+                    <td colspan="1">
+                        @Html.DropDownListFor(model => model.Education[1].StudyType, ViewData["StudyTypeList"] as List<SelectListItem>)
+                     
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        @Html.TextBoxFor(model => model.Education[2].StartDate, new { type = "date" })
+                        @Html.TextBoxFor(model => model.Education[2].EndDate, new { type = "date" })
+                    </td>
+                    <td colspan="2">
+                        @Html.TextBoxFor(model => model.Education[2].School)
+                    </td>
+                    <td colspan="1">
+                        @Html.TextBoxFor(model => model.Education[2].Major)
+                    </td>
+                    <td colspan="1">
+                        @Html.TextBoxFor(model => model.Education[2].Education)
+                    </td>
+                    <td colspan="1">
+                        @Html.DropDownListFor(model => model.Education[2].StudyType, ViewData["StudyTypeList"] as List<SelectListItem>)
+                      
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        @Html.TextBoxFor(model => model.Education[3].StartDate, new { type = "date" })
+                        @Html.TextBoxFor(model => model.Education[3].EndDate, new { type = "date" })
+                    </td>
+                    <td colspan="2">
+                        @Html.TextBoxFor(model => model.Education[3].School)
+                    </td>
+                    <td colspan="1">
+                        @Html.TextBoxFor(model => model.Education[3].Major)
+                    </td>
+                    <td colspan="1">
+                        @Html.TextBoxFor(model => model.Education[3].Education)
+                    </td>
+                    <td colspan="1">
+                        @Html.DropDownListFor(model => model.Education[3].StudyType, ViewData["StudyTypeList"] as List<SelectListItem>)
+                    </td>
+                </tr>
+                @*   //家庭成员table*@
+                <tr class="firstTR">
+                    <td class="firstTD lab" rowspan="4"> 家<br />庭<br />成<br />员</td>
+                    <td>姓名</td>
+                    <td>关系</td>
+                    <td colspan="1">年龄</td>
+                    <td colspan="2">工作单位</td>
+                    <td colspan="1">职务</td>
+                    <td colspan="1">联系方式</td>
+                </tr>
+                <tr>
+                    <td>
+                        @Html.TextBoxFor(model => model.Family[0].Name)
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Family[0].Relationship)
+                    </td>
+                    <td colspan="1">
+                        @Html.TextBoxFor(model => model.Family[0].Age)
+                    </td>
+                    <td colspan="2">
+                        @Html.TextBoxFor(model => model.Family[0].WorkNnit)
+                    </td>
+                    <td colspan="1">
+                        @Html.TextBoxFor(model => model.Family[0].Position)
+                    </td>
+                    <td colspan="1">
+                        @Html.TextBoxFor(model => model.Family[0].PhoneNumber)
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        @Html.TextBoxFor(model => model.Family[1].Name)
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Family[1].Relationship)
+                    </td>
+                    <td colspan="1">
+                        @Html.TextBoxFor(model => model.Family[1].Age)
+                    </td>
+                    <td colspan="2">
+                        @Html.TextBoxFor(model => model.Family[1].WorkNnit)
+                    </td>
+                    <td colspan="1">
+                        @Html.TextBoxFor(model => model.Family[1].Position)
+                    </td>
+                    <td colspan="1">
+                        @Html.TextBoxFor(model => model.Family[1].PhoneNumber)
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        @Html.TextBoxFor(model => model.Family[2].Name)
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Family[2].Relationship)
+                    </td>
+                    <td colspan="1">
+                        @Html.TextBoxFor(model => model.Family[2].Age)
+                    </td>
+                    <td colspan="2">
+                        @Html.TextBoxFor(model => model.Family[2].WorkNnit)
+                    </td>
+                    <td colspan="1">
+                        @Html.TextBoxFor(model => model.Family[2].Position)
+                    </td>
+                    <td colspan="1">
+                        @Html.TextBoxFor(model => model.Family[2].PhoneNumber)
+                    </td>
+                </tr>
+
+              
+                @*  //奖惩信息table*@
+
+                <tr class="firstTR">
+                    <td class="firstTD lab" rowspan="4"> 奖<br />惩<br />信<br />息</td>
+                    <td> 时间</td>
+                    <td>所在公司</td>
+                    <td>所在部门</td>
+                    <td>类别</td>
+                    <td colspan="3">具体内容或事项</td>
+                </tr>
+                <tr>
+                    <td>
+                        @Html.TextBoxFor(model => model.Reward[0].HappenDate, new { type = "date" })
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Reward[0].CompanyName)
+
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Reward[0].Department)
+                    </td>
+
+                    <td>
+                        @Html.TextBoxFor(model => model.Reward[0].RewardType)
+
+                    </td>
+                    <td colspan="3">
+                        @Html.TextBoxFor(model => model.Reward[0].Content)
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        @Html.TextBoxFor(model => model.Reward[1].HappenDate, new { type = "date" })
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Reward[1].CompanyName)
+
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Reward[1].Department)
+                    </td>
+
+                    <td>
+                        @Html.TextBoxFor(model => model.Reward[1].RewardType)
+
+                    </td>
+                    <td colspan="3">
+                        @Html.TextBoxFor(model => model.Reward[1].Content)
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        @Html.TextBoxFor(model => model.Reward[2].HappenDate, new { type = "date" })
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Reward[2].CompanyName)
+
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Reward[2].Department)
+                    </td>
+
+                    <td>
+                        @Html.TextBoxFor(model => model.Reward[2].RewardType)
+
+                    </td>
+                    <td colspan="3">
+                        @Html.TextBoxFor(model => model.Reward[2].Content)
+                    </td>
+                </tr>
+                @*  //亲属关系申报table*@
+
+                <tr class="firstTR">
+                    <td class="firstTD lab" rowspan="3"> 亲<br />属<br />关系<br />申报</td>
+                    <td colspan="2"> 亲属关系</td>
+                    <td>姓名</td>
+                    <td>部门</td>
+                    <td>岗位</td>
+                    <td colspan="2">联系方式</td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        @Html.TextBoxFor(model => model.Relative[0].Relationship)
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Relative[0].Name)
+
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Relative[0].Department)
+                    </td>
+
+                    <td>
+                        @Html.TextBoxFor(model => model.Relative[0].Post)
+
+                    </td>
+                    <td colspan="2">
+                        @Html.TextBoxFor(model => model.Relative[0].PhoneNumber)
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        @Html.TextBoxFor(model => model.Relative[1].Relationship)
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Relative[1].Name)
+
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Relative[1].Department)
+                    </td>
+
+                    <td>
+                        @Html.TextBoxFor(model => model.Relative[1].Post)
+
+                    </td>
+                    <td colspan="2">
+                        @Html.TextBoxFor(model => model.Relative[1].PhoneNumber)
+                    </td>
+                </tr>
+                @*  //工作经历table*@
+                <tr class="firstTR"><td colspan="8">工作经历</td></tr>
+                <tr>
+
+                    <td> 起止时间</td>
+                    <td>公司名称</td>
+                    <td>部门</td>
+                    <td>岗位</td>
+                    <td>离职原因</td>
+                    <td>证明人</td>
+                    <td>与本人关系 </td>
+                    <td>联系方式</td>
+                </tr>
+                <tr>
+                    <td>
+                        @Html.TextBoxFor(model => model.WorkExperience[0].StartDate, new { type = "date" })
+                        @Html.TextBoxFor(model => model.WorkExperience[0].EndDate, new { type = "date" })
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.WorkExperience[0].CorporateName)
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.WorkExperience[0].Department)
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.WorkExperience[0].Post)
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.WorkExperience[0].QuitReason)
+
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.WorkExperience[0].WitnessName)
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.WorkExperience[0].RelativeRelation)
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.WorkExperience[0].PhoneNumber)
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        @Html.TextBoxFor(model => model.WorkExperience[1].StartDate, new { type = "date" })
+                        @Html.TextBoxFor(model => model.WorkExperience[1].EndDate, new { type = "date" })
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.WorkExperience[1].CorporateName)
+
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.WorkExperience[1].Department)
+                    </td>
+
+                    <td>
+                        @Html.TextBoxFor(model => model.WorkExperience[1].Post)
+
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.WorkExperience[1].QuitReason)
+
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.WorkExperience[1].WitnessName)
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.WorkExperience[1].RelativeRelation)
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.WorkExperience[1].PhoneNumber)
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        @Html.TextBoxFor(model => model.WorkExperience[2].StartDate, new { type = "date" })
+                        @Html.TextBoxFor(model => model.WorkExperience[2].EndDate, new { type = "date" })
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.WorkExperience[2].CorporateName)
+
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.WorkExperience[2].Department)
+                    </td>
+
+                    <td>
+                        @Html.TextBoxFor(model => model.WorkExperience[2].Post)
+
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.WorkExperience[2].QuitReason)
+
+                    </td>
+
+                    <td>
+                        @Html.TextBoxFor(model => model.WorkExperience[2].WitnessName)
+                    </td>
+                    <td>        
+                        @Html.TextBoxFor(model => model.WorkExperience[2].RelativeRelation)
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.WorkExperience[2].PhoneNumber)
+                    </td>
+                </tr>
+                @*  //职称资格技能信息table*@
+                <tr>
+                    <td colspan="8">职称资格技能信息</td>
+                </tr>
+                <tr class="firstTR">
+                    <td >职称信息</td>
+                    <td>发证日期</td>
+                    <td>获得职称</td>
+                    <td>职称等级</td>
+                    <td>资格证</td>
+                    <td>证书名称</td>
+                    <td>职业</td>
+                    <td>有效期</td>
+                </tr>
+                <tr>
+                    <td >
+                        @Html.TextBoxFor(model => model.Title[0].TitleInfo)
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Title[0].TitleDate, new { type = "date" })
+                      
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Title[0].TitleName)
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Title[0].TitleGrade)
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Title[0].Qualifications)
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Title[0].CertificateName)
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Title[0].Occupation)
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Title[0].TermOfValidity)
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        @Html.TextBoxFor(model => model.Title[1].TitleInfo)
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Title[1].TitleDate, new { type = "date" })
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Title[1].TitleName)
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Title[1].TitleGrade)
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Title[1].Qualifications)
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Title[1].CertificateName)
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Title[1].Occupation)
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Title[1].TermOfValidity)
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        @Html.TextBoxFor(model => model.Title[2].TitleInfo)
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Title[2].TitleDate, new { type = "date" })
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Title[2].TitleName)
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Title[2].TitleGrade)
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Title[2].Qualifications)
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Title[2].CertificateName)
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Title[2].Occupation)
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.Title[2].TermOfValidity)
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        @Html.HiddenFor(model => model.Basics.ID)
+    }
+
+
+</div>
+<div id="uploadDiv" class="easyui-dialog" closed="true" modal="true" title="上传" style="width:300px; height:200px;" resizable="true" closable="true">
+    <iframe scrolling="yes" id='Iframeupload' frameborder="0" src="" style="width:100%;height:98%;"></iframe>
+</div>

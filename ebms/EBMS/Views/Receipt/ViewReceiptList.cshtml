@@ -1,0 +1,180 @@
+﻿@{
+    ViewBag.Title = "ViewReceiptList";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+<div class="Company-top-box">
+    <div class="search-box">
+        <input type="text" id="txtQuery" style="width: 150px;" placeholder="订单号" />
+        <span style="color: #808080; padding-right: 10px; font-size: 13px; margin-top: 3px; margin-left: 10px;">开始时间</span>
+        <input name="statethisdate" style="float: left;" value="" id="statethisdate" class="easyui-datebox" data-options="sharedCalendar:'#statethisdate'">
+        <span style="color: #808080; padding-right: 10px; font-size: 13px; margin-top: 3px; margin-left: 10px;">结束时间</span>
+        <input name="Endthisdate" style="float: left;" value="" id="Endthisdate" class="easyui-datebox" data-options="sharedCalendar:'#Endthisdate'">
+        <input type="button" value="查询" id="btnQuery" class="icon-search">
+    </div>
+    <div class="btn-bar">
+        <a href="#" onclick="Edit()" class="icon-edit">编辑</a>
+        <a href="#" onclick="Print()" class="icon-print">打印</a>
+        <a href="#" onclick="Delete()" class="icon-remove">删除</a>
+        <p class="showBar">查看详情 : 请双击需要查看的数据</p>
+    </div>
+</div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+<script type="text/javascript">
+    //回车触发查询
+    enterSearch("#btnQuery");
+    $(function () {
+        var url = "GetViewReciptList";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() * 0.95,
+            fitColumns: true,
+            sortName: 'ID',
+            sortOrder: 'desc',
+            idField: 'id',
+            pageSize: 20,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                { field: 'PostUser', title: '操作人', width: 60, align: 'center' },
+                { field: 'OrderCode', title: '订单号', width: 100, align: 'center' },
+                { field: 'Code', title: '收款单号', width: 100, align: 'center' },
+                { field: 'Receivings', title: '收货人', width: 60, align: 'center' },
+                { field: 'Vip_Name', title: '客户', width: 60, align: 'center' },
+                 { field: 'StorName', title: '销售单位', width: 80, align: 'center' },
+                { field: 'Date', title: '日期', width: 80, align: 'center', formatter: formatDatebox },
+                 { field: 'Money', title: '金额', width: 60, align: 'center' },
+                { field: 'PrintCount', title: '打印次数', width: 60, align: 'center' }
+            ]],
+            onDblClickRow: function (value, row, index) {
+                $('#openIframedetail')[0].src = "ViewReceiptDetail?receiptId=" + row.ID;
+                $("#detailDiv").dialog({
+                    onClose: function () {
+                        $("#List").datagrid("reload");//刷新列表 
+                    }
+                });
+                $('#detailDiv').dialog('open');
+            }
+        });
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            });
+        });
+    });
+
+    //打印
+    function Print() {
+        var row = $('#List').datagrid("getSelected");
+        if (row == null) {
+            $.messager.alert('提示', "请选中需要操作的数据", "info");
+            return false;
+        }
+        $('#framePrint')[0].src = "ViewReceiptPrint?id=" + row.ID;
+        $("#PrintDiv").dialog({
+            onClose: function () {
+                $("#List").datagrid("reload");//刷新列表 
+            }
+        });
+        $('#PrintDiv').dialog('open');
+    }
+
+    //编辑
+    function Edit() {
+        var row = $('#List').datagrid("getSelected");
+        if (row == null) {
+            $.messager.alert('提示', "请选中需要操作的数据", "info");
+            return false;
+        }
+        if (row.PrintCount == 0) {
+            $('#openIframeEdit')[0].src = "ViewReceiptEdit?id=" + row.ID;
+            $("#editDiv").dialog({
+                onClose: function () {
+                    $("#List").datagrid("reload");//刷新列表 
+                }
+            });
+            $('#editDiv').dialog('open');
+        } else {
+            $.messager.alert('提示', "只有未被打印的才可编辑", "info");
+            $("#List").datagrid("reload");
+        }
+    }
+
+    function Delete() {
+        var row = $('#List').datagrid("getSelected");
+        if (row == null) {
+            $.messager.alert('提示', "请选中需要操作的数据", "info");
+            return false;
+        }
+        if (row.PrintCount == 0) {
+            $.messager.confirm('提示', "@Lib.MessageRes.DelConfirm", function (r) {
+                if (r) {
+                    loading(0);
+                    $.ajax({
+                        url: "RecieptDelete?id=" + row.ID,
+                        type: "Post",
+                        contentType: "application/json",
+                        dataType: "json",
+                        success: function (data) {
+                            loading(1);
+                            if (data.State == "Success") {
+                                $.messager.alert('提示', "@Lib.MessageRes.DelOK.", "info", function () {
+                                    $('#List').datagrid('reload');
+                                });
+                            }
+                            else {
+                                $.messager.alert('提示', data.Message, "info", function () {
+                                    $('#List').datagrid('reload');
+                                });
+                            }
+                        },
+                        error: function () {
+                            loading(1);
+                        }
+                    });
+                }
+            });
+        } else {
+            $.messager.alert('提示', "只有未被打印的才可删除", "info");
+            $("#List").datagrid("reload");
+        }
+    }
+
+    $("#btnQuery").click(function () {
+
+        var queryStr = $("#txtQuery").val().trim();
+        var statedate = $('#statethisdate').datebox('getValue');
+        var EndDate = $('#Endthisdate').datebox('getValue');
+        //如果查询条件为空默认查询全部
+        if (queryStr == null) {
+            queryStr = "%";
+        }
+
+        $('#List').datagrid({
+            url: 'GetViewReciptList?orderCode=' + encodeURI(queryStr) + "&startTime=" + statedate + "&endTime=" + EndDate
+        });
+
+    });
+
+</script>
+<div id="detailDiv" class="easyui-dialog" closed="true" modal="true" title="详情" style="width: 800px; height: 350px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIframedetail' frameborder="0" src="" style="width: 98%; height: 98%;"></iframe>
+</div>
+<div id="editDiv" class="easyui-dialog" closed="true" modal="true" title="编辑" style="width: 1000px; height: 500px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIframeEdit' frameborder="0" src="" style="width: 98%; height: 98%;"></iframe>
+</div>
+<div id="PrintDiv" class="easyui-dialog" closed="true" modal="true" title="打印" style="width: 1010px; height: 550px;" resizable="true" closable="true">
+    <iframe scrolling="no" id='framePrint' frameborder="0" src="" style="width: 100%; height: 98%;"></iframe>
+</div>
+

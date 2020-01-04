@@ -1,0 +1,118 @@
+﻿@{
+    ViewBag.Title = "WDTJDQuery";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<style>
+    .datebox .combo-arrow {
+        margin: 6px 0 0 -20px;
+    }
+
+    .datebox-lable-s {
+        color: #808080;
+        padding-right: 10px;
+        font-size: 13px;
+        margin-top: 3px;
+        margin-left: 10px;
+    }
+</style>
+<div class="Company-top-box">
+    <div class="search-box">
+        <input type="text" placeholder="产品代码" id="txtQuery" class="icon-search-txt">
+        <select id="WDTType" name="WDTType">
+            <option value="">==仓库==</option>
+            <option value="榔梨电商小货仓">榔梨电商小货仓</option>
+            <option value="黄花韵达大货仓">黄花韵达大货仓</option>
+            <option value="榔梨电商小货退货仓 ">榔梨电商小货退货仓 </option>
+            <option value="缺货暂不发货（虚拟）">缺货暂不发货（虚拟）</option>
+            <option value="黄花韵达大货退货仓">黄花韵达大货退货仓</option>
+            <option value="高桥电商退货仓">高桥电商退货仓</option>
+            <option value="京东外仓">京东外仓</option>
+            <option value="配件库">配件库</option>
+            <option value="榔梨外贸仓">榔梨外贸仓</option>
+            <option value="高桥摄影棚仓">高桥摄影棚仓</option>
+            <option value="榔梨工厂暂存仓">榔梨工厂暂存仓</option>
+            <option value="方祥仓">方祥仓</option>
+            <option value="厂家代发仓（虚拟）">厂家代发仓（虚拟）</option>
+            <option value="高桥呼吸机不良品库">高桥呼吸机不良品库</option>
+            <option value="科源电商仓">科源电商仓</option>
+            <option value="原材料仓">原材料仓</option>
+            <option value="成品仓">成品仓</option>
+            <option value="合格品仓">合格品仓</option>
+            <option value="待检仓">待检仓</option>
+            <option value="新成品仓">新成品仓</option>
+            <option value="合格品一组">合格品一组</option>
+            <option value="合格品二组">合格品二组</option>
+            <option value="合格品三组">合格品三组</option>
+            <option value="合格品四组">合格品四组</option>
+        </select>
+  
+       
+
+        <input type="button" value="查询" id="btnQuery" class="icon-search">
+    </div>
+</div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+
+
+<script type="text/javascript">
+    $("body").css({ "padding": "5px 0px 0px 7px", "overflow": "hidden" });
+   
+    enterSearch("#btnQuery");
+    $(function () {
+        var url = "";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            height: $(window).height() - 50,
+            method: 'post',
+            fitColumns: true,
+            sortName: 'ID',
+            pageSize: 30,
+            sortOrder: 'desc',
+            pagination: true,
+            showFooter: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                  { field: 'fnumber', title: '产品代码', width: 100, align: 'center' },
+                  { field: 'fname', title: '产品名称', width: 100, align: 'center' },
+                  { field: 'fmodel', title: '规格', width: 60, align: 'center' },
+                  { field: 'jlname', title: '计量单位', width: 180, align: 'center' },
+                  { field: 'fqty', title: '库存数量', width: 100, align: 'center' },
+                  { field: 'CKfname', title: '仓库名称', width: 140, align: 'center' },
+                  { field: 'PTname', title: '所属平台', width: 140, align: 'center' }
+            ]],
+        })
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            });
+        });
+    })
+    function Query() {
+
+        var Type = $("#WDTType").val();    
+
+        var queryStr = $("#txtQuery").val();
+        if (queryStr == "" || queryStr == null)
+        {
+            alert("请填产品代码！");
+        }
+        $('#List').datagrid({
+            url: 'GetList?queryStr=' + encodeURI(queryStr)+'&Type='+Type
+        });
+        $("#txtQuery").focus().select();
+    }
+    $('#btnQuery').click(function () {
+        Query();
+    });
+ 
+
+</script>

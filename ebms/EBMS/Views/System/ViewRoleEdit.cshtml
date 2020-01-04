@@ -1,0 +1,156 @@
+﻿@model  EBMS.Models.T_Role
+@using Lib;
+@{
+    ViewBag.Title = "ViewRoleEdit";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+<style>
+.roles-top {margin-left:10px;display:table;}
+.roles-top div {margin-top:10px}
+.half-l {float:left;width:50%}
+.half-r {float:left;width:50%}
+#tree .tree-folder,#tree .tree-file{display:none}
+.role-box {display:table;margin:10px 0 0 70px}
+/*.tree-nav {float:left;width:40%}
+.ck-box {float:right;width:50%;}*/
+.my-tree-box {display:none}
+#ParentAccess{width:175px;height: 23px;border: 1px solid #ccc;}
+</style>
+@using (Html.BeginForm("EditForm", "Controllers", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    <input type="hidden" id="Access" value="@ViewData["AccessArry"]">
+     <input type="hidden" id="type" name="type" value="Edit" />
+      <input type="hidden" id="ids" name="ids" value="" />
+    <input type="hidden" id="id" name="id" value="@ViewData["ID"]" />
+<div class="mvctool">
+     <a id="btnSave" href="javascript:;" class="modal-btn modal-btn-save">保存</a>
+</div>
+<div class="roles-top">
+    <div> 
+        @Html.LabelFor(model => model.Name)：
+       @Html.TextBoxFor(model => model.Name)</div>
+     <div >
+          @Html.LabelFor(model => model.Access)：
+          @Html.DropDownList("ParentAccess", ViewData["Power"] as List<SelectListItem>)
+     </div>
+</div>
+<div class="role-box">
+    <div id="tree" class="tree-nav"></div>
+</div>
+}
+<script src="/Scripts/jquery.validate.min.js" type="text/javascript"></script>
+<script>
+    $(function () {
+        $("#ParentAccess option").each(function () {
+            var $optionId = $(this).val()
+            if ($optionId != "9999") {
+                $("#tree").append("<ul id=" + $optionId + " class='my-tree-box'></ul>");
+              getLeftNav($optionId)//循环树
+            }
+        })
+        //初始化 默认选择一个树
+        var $val = $("#ParentAccess option:eq(0)").val();
+        $("#" + $val).show();
+        //选择一级的
+        $("#ParentAccess").change(function () {
+            var pId = $(this).val()
+            if (pId != "9999")
+            {
+                var $curUl = $("#" + pId)
+                $(".my-tree-box").not($curUl).hide()
+                $curUl.show();
+            }
+        })
+        function getChecked(pId) {
+            var nodes = $('#' + pId).tree('getChecked', 'indeterminate');
+            var nodes1 = $('#'+pId).tree('getChecked');
+            var s = '';
+            for (var i = 0; i < nodes.length; i++) {
+                if (s != '') { s += ',' };
+                s += nodes[i].id;
+            }
+            for (var i = 0; i < nodes1.length; i++) {
+                if (s != '') { s += ',' };
+                s += nodes1[i].id;
+            }
+            return s;
+        }
+        function getLeftNav(pId) {
+            //pId是顶级导航的英文名，左侧菜单的父级名
+            
+            $.ajax({
+                url: "../System/getTreeData?pId=" + pId,
+                type: "Post",
+                contentType: "application/json",
+                dataType: "json",
+                success: function (dataTree) {
+                    var navTree = eval(dataTree);
+                    $("#"+pId).tree({
+                        data: navTree,
+                        checkbox: true,
+                        lines: true,                    })
+                    //选择已经有的权限
+                    //除了根节点全部折叠
+                    //$("#" + pId).tree("collapseAll");
+                    //var rootNode = $("#" + pId).tree('getRoot'); //调用expand方法 
+                    //$("#" + pId).tree('expand', rootNode.target);
+                    getRole(pId);
+                },
+                error: function () {
+                    //失败 
+                }
+            });
+        }
+       var flag = 0
+       $("#btnSave").click(function () { 
+            if (flag == 0) {
+                flag++;
+                loading(0);
+                var str = ""
+                $("#ParentAccess option").each(function () {
+                    var $optionId = $(this).val()
+                    if ($optionId != "9999") {
+                        var getCheckId = getChecked($optionId)
+                        if (getCheckId != "") {
+                            str += getCheckId + ","
+                        }
+                    }
+                })
+                var newstr = str.substring(0, str.length - 1);
+                $("#ids").val(newstr);
+                $.ajax({
+                    url: "../System/RoleSave",
+                    type: "Post",
+                    data: $("#EditForm").serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        loading(1);
+                        if (data == "1") {
+                            $.messager.alert('提示', '保存成功', "info", function () {
+                                parent.$('#editDiv').dialog('close');
+                                parent.$('#List').datagrid('reload');
+                                parent.$('#List').datagrid("clearSelections");
+                                flag = 0;
+                            });
+                        }
+                    },
+                    error: function () {
+                        loading(1);
+                        flag = 0;
+                    }
+                });
+            }
+        })
+    })
+    //已有的权限 打勾
+    function getRole(pId) {
+        var Access = $("#Access").val();
+        var jsonData = JSON.parse(Access);
+        $.each(jsonData, function (id, val) {
+            if (pId == val) {
+                var node = $("#" + val).tree('find', id);
+                $("#" + val).tree('check', node.target);
+            }
+        })
+   }
+</script>

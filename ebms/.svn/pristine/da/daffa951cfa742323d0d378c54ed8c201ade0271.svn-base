@@ -1,0 +1,176 @@
+﻿@model EBMS.Models.T_Reissue
+@{
+    ViewBag.Title = "ViewReissueApprove";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<script type="text/javascript">
+    $(function () {
+
+        var url = "GetReissueDetail?reissueId=" + "@Model.ID";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() * 0.4,
+            fitColumns: true,
+            sortName: 'ID',
+            sortOrder: 'desc',
+            idField: 'ID',
+            pageSize: 10,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                              { field: 'ProductCode', title: '产品编码', width: 50, align: 'center' },
+                { field: 'ProductName', title: '产品名称', width: 90, align: 'center' },
+            { field: 'Num', title: '产品数量', width: 50, align: 'center' },
+              { field: 'Remark', title: '备注', width: 80, align: 'center' }
+            ]]
+        });
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            });
+        });
+
+        $("#btnAgree").click(function () {
+            $.messager.confirm("操作提示", "您确定要执行操作吗？", function (data) {
+                if (data) {
+                    post(1);
+                }
+            });
+        });
+        $("#btnUnAgree").click(function () {
+            $.messager.confirm("操作提示", "您确定要执行操作吗？", function (data) {
+                if (data) {
+                    post(2);
+                }
+            });
+        });
+    });
+    var sign = 0;
+    function post(status) {
+        var memo = $("#Memo").val();
+        var para = { "approveID": "@ViewData["approveid"]", "status": status, "memo": memo };
+        if (sign == 0) {
+            sign++;
+            loading(0);
+            $.ajax({
+                url: "Check",
+                type: "Post",
+                data: para,
+                success: function (data) {
+                    loading(1);
+                    if (data.State == "Success") {
+                        $.messager.alert('提示', '操作成功', "info", function () {
+                            parent.$('#approveDiv').dialog('close');
+                            parent.$("#List").datagrid("reload");
+                            sign = 0
+                        });
+                    } else {
+                        $.messager.alert('提示', data.Message, "info", function () {
+                            parent.$("#List").datagrid("reload");
+                            sign = 0
+                        });
+                    }
+                    parent.$('#List').datagrid("clearSelections");
+                },
+                error: function () {
+                    loading(1);
+                    sign = 0;
+                }
+            });
+        }
+    }
+</script>
+<table class="fromEditTable setTextWidth300">
+    <tr>
+        <td>
+            <div class="approve-btn-box">
+                <div class="btn-bar">
+                    <a href="#" id="btnAgree" class="icon-agree">同意</a>
+                    <a href="#" id="btnUnAgree" class="icon-disagree">不同意</a>
+                </div>
+            </div>
+        </td>
+        <td style="text-align: right">审核备注：
+        </td>
+        <td>
+            <input type="text" id="Memo" /></td>
+    </tr>
+</table>
+<table class="fromEditTable setTextWidth300">
+    <tbody>
+
+        <tr>
+            <td style="width: 90px; text-align: right;">
+                @Html.LabelFor(model => model.PostUser)：    
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.PostUser)
+            </td>
+            <td style="width: 90px; text-align: right;">
+                @Html.LabelFor(model => model.OrderCode)：   
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.OrderCode)
+            </td>
+            <td style="width: 90px; text-align: right;">
+                @Html.LabelFor(model => model.ExpressName)：   
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.ExpressName)
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align: right;">
+                @Html.LabelFor(model => model.WarhouseName)：   
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.WarhouseName)
+            </td>
+            <td style="text-align: right;">
+                @Html.LabelFor(model => model.ReceivingName)：
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.ReceivingName)
+            </td>
+            <td style="text-align: right;">
+                @Html.LabelFor(model => model.BusinessName)：
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.BusinessName)
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align: right;">
+                @Html.LabelFor(model => model.Phone)：   
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.Phone)
+            </td>
+            <td style="text-align: right;">
+                @Html.LabelFor(model => model.TelPhone)：   
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.TelPhone)
+            </td>
+            <td style="text-align: right;">
+                @Html.LabelFor(model => model.Address)：   
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.Address)
+            </td>
+        </tr>
+    </tbody>
+</table>
+<table id="List"></table>
+<hr style="height: 1px; border: none; border-top: 1px dashed #0066CC;" />
+@Html.Raw(ViewData["history"])

@@ -1,0 +1,75 @@
+﻿@{
+    ViewBag.Title = "销量比较";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+<div class="mvctool">
+    <form action="?" method="post">
+
+
+        <p>
+            <label for="mydate">统计日期：</label>
+               <input name="start" style="float: left;" value="" id="start" class="easyui-datebox" data-options="sharedCalendar:'#start'">
+
+        </p>
+        <br />
+        <p>
+            请选择对方店铺： @Html.DropDownList("shopname", ViewData["shoplist"] as List<SelectListItem>)
+            请选择对方商品： @Html.DropDownList("goodscode", ViewData["goodslist"] as List<SelectListItem>)
+ </p>
+       <br /> <p>     请选择我方商品：   @Html.DropDownList("mycode", ViewData["hhsgoods"] as List<SelectListItem>)
+
+            <button type="submit" id="search" class="icon-search" style="width:60px; height:24px">查询</button>
+        </p>
+    </form>
+
+</div>
+<script type="text/javascript">
+  
+    
+    $(function () {
+        $('#container').highcharts({
+            title: {
+                text: '销量比较',
+                x: -20 //center
+            },
+            subtitle: {
+                text: '',
+                x: -20
+            },
+            xAxis: {
+                categories: [@Html.Raw( ViewData["x"])]
+            },
+            yAxis: {
+                title: {
+                    text: '销量'
+                },
+                plotLines: [{
+                    value: 0,
+                    width: 1,
+                    color: '#808080'
+                }]
+            },
+            tooltip: {
+                valueSuffix: '个'
+            },
+            legend: {
+                layout: 'vertical',
+                align: 'right',
+                verticalAlign: 'middle',
+                borderWidth: 0
+            },
+            series: [{
+                name: '好护士器械旗舰店',
+                data: [@Html.Raw(ViewData["y"])]
+            }, {
+                name: '冠昌医疗器械旗舰店',
+                data: [@Html.Raw(ViewData["y1"])]
+            }]
+        });
+    });
+</script>
+<script src="@Url.Content("~/Content/chart/highcharts.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Content/chart/modules/exporting.js")" type="text/javascript"></script>
+<div id="container" style="min-width: 310px; height: 600px; margin:150px auto 0 auto"></div>
+

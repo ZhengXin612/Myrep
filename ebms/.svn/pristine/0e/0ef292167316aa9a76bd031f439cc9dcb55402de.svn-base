@@ -1,0 +1,169 @@
+﻿@model  EBMS.Controllers.ReceiptController.Recipts
+@{
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+    int total = Convert.ToInt32(ViewData["total"]);
+    int page = Convert.ToInt32(ViewData["page"]);
+}
+<script type="text/javascript">
+    function DX(num) {
+        var strOutput = "";
+        var strUnit = '仟佰拾亿仟佰拾万仟佰拾元角分';
+        num += "00";
+        var intPos = num.indexOf('.');
+        if (intPos >= 0)
+            num = num.substring(0, intPos) + num.substr(intPos + 1, 2);
+        strUnit = strUnit.substr(strUnit.length - num.length);
+        for (var i = 0; i < num.length; i++)
+            strOutput += '零壹贰叁肆伍陆柒捌玖'.substr(num.substr(i, 1), 1) + strUnit.substr(i, 1);
+        return strOutput.replace(/零角零分$/, '整').replace(/零[仟佰拾]/g, '零').replace(/零{2,}/g, '零').replace(/零([亿|万])/g, '$1').replace(/零+元/, '元').replace(/亿零{0,3}万/, '亿').replace(/^元/, "零元");
+    };
+
+
+    function printpage(id) {
+        $.ajax({
+            url: "UpdateprintCountByID",
+            type: "Post",
+            data: { id: id },
+            dataType: "json",
+            success: function (data) {
+                if (data.State == "Success") {
+                    parent.$("#List").datagrid("reload");
+                    $(".noprint").hide();
+                    window.print();
+                    $(".noprint").show();
+                }
+                else {
+                    $.messager.alert("提示", data.Message, "info");
+                }
+
+            }
+        });
+
+    }
+</script>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>收款收据</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+    <style type="text/css">
+        body {
+            font-size: 14px;
+        }
+
+
+
+        .Any_single {
+            width: 99%;
+            position: relative;
+        }
+
+            .Any_single h2 {
+                text-align: center;
+                width: 50%;
+                margin: 0 auto;
+                font-size: 18px;
+                height: 35px;
+                line-height: 35px;
+            }
+
+                .Any_single h2 span {
+                    padding: 0 10px;
+                }
+
+        .h2-double-line {
+            border: 1px solid #000;
+            width: 50%;
+            margin: 0 auto;
+            border-left: 0;
+            border-right: 0;
+        }
+
+        .Any_single_body {
+            width: 95%;
+            margin: 0 auto;
+        }
+
+
+
+
+        .Any_single_table {
+            border: 1px solid #000;
+            border-collapse: collapse;
+            border-spacing: 0;
+            width: 98%;
+            margin-top: 10px;
+            font-size: 12px;
+        }
+
+
+
+            .Any_single_table td {
+                border: 1px solid;
+                text-align: center;
+                height: 30px;
+            }
+    </style>
+</head>
+<body>
+    <div class="noprint">
+        <a href="javascript:printpage(@Model.ID);">打印</a>
+        @if (page > 0 && total > 1)
+        {
+            <span>&nbsp;&nbsp;&nbsp;分页：</span> @Html.Raw(ViewData["pager"])
+        }
+    </div>
+    <div class="Any_single">
+        <h2>收<span></span>款<span></span>收<span></span>据</h2>
+        <div class="h2-double-line"></div>
+        <table style="width: 95%; margin-left: 50px; margin-top: 20px;">
+            <tr style="height: 50px;">
+                <td>销售单位：@Model.StorName</td>
+                <td>购买时间：@Model.ShopDate</td>
+            </tr>
+            <tr>
+                <td>客户名称：@Model.Vip_Name</td>
+                <td>收货姓名：@Model.Receivings</td>
+            </tr>
+        </table>
+        @if (Model.receiptDetails.Count() > 0)
+        {
+            <div class="Any_single_body">
+                <table class="Any_single_table">
+                    <tbody>
+                        <tr>
+
+                            <td style="width: 40%">品名</td>
+                            <td>规格</td>
+                            <td>数量</td>
+                        </tr>
+                        @foreach (var item in Model.receiptDetails)
+                        {
+                            <tr>
+                                <td>@item.ProductName</td>
+                                <td>@item.Unit</td>
+                                <td>@item.Qty</td>
+                            </tr>   
+                        }
+                        @if (page == total)
+                        {
+                            <tr>
+                                <td>总金额</td>
+                                <td colspan="2">@Model.Money 元</td>
+                            </tr>   
+                        }
+                    </tbody>
+                </table>
+            </div>
+                        if (total > 1)
+                        {
+            <span style="float: right; width: 60px" id="footPage">@page / @total 页</span>
+                        }
+        }
+    </div>
+</body>
+</html>
+

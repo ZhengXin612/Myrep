@@ -1,0 +1,218 @@
+
+body{font-family:"微软雅黑";}
+input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0px 1000px #fafafa inset;
+}
+#left-nav,#j-top-nav,.logo {-webkit-user-select: none;}
+a,a:hover,a:active{text-decoration: none}
+
+/*Login pages*/
+/*.login-bg{background:url(../images/loginBg.jpg) no-repeat;background-size:cover}
+.login-box{margin: 0 auto;display: table;}
+.login-logo{margin:160px 0 40px 0}
+.login-title{color:#666;font-weight:normal;font-size:20px;text-align: center;}
+.login-form{margin:40px auto ;width: 232px}
+.login-form .login-txt{display: block;margin:0 auto 20px auto;width:220px;height: 30px;line-height: 30px;padding: 0 5px;color:#333;border: 1px solid #ddd;outline:none;transition:all 0.5s ease;-ms-transition:all 0.5s ease;-o-transition:all 0.5s ease;-webkit-transition:all 0.5s ease;-moz-transition:all 0.5s ease}
+.login-btn{background:#2299ee;border:0;outline:0;padding:0;color:#fff;font-size: 14px;width: 232px;border-radius:3px;margin: 0 auto;display: block;height:32px;line-height: 32px;cursor:pointer;}
+.login-btn:hover{background:#187bc2;}*/
+.remember-password {float:left}
+.remember-password span{font-size: 12px;color:#343434}
+.login-page {padding:0;margin:0;font-family:"微软雅黑";height:100%}
+.login-top{width:100%;height:223px;/*background:#3499DA;*/display:table}
+.logoLogin {width:1100px;margin:110px auto 0 auto}
+.login-mid {width:401px;/*box-shadow: 0 3px 3px rgba(0,0,0,.2);background:#fff;*/margin:0px auto 0 auto;padding:29px 68px}
+.login-mid-h {display:table;width:100%}
+.login-mid-h h2 {float: left;font-size: 20px;font-weight: normal;color:#666}
+.login-bot {display:table;width:100%;margin-top: 10px;}
+.l-f-l{width:100%;display:table;height:40px;margin:10px 0 30px 0;border-bottom:#ddd 1px solid;}
+.input-bg {width:40px;height:40px;float:left}
+.input-bg-a {background:url(../images/account.PNG) no-repeat center center;background-size:25px 25px}
+.input-bg-a-1{background:url(../images/account1.PNG) no-repeat center center;background-size:25px 25px}
+.login-txt {width:349px;height:40px;border:0;outline:none;font-size:16px;color:#666;float:left;padding:0 6px;background: none;}
+.ck{float:left;position:relative;z-index:66}
+.input-bg-b {background:url(../images/pass.PNG) no-repeat center center;background-size:25px 25px}
+.input-bg-b-1{background:url(../images/pass1.PNG) no-repeat center center;background-size:25px 25px}
+.copy-right {font-size:12px;text-align:center;color:#666;}
+.login-btn {background:#2299ee;border:0;outline:0;padding:0;color:#fff;font-size: 14px;width:401px;border-radius:3px;margin: 0 auto;display: block;height:50px;line-height: 50px;cursor:pointer;position:relative;z-index:66}
+.login-btn:hover{background:#187bc2;}
+
+/*Index pages*/
+.cofoe-erp-parent-body{padding:0;margin:0;overflow: hidden;width: 100%;height: 100%}
+.cofoe-top{height: 50px;background:#2299ee;}
+.logo{float:left;position:relative;margin:12px 0 0 20px;z-index: 999}
+.logo a {color:#fff;font-size:20px}
+.cofoe-top-nav{width:100%;height:40px}
+.cofoe-top-body{width: 100%;height: 50px;position:absolute;left:0;top:0;margin:0;padding: 0;z-index: 999}
+.logo-animate-box{width:24px;height:2px;background:#fff;position:absolute;top:24px;left: 2px;animation: logoAnimation 0.8s  linear;-webkit-animation: logoAnimation 0.8s  linear;-moz-animation: logoAnimation 0.8s  linear;-o-animation: logoAnimation 0.8s  linear;-ms-animation: logoAnimation 0.8s  linear;}
+.tools{float:right;}
+.tools a{color:#fff;height:20px;display:block;line-height:20px;margin:14px 26px 0 0;float:right;opacity:1}
+.user {background:url(../images/human.png) no-repeat;background-size:14px;padding-left:20px;}
+.exit{background:url(../images/sign_out.png) no-repeat 0 2px;background-size:32px;padding-left:35px;}
+.set{background:url(../images/set.png) no-repeat 0 2px;background-size:18px;padding-left:25px;}
+.tools a:hover{opacity:.8}
+.west{border:0;width:240px;}
+#cofoe-box .layout-panel-west{/*box-shadow:3px 0 15px #ddd*/border-right:1px solid #ddd }
+.top-nav-list{float: left;padding:0;margin: 0}
+.top-nav-list li{list-style: none;font-size:14px;float: left;height:38px;line-height: 40px;margin:0 20px;padding:0 5px;border-bottom:2px solid #fff;}
+.top-nav-list li a{text-decoration:none;color:#333;display:block;width: 100%;height:38px;}
+.top-nav-list .cur,.top-nav-list li:hover{border-bottom:2px solid #2299ee}
+.top-nav-list .cur a,.top-nav-list li:hover a{color:#2299ee}
+.icon-work{width: 13px;height: 13px;float: left;background:url(../images/cofoeErp.png) no-repeat -82px -3px;margin:14px 9px 0 7px}
+#cofoe-box .layout-panel-north{box-shadow:0 0 6px #ccc;height:90px;overflow:hidden;border:0;position: relative;z-index:99}
+.top-nav-list .cur .icon-work,.top-nav-list .work-btn:hover .icon-work{background:url(../images/cofoeErp.png) no-repeat -102px -3px;}
+.south{border:0;height:24px;background:#333;color:#fff;width: 100%;padding:0}
+.content{border:0;}
+.Copy-right{height:24px;line-height:24px;color:#fff;text-align:center;padding: 0;margin: 0;width: 100%}
+.left-nav{margin:20px 10px}
+#left-nav{font-size: 14px}
+#left-nav .tree-node{padding: 3px 0;margin:2px 0}
+#left-nav .tree-title {font-size: 14px}
+#left-nav .tree-icon{margin: 0px 2px 0 1px;}
+#left-nav .tree-node-selected{background:#eaf2ff}
+#left-nav .tree-node-selected .tree-title{color:#29e}
+#left-nav .tree-node-hover{background:#efefef}
+#left-nav .tree-file{background: url(../images/dote.png) no-repeat center center;}
+#mainTab .tabs-header{border-top:0px;padding-top:5px;/*padding-left: 3px*/}
+#left-nav .tree-node-selected  .tree-file{background:url(../images/dote2.png) no-repeat center center;}
+#MyTree .tree-node-selected {background:#eaf2ff;border-right:1px solid #2299ee}
+#MyTree .tree-folder{display:none}
+#MyTree .tree-file{display:none}
+.login-form .errorMsg{color:#E86C6C;}
+#canvas{
+	width:100%;
+	height:50px;
+	overflow: hidden;
+	position:absolute;
+	top:0;
+	left:0;
+	background-color: #1a1724;               
+}
+.canvas-wrap{
+	position:relative;
+	
+}
+div.canvas-content{
+	position:relative;
+	z-index:6;
+	color:#fff;
+	text-align:center;
+	padding-top:30px;
+}
+/*生产计划单添加*/
+.plan-table{margin:10px}
+.plan-table .textbox{border-radius:0}
+.plan-table-tr{width:100%;display:table;height:30px;padding-bottom:5px;margin-bottom:10px;border-bottom:1px dashed #ddd}
+.plan-table-label{width:80px;float:left;}
+.plan-table-div {float:left;width:200px;}
+.plan-table-msg {float:left;width:180px}
+.plan-Note {margin-bottom:16px}
+.sel-box {float:left;margin:2px 10px 0 15px}
+/*左侧导航小图标设置*/
+#left-nav .c-icon-wgr{background: url(../images/email_trace.png) no-repeat center center;}
+#left-nav .c-icon-xsgl{background: url(../images/form_design.png) no-repeat center center;}
+#left-nav .c-icon-xtgl{background: url(../images/monitor_window_3d.png) no-repeat center center;}
+#left-nav .c-icon-fpgl{background: url(../images/invoice.PNG) no-repeat center center;background-size:20px 20px}
+#left-nav .c-icon-yfskgl{background: url(../images/payment.PNG) no-repeat center center;background-size:20px 20px}
+#left-nav .c-icon-ysskgl{background: url(../images/coins_in_hand.PNG) no-repeat center center;background-size:20px 20px}
+#left-nav .c-icon-cggl{background: url(../images/shopping_cart.PNG) no-repeat center center;background-size:17px 17px}
+#left-nav .c-icon-cgbb{background: url(../images/paper_content_chart_48.PNG) no-repeat center center;background-size:20px 20px}
+#left-nav .c-icon-gysgl{background: url(../images/business-man.PNG) no-repeat center center;background-size:16px 16px}
+#left-nav .c-icon-xs{background: url(../images/cash.PNG) no-repeat center center;background-size:16px 16px}
+#left-nav .c-icon-ckgl{background: url(../images/storehouse_400.PNG) no-repeat center center;background-size:25px 25px}
+#left-nav .c-icon-table{background: url(../images/product-sales-report.PNG) no-repeat center center;background-size:20px 20px}
+#left-nav .c-icon-scgr{background: url(../images/Workers.PNG) no-repeat center center;background-size:20px 20px}
+#left-nav .c-icon-jczl{background: url(../images/office_folders.PNG) no-repeat center center;background-size:20px 20px}
+#left-nav .tree-node-selected .c-icon-scgr{background: url(../images/Workers.PNG) no-repeat center center;background-size:20px 20px}
+#left-nav .tree-node-selected .c-icon-jczl{background: url(../images/office_folders.PNG) no-repeat center center;background-size:20px 20px}
+#left-nav .tree-node-selected .c-icon-table{background: url(../images/product-sales-report.PNG) no-repeat center center;background-size:20px 20px}
+#left-nav .tree-node-selected .c-icon-ckgl{background: url(../images/storehouse_400.PNG) no-repeat center center;background-size:25px 25px}
+#left-nav .tree-node-selected .c-icon-xs{background: url(../images/cash.PNG) no-repeat center center;background-size:16px 16px}
+#left-nav .tree-node-selected .c-icon-gysgl{background: url(../images/business-man.PNG) no-repeat center center;background-size:16px 16px}
+#left-nav .tree-node-selected .c-icon-cgbb{background: url(../images/paper_content_chart_48.PNG) no-repeat center center;background-size:20px 20px}
+#left-nav .tree-node-selected .c-icon-cggl{background: url(../images/shopping_cart.PNG) no-repeat center center;background-size:17px 17px}
+#left-nav .tree-node-selected .c-icon-ysskgl{background: url(../images/coins_in_hand.PNG) no-repeat center center;background-size:20px 20px}
+#left-nav .tree-node-selected .c-icon-yfskgl{background: url(../images/payment.PNG) no-repeat center center;background-size:20px 20px}
+#left-nav .tree-node-selected .c-icon-fpgl{background: url(../images/invoice.PNG) no-repeat center center;background-size:20px 20px}
+#left-nav .tree-node-selected .c-icon-wgr{background: url(../images/email_trace.png) no-repeat center center;}
+#left-nav .tree-node-selected .c-icon-xsgl{background: url(../images/form_design.png) no-repeat center center;}
+#left-nav .tree-node-selected .c-icon-xtgl{background: url(../images/monitor_window_3d.png) no-repeat center center;}
+
+
+
+.icon-remove{background:url(../images/Delete.png) no-repeat;background-size:12px}
+.icon-remove:hover{background:url(../images/Delete2.png) no-repeat;background-size:12px}
+.icon-add{background:url(../images/add.png) no-repeat 0 1px;background-size:12px}
+.icon-add:hover{background:url(../images/add2.png) no-repeat 0 1px;background-size:12px}
+.icon-edit{background:url(../images/Edit.png) no-repeat;background-size:14px;}
+.icon-edit:hover{background:url(../images/Edit2.png) no-repeat;background-size:14px}
+.icon-search{background:url(../images/search.png) no-repeat;background-size:20px;outline:none;border:none;height:25px;padding:0 5px 0 22px;margin: 0 5px 0 5px;color:#666}
+.icon-search:hover {color:#2299ee}
+.icon-check{background:url(../images/check.png) no-repeat;background-size:12px;}
+.icon-check:hover{background:url(../images/check1.png) no-repeat;background-size:12px;}
+.icon-void{background:url(../images/zf.png) no-repeat 0 1px;background-size:12px}
+.icon-void:hover{background:url(../images/zf2.png) no-repeat 0 1px;background-size:12px}
+.btn-bar .icon-edit {padding-left:18px}
+.btn-bar .icon-print {padding-left:18px}
+.icon-print{background:url(../images/print.png) no-repeat ;background-size:14px}
+.icon-print:hover{background:url(../images/print2.png) no-repeat ;background-size:14px}
+.icon-search-txt {float:left}
+.modal-btn{padding-left:20px;color:#333}
+.modal-btn:hover{color:#2299ee}
+.modal-btn-save { background:url("../images/Save.png") no-repeat;background-size:16px;outline:none;border:none}
+.btn-bar{float:left;height:25px;line-height:25px;margin-left:36px;}
+.btn-bar a{color:#333;margin-right:15px;padding-left:16px}
+.btn-bar a:hover{color:#2299ee}
+.tools-btn {padding-left:15px;color:#333;margin-right:4px}
+.tools-btn:hover{color: #2299ee;}
+.showBar {background:url(../images/show.png) no-repeat left center;background-size:18px;padding-left:24px;float:right;margin:-1px 0 0 20px}
+.icon-agree{background:url(../images/agree.png) no-repeat 0 1px;background-size:14px;}
+.icon-disagree{background:url(../images/disagree.png) no-repeat;background-size:15px;}
+/*用户管理页面*/
+.Company-top-box{height:35px;padding-top:5px}
+#MyTree .tree-node span:first-child{width:17px;height:18px;display:block;float:left;margin:0 3px}
+#MyTree .tree-expanded,#MyTree .tree-indent,#MyTree .tree-collapsed{width:17px;height:18px;display:block;float:left;margin:0 3px}
+#categoryChooseDiv{width:220px;float:left;border-top:1px solid #ddd;overflow:auto}
+.UserTable {float:left;height:600px}
+.search-box {float:left;}
+.mvctool {height:30px;line-height:30px;margin-left:10px}
+.window .window-body{border-color:#ccc}
+.history-box {margin:0 10px}
+/*审核*/
+.check-bar {line-height:35px;z-index:22;background:#fff;height:35px}
+.check-bar a {color:#333;margin-right:15px;padding-left:16px;}
+.check-memo {margin:20px 10px}
+.check-memo p {margin-bottom:16px}
+.approve-btn-box {height:30px;line-height:30px;margin-top:10px}
+.approve-btn-box .btn-bar {margin-left:10px}
+/*用户登录页面*/
+#Loading {display:none;float:right;font-size:12px;margin-top: 5px;}
+#mes {color:#c33;font-size:12px;display:table}
+a{ 
+outline-style:none;/*FF使用*/ 
+}
+a:focus{ 
+outline:none;/*FF使用*/ 
+}
+.datebox .combo-arrow {margin:2px 0 0 -20px}
+.plan-add .datebox .combo-arrow {margin:0}
+.product-input{border:1px solid #ccc;padding:3px 2px}
+/*物料*/
+#add-supplier {margin-left:10px;cursor:pointer}
+#add-supplier:hover{color:#2299ee}
+#supplier-arry {padding: 10px 0 0 0;display:table;width:100%}
+#supplier-arry li{float:left;margin:0 0 10px 10px;}
+.removeLi {margin-left:5px;font-family:'宋体'}
+.removeLi:hover {cursor:pointer;color:#2299ee}
+#Bill_Number {cursor:pointer}
+/*加载方法*/
+.loading-box{width:220px;height:50px;margin:-15px 0 0 -110px;position:fixed;z-index:999;background:url(../images/loading.gif) no-repeat 45px 12px #fff;top:30%;left:50%;box-shadow:0 0 8px #999;line-height:50px;text-align:center;color:#666}
+/*加载方法*/
+.detail-list {margin:5px 0 0 5px}
+.my-photo {width:140px;height:190px;margin:0 auto;background:url(../images/manPhoto.png) no-repeat center center;background-size:90px;overflow:hidden}
+
+.my-photo img {width:100%}
+.pannelDiv {display:none}
+.l-td {color:#999}
+.NickName {font-size:30px;padding: 0;margin:20px 0 0px 20px}
+.man {color:#2299ee}
+.women{color:#DC143C}

@@ -1,0 +1,140 @@
+﻿@{
+    ViewBag.Title = "ViewGeneralizeExceptionList";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+<div class="Company-top-box">
+    <div class="search-box">
+        <input type="text" id="txtQuery" style="width: 200px;" placeholder="店铺名称/宝贝名称/上传人/申请人" />
+        <span style="color: #808080; padding-right: 10px; font-size: 13px; margin-top: 3px; margin-left: 10px;">开始时间</span>
+        <input name="statethisdate" style="float: left;" value="" id="statethisdate" class="easyui-datebox" data-options="sharedCalendar:'#statethisdate'">
+        <span style="color: #808080; padding-right: 10px; font-size: 13px; margin-top: 3px; margin-left: 10px;">结束时间</span>
+        <input name="Endthisdate" style="float: left;" value="" id="Endthisdate" class="easyui-datebox" data-options="sharedCalendar:'#Endthisdate'">
+        <input type="button" value="查询" id="btnQuery" class="icon-search">
+    </div>
+    <div class="btn-bar">
+        @if (ViewData["user"] == "true")
+        { 
+            <a href="#" onclick="Approve()" class="icon-check">批量处理</a>
+        }
+        <p class="showBar">查看审核详情 : 请双击需要查看的数据</p>
+    </div>
+</div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+<script type="text/javascript">
+    //回车触发查询
+    enterSearch("#btnQuery");
+    $(function () {
+        var url = "GetGeneralizeExceptionList";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() * 0.95,
+            sortName: 'ID',
+            sortOrder: 'desc',
+            idField: 'ID',
+            pageSize: 30,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: false,//单选模式
+            rownumbers: false,//行号
+            showFooter: true,
+            frozenColumns: [[
+                 { field: 'ID', title: 'ID', width: 60, checkbox: true },
+                  { field: 'CreateDate', title: '时间', width: 80, align: 'center', formatter: formatDatebox },
+                  { field: 'UploadName', title: '上传人', width: 80, align: 'center' },
+                { field: 'PlatformCode', title: '平台', width: 100, align: 'center' },
+                { field: 'StoreName', title: '店铺名称', width: 120, align: 'center' },
+            ]],
+            columns: [[
+                { field: 'PostUser', title: '操作人', width: 80, align: 'center' },
+                { field: 'OrderNumber', title: '订单号', width: 130, align: 'center' },
+                { field: 'ProductName', title: '宝贝名称', width: 120, align: 'center' },
+                 { field: 'OrderType', title: '订单类型', width: 80, align: 'center' },
+                 { field: 'BankNumber', title: '银行卡', width: 100, align: 'center' },
+                { field: 'Cost', title: '金额', width: 70, align: 'center' },
+                { field: 'CommissionCost', title: '佣金', width: 70, align: 'center' },
+                { field: 'DKUserMessage', title: '刷手信息', width: 100, align: 'center' },
+                { field: 'AliNumber', title: '旺旺号', width: 120, align: 'center' },
+            { field: 'TenPay', title: '财付通', width: 100, align: 'center' },
+            { field: 'BorrowCode', title: '借支批号', width: 150, align: 'center' },
+                                                      {
+                                                          field: 'IsDispose', title: '是否处理', width: 60, align: 'center', formatter: function (value, row, index) {
+                                                              switch (value) {
+                                                                  case 0:
+                                                                      return "<font color=red>未处理</font>"
+                                                                      break;
+                                                                  case 1:
+                                                                      return "<font color=green>已处理</font>"
+                                                                      break;
+                                                                  default:
+                                                                      return ""
+                                                              }
+                                                          }
+                                                      }
+            ]],
+            onDblClickRow: function (value, row, index) {
+                $('#openIframedetail')[0].src = "ViewGrnrralizeApproveDetail?pid=" + row.Guid;
+                $("#detailDiv").dialog({
+                    onClose: function () {
+                        $("#List").datagrid("reload");//刷新列表 
+                    }
+                });
+                $('#detailDiv').dialog('open');
+            }
+        });
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            });
+        });
+    });
+
+    function Approve() {
+        var rows = $('#List').datagrid('getSelections');
+        if (rows.length == 0) {
+            $.messager.alert('提示', "请选中需要操作的数据", "info");
+            return false;
+        }
+        var ids = "";
+        for (var i = 0; i < rows.length; i++) {
+            if (rows[i].IsDispose == 1) {
+                $.messager.alert('提示', "存在数据已经处理", "info");
+                return false;
+            }
+            ids += rows[i].Guid + ","
+        }
+        ids = ids.substr(0, ids.length - 1);
+        $('#openIframeApprove')[0].src = "ViewGeneralizeExceptionApprove?ids=" + ids;
+        $("#approveDiv").dialog({
+            onClose: function () {
+                $("#List").datagrid("reload");//刷新列表 
+            }
+        });
+        $('#approveDiv').dialog('open');
+    }
+
+    $("#btnQuery").click(function () {
+        var queryStr = $("#txtQuery").val().trim();
+        var statedate = $('#statethisdate').datebox('getValue');
+        var EndDate = $('#Endthisdate').datebox('getValue');
+        $('#List').datagrid({
+            url: 'GetGeneralizeExceptionList?query=' + queryStr + "&startDate=" + statedate + "&endDate=" + EndDate
+        });
+    });
+
+</script>
+<div id="detailDiv" class="easyui-dialog" closed="true" modal="true" title="审核详情" style="width: 800px; height: 300px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIframedetail' frameborder="0" src="" style="width: 98%; height: 98%;"></iframe>
+</div>
+<div id="approveDiv" class="easyui-dialog" closed="true" modal="true" title="处理" style="width: 600px; height: 503px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIframeApprove' frameborder="0" src="" style="width: 98%; height: 98%;"></iframe>
+</div>

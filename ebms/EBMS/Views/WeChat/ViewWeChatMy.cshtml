@@ -1,0 +1,203 @@
+﻿@{
+    ViewBag.Title = "我的微信账单";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+<div class="Company-top-box">
+    <div class="search-box">
+             <input type="text" placeholder="订单号/微信号/.." id="txtQuery"  class="icon-search-txt">
+         <input type="text" placeholder="备注/操作人/.." id="txtBzhu"  class="icon-search-txt">
+         店铺:
+        @Html.DropDownList("store", ViewData["shop"] as List<SelectListItem>)
+              支出帐号:
+        @Html.DropDownList("Expenditure", ViewData["ExpenditureList"] as List<SelectListItem>)
+             <span style="color: #808080; padding-right: 10px; font-size: 13px; margin-top: 3px; margin-left: 10px;">开始时间</span>
+        <input name="statethisdate" style="float: left;" value="" id="statethisdate" class="easyui-datebox" data-options="sharedCalendar:'#statethisdate'">
+        <span style="color: #808080; padding-right: 10px; font-size: 13px; margin-top: 3px; margin-left: 10px;">结束时间</span>
+        <input name="Endthisdate" style="float: left;" value="" id="Endthisdate" class="easyui-datebox" data-options="sharedCalendar:'#Endthisdate'">
+        <select id="selStatus" name="selStatus" class="sel-box">
+            <option value="" selected>订单状态</option>
+            <option value="正常订单">正常订单</option>
+            <option value="异常订单">异常订单</option>
+        </select>
+         <input type="button" value="查询" id="btnQuery" class="icon-search">
+
+     </div>
+     <div class="btn-bar">
+          <a href="#" id="btnDelete" class="icon-remove">删除</a>
+           <a href="#" id="btnEdit" class="icon-edit">编辑</a>
+    </div>
+</div>
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+
+<script type="text/javascript">
+    enterSearch("#btnQuery");
+
+    $(function () {
+        var url = "/WeChat/GetIWeChat/";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() - 45,
+            fitColumns: true,
+            // sortName: 'Code',
+            sortOrder: 'desc',
+            idField: 'ID',
+            pageSize: 20,
+            pagination: true,
+            showFooter: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                { field: 'ShopName', title: '店铺名称', width: 120, align: 'center' },
+                { field: 'OrderNumber', title: '订单号', width: 100, align: 'center' },
+                { field: 'Wangwang', title: '旺旺号', width: 100, align: 'center' },
+                      { field: 'Commission', title: '总佣金', width: 100, align: 'center' },
+                    { field: 'Expenditure', title: '支出帐号', width: 100, align: 'center' },
+                 { field: 'SystemRemarks', title: '系统备注', width: 100, align: 'center' },
+                 { field: 'iszhengc', title: '订单状态', width: 100, align: 'center' },
+                  { field: 'WechatNumber', title: '微信帐号', width: 100, align: 'center' },
+                    { field: 'EstablishDate', title: '操作时间', width: 100, align: 'center' },
+                { field: 'Remarks', title: '备注', width: 100, align: 'center' },
+                {
+                    field: 'Status', title: '状态', width: 100, align: 'center', formatter: function (value, row, index) {
+                        switch (row.Status) {
+                            case -1:
+                                return "<font color=#d02e2e>未审核</font>";
+                                break;
+                            case 0:
+                                return "<font color=#2967c9>审核中</font>";
+                                break;
+                            case 1:
+                                return "<font color=#1fc73a>已同意</font>";
+                                break;
+                            case 2:
+                                return "<font color=#d02e2e>不同意</font>";
+                                break;
+                            case 3:
+                                return "<font color=#d02e2e>已作废</font>";
+                                break;
+
+                        }
+                    }
+                },
+
+            ]],
+            onDblClickRow: function (value, row, index) {
+                $("#detailDiv").dialog({
+                    onClose: function () {
+                        $("#List").datagrid("reload");//刷新列表 
+                    }
+                });
+             
+            },
+            onDblClickRow: function (rowIndex, rowData) {
+                var url = "../WeChat/ViewWeChatDetail?tid=" + rowData.ID
+                window.open(url, "_blank", "height=" + (window.screen.availHeight * 0.7) + ",width=" + (window.screen.availWidth * 0.7) + ",scrollbars=yes,resizable=1,modal=false,alwaysRaised=yes");
+            }
+
+
+        })
+
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 40
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 40
+            });
+        });
+
+
+    })
+
+    function Query() {
+        var queryStr = $("#txtQuery").val();
+        var statedate = $('#statethisdate').datebox('getValue');
+        var EndDate = $('#Endthisdate').datebox('getValue');
+        var store = $("#store option:selected").text();
+        var Bzhu = $("#txtBzhu").val();
+        var Expenditure = $("#Expenditure option:selected").text();
+        var selstatus = $("#selStatus").val();
+        $('#List').datagrid({
+            url: '/WeChat/GetIWeChat?queryStr=' + encodeURI(queryStr) + '&statedate=' + statedate + '&EndDate=' + EndDate + '&store=' + store + '&Bzhu=' + Bzhu + '&Expenditure=' + Expenditure + '&selstatus=' + selstatus
+        });
+        $("#txtQuery").focus().select();
+    }
+
+    $('#btnQuery').click(function () {
+        Query();
+    });
+
+
+    $('#btnDelete').click(function () {
+        var row = $('#List').datagrid('getSelected');
+        if (row.Status == 1 || row.Status == 0) {
+            alert("审核中或已同意的不允许删除");
+            return;
+        }
+        if (row) {
+            $.messager.confirm('提示', '@Lib.MessageRes.DelConfirm', function (r) {
+                if (r) {
+                    loading(0)
+                    var row = $('#List').datagrid('getSelected');
+                    $.ajax({
+                        url: "/WeChat/DeleteInvoiceApplyFinance?ID=" + row.ID,
+                        type: "Post",
+                        contentType: "application/json",
+                        dataType: "json",
+                        success: function (data) {
+                            if (data == "1") {
+                                $.messager.alert('提示', '@Lib.MessageRes.DelOK', "info");
+                             $('#List').datagrid('reload');
+                             loading(1)
+                         }
+                         else {
+                             loading(1)
+                             $.messager.alert('提示', data.Message, "info");
+
+                         }
+                     },
+                     error: function (data) {
+                         loading(1)
+                         $.messager.alert('提示', data, "info");
+
+                     }
+                 });
+             }
+            })
+     }
+     else {
+         $.messager.alert("提示", '@Lib.MessageRes.PleaseSelect', "info");
+        }
+    })
+    $("#btnEdit").click(function () {
+        var row = $('#List').datagrid('getSelected');
+        if (row != null) {
+            if (row.Status == 1 || row.Status == 0) {
+                alert("审核中或已同意的不允许修改");
+                return;
+            }
+            $('#openIframeEdit')[0].src = "ViewWeChatEdit?id=" + row.ID;
+            $("#editDiv").dialog({
+                onClose: function () {
+                    $("#List").datagrid("reload");//刷新列表 
+                }
+            });
+            $('#editDiv').dialog('open');
+        }
+        else { $.messager.alert('提示', '请选择一条记录', "info"); }
+    });
+</script>
+<div id="editDiv" class="easyui-dialog" closed="true" modal="true" title="编辑" style="width: 1000px; height: 540px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIframeEdit' frameborder="0" src="" style="width: 98%; height: 98%;"></iframe>
+</div>
+<div id="detailDiv" class="easyui-dialog" closed="true" modal="true" title="详情" style="width: 800px; height: 600px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIframedetail' frameborder="0" src="" style="width: 98%; height: 98%;"></iframe>
+</div>
+

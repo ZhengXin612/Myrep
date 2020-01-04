@@ -1,0 +1,36 @@
+﻿@{
+    ViewBag.Title = "下载图片";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+
+<h2>点击图片即可下载</h2>
+<script>
+  
+    var id = " @ViewData["EID"] ";
+   
+    $(function () {
+        window.title = "下载图片";
+        $.ajax({
+            url: "/ExpressIndemnity/GetPicUrl",
+            data: {"EID":id},
+            type: "Post",
+            datatype: "json",
+            success: function (data)
+            {
+                for (var i = 0; i < data.length; i++) {
+                    if (data[i].PicURL.length > 0) {
+                        var str = "<div style=\"width:150px;height:200px;float:left;margin-right:10px;\"><a  onclick=\"ss(this," + data[i].ID + ")\"> <img   style=\"width:100%;height:100%\" id=img" + i + " src=" + data[i].PicURL + " /></a></div>";
+                            $("#imgUL").append(str);
+                        }
+                }
+            }
+        })
+    })
+    function ss(tag, id)
+    {
+        tag.href = '/ExpressIndemnity/DownPicture?id=' + id ;
+    }
+</script>
+
+<div id="imgUL" style="margin-left:1%;margin-top:1%"> </div>
+

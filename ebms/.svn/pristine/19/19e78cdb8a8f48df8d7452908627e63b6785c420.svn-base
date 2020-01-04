@@ -1,0 +1,20 @@
+﻿@{
+    ViewBag.Title = "ViewImportExcel";
+}
+
+<form method="post" id="form1" action="/FixedAssets/ImportExcel"
+enctype="multipart/form-data"  data-ajax="false" > 
+    <div style="line-height:30px">
+       <label><span style="color:red;font-size:large">&nbsp;&nbsp;文件格式顺序：</span><br />
+         <span style="font-size:large">&nbsp;&nbsp;序列,图片路径,资产名称,规格,资产代码,成本,购买人,供应商,保修期<br />
+           &nbsp;&nbsp;购买时间,部门,使用人,地点,负责人,备注,审核条码<br />
+            
+           </span> 
+       </label>
+        <input name="file" type="file" id="file" /> 
+                    <br />
+       
+          <input type="submit" name="Upload" value="导入"  />
+     </div>
+
+</form>

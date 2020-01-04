@@ -1,0 +1,231 @@
+﻿@model EBMS.Models.T_Generalize
+@{
+    ViewBag.Title = "ViewGeneralizeEdit";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<script type="text/javascript">
+    $(function () {
+        var sign = 0;
+        $("#btnSave").click(function () {
+            if ($("#EditForm").valid()) {
+                if (sign == 0) {
+                    sign++;
+                    loading(0);
+                    $.ajax({
+                        url: "ViewGeneralizeEditSave?thisdate=" + $("#thisdate").datebox('getValue'),
+                        type: "Post",
+                        data: $("#EditForm").serialize(),
+                        success: function (data) {
+                            loading(1);
+                            if (data.State == "Success") {
+                                $.messager.alert('提示', '操作成功', "info", function () {
+                                    parent.$('#editDiv').dialog('close');
+                                    parent.$("#List").datagrid("reload");
+                                    sign = 0
+                                });
+                            } else {
+                                $.messager.alert('提示', data.Message, "info", function () {
+                                    parent.$("#List").datagrid("reload");
+                                    sign = 0
+                                });
+                            }
+                            parent.$('#List').datagrid("clearSelections");
+                        },
+                        error: function () {
+                            loading(1);
+                            sign = 0;
+                        }
+                    });
+                }
+            }
+        });
+    })
+</script>
+<div class="mvctool">
+    <input id="btnSave" class="modal-btn modal-btn-save" type="submit" value="保存">
+</div>
+@using (Html.BeginForm("EditForm", "Controllers", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+    <table class="fromEditTable setTextWidth300">
+        <tbody>
+            <tr>
+                <td style="width: 16.5%; text-align: right">
+                    @Html.HiddenFor(model => model.Status)
+                    @Html.HiddenFor(model => model.ID)
+                    @Html.LabelFor(model => model.CreateDate)：
+                </td>
+
+                <td style="width: 16.5%;">
+                    <input name="thisdate" value="@ViewData["thisDate"]" id="thisdate"  class="easyui-datebox" data-options="sharedCalendar:'#thisdate'">
+                </td>
+                <td style="width: 16.5%;">
+                    @Html.ValidationMessageFor(model => model.CreateDate)
+                </td>
+                <td style="width: 16.5%; text-align: right">
+                    @Html.LabelFor(model => model.PlatformCode)：
+                </td>
+
+                <td style="width: 16.5%;">
+                    @Html.TextBoxFor(model => model.PlatformCode, new { @style = "width:170px" })
+                </td>
+                <td style="width: 16.5%;">
+                    @Html.ValidationMessageFor(model => model.PlatformCode)
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right">
+                    @Html.LabelFor(model => model.StoreName)：
+                </td>
+                <td>
+                    @Html.DropDownListFor(model => model.StoreName, ViewData["store"] as List<SelectListItem>)
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.StoreName)
+                </td>
+                <td style="text-align: right">
+                    @Html.LabelFor(model => model.OrderNumber)：
+                </td>
+
+                <td>
+                    @Html.TextBoxFor(model => model.OrderNumber, new { @style = "width:170px" })
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.OrderNumber)
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right">
+                    @Html.LabelFor(model => model.ProductName)：
+                </td>
+
+                <td>
+                    @Html.TextBoxFor(model => model.ProductName, new { @style = "width:170px" })
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.ProductName)
+                </td>
+                <td style="text-align: right">
+                    @Html.LabelFor(model => model.Cost)：
+                </td>
+
+                <td>
+                    @Html.TextBoxFor(model => model.Cost, new { @style = "width:170px" })
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.Cost)
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right">
+                    @Html.LabelFor(model => model.CommissionCost)：
+                </td>
+
+                <td>
+                    @Html.TextBoxFor(model => model.CommissionCost, new { @style = "width:170px" })
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.CommissionCost)
+                </td>
+                <td style="text-align: right">
+                    @Html.LabelFor(model => model.DKUserMessage)：
+                </td>
+
+                <td>
+                    @Html.TextBoxFor(model => model.DKUserMessage, new { @style = "width:170px" })
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.DKUserMessage)
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right">
+                    @Html.LabelFor(model => model.AliNumber)：
+                </td>
+
+                <td>
+                    @Html.TextBoxFor(model => model.AliNumber, new { @style = "width:170px" })
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.AliNumber)
+                </td>
+                <td style="text-align: right">
+                    @Html.LabelFor(model => model.TenPay)：
+                </td>
+
+                <td>
+                    @Html.TextBoxFor(model => model.TenPay, new { @style = "width:170px" })
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.TenPay)
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right">
+                    @Html.LabelFor(model => model.BankNumber)：
+                </td>
+
+                <td>
+                    @Html.TextBoxFor(model => model.BankNumber, new { @style = "width:170px" })
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.BankNumber)
+                </td>
+                <td style="text-align: right">
+                    @Html.LabelFor(model => model.OrderType)：
+                </td>
+
+                <td>
+                    @Html.DropDownListFor(model => model.OrderType, ViewData["type"] as List<SelectListItem>)
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.OrderType)
+                </td>
+            </tr>
+
+            <tr>
+                <td style="text-align: right">
+                    @Html.LabelFor(model => model.PayCommissionNumber)：
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.PayCommissionNumber, new { @style = "width:170px" })
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.PayCommissionNumber)
+                </td>
+                <td style="text-align: right">
+                    @Html.LabelFor(model => model.BorrowCode)：
+                </td>
+
+                <td>
+                    @Html.TextBoxFor(model => model.BorrowCode, new { @style = "width:170px" })
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.BorrowCode)
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right">
+                    @Html.LabelFor(model => model.Memo)：
+                </td>
+
+                <td>
+                    @Html.TextBoxFor(model => model.Memo, new { @style = "width:170px" })
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.Memo)
+                </td>
+                <td style="text-align: right">
+                    @Html.LabelFor(model => model.ResponsibleName)：
+                </td>
+
+                <td>
+                    @Html.TextBoxFor(model => model.ResponsibleName, new { @style = "width:170px" })
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(model => model.ResponsibleName)
+                </td>
+            </tr>
+        </tbody>
+    </table>
+}

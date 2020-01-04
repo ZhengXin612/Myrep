@@ -1,0 +1,48 @@
+﻿@{
+    ViewBag.Title = "ViewInterviewList";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<table id="List"></table>
+<div id="showDiv" class="easyui-dialog" closed="true" modal="true" title="审核详情" style="width:420px; height:420px;" resizable="true" closable="true">
+    <iframe scrolling="yes" id='openIframeShow' frameborder="0" src="" style="width:100%;height:98%;"></iframe>
+</div>
+<script type="text/javascript">
+  
+    enterSearch("#btnQuery");
+    $(function () {
+        var url = "GetDetailList?ID=@ViewData["ID"]";
+        $('#List').datagrid({
+            url: url,
+            width: $(window).width() ,
+            height: $(window).height(),
+            method: 'post',
+            fitColumns: true,
+            // sortName: 'Code',
+            sortOrder: 'desc',
+            idField: 'ID',
+            pageSize: 20,
+            pagination: true,
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                  { field: 'Name', title: '商品名称', width: 100, align: 'center' },
+                  { field: 'Code', title: '商品代码', width: 100, align: 'center' },
+                  { field: 'Qty', title: '发货数量', width: 60, align: 'center' },
+            ]],
+            onDblClickRow: function (rowIndex, rowData) {
+                Show(rowData.ID)
+            }
+        })
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() ,
+                height: $(window).height()
+            })
+        });
+    })
+   
+</script>

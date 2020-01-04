@@ -1,0 +1,42 @@
+﻿@model EBMS.Models.T_InterceptLogistics
+@{
+    ViewBag.Title = "ApproveDetail";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<table class="fromEditTable setTextWidth300" id="cashback">
+    @Html.HiddenFor(model => model.ID)
+    <tr>
+        <td style="text-align: right;width:20%;">
+            @Html.LabelFor(model=>model.OrderNumber)
+        </td>
+        <td>
+            @Html.TextBoxFor(model => model.OrderNumber, new { @readonly = "readonly", @style = "padding-left:5px;" })
+        </td>
+    </tr>
+    <tr>
+        <td style="text-align: right;width:20%;">
+            @Html.LabelFor(model => model.ExpressName)
+        </td>
+        <td>
+            @Html.TextBoxFor(model => model.ExpressName, new { @readonly = "readonly", @style = "padding-left:5px;" })
+        </td>
+    </tr>
+    <tr>
+        <td style="text-align: right;width:20%;">
+            @Html.LabelFor(model => model.ExpressNumber)
+        </td>
+        <td>
+            @Html.TextBoxFor(model => model.ExpressNumber, new { @readonly = "readonly", @style = "padding-left:5px;" })
+        </td>
+    </tr>
+    <tr>
+        <td style="text-align: right;width:20%;">
+            @Html.LabelFor(model => model.OrderMoney)
+        </td>
+        <td>
+            @Html.TextBoxFor(model => model.OrderMoney, new { @readonly = "readonly",@style="padding-left:5px;" })
+        </td>
+    </tr>
+</table>
+<div class="history-box" style="padding-top:10px;">@Html.Raw(ViewData["history"])</div>

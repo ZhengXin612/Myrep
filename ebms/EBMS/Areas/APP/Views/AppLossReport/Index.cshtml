@@ -1,0 +1,151 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>title</title>
+    <link href="~/Areas/App/AppContent/css/api.css" rel="stylesheet" type="text/css" />
+    <link href="~/Areas/App/AppContent/css/dropload.css" rel="stylesheet" type="text/css" />  
+</head>
+    <body>
+<div class="mask-box" id="status-Box">
+   <ul class="select-status">
+         <li data-val="9999">全部</li>
+         <li data-val="-1">未审核</li>
+         <li data-val="1">已同意</li>
+         <li data-val="2">不同意</li>
+         <li data-val="3">我的申请</li>
+   </ul>
+</div>
+<h2 class="header-bar">
+    <a id="back" href="" class="back-btn" ><i class="icon iconfont icon-back"></i></a>
+    <i class="icon iconfont icon-category r-trigger-list-status"></i>
+</h2>
+<div class="outer">
+    <div class="inner">
+        <div class="lists"></div>
+    </div>
+</div>
+<script src="~/Areas/App/AppContent/js/jquery-2.2.1.min.js"></script>
+<script src="~/Areas/App/AppContent/js/dropload.min.js"></script>
+<script>
+    var getDetail = null;
+    $(function () {
+             var $CurUser = localStorage.getItem("CurUser");
+             $("#back").attr("href", "/App/AppHome/Index?CurUser=" + $CurUser)
+            var num = 10;
+            var page = 0;
+            var myList = 0;
+            var status = "-1";
+            getDetail = function (_id) {
+                window.location.href = "/App/AppLossReport/Detail?id=" + _id
+            }
+            function getDom(page, _fuc) {
+                $.ajax({
+                    type: 'POST',
+                    url: "/AppLossReport/GetList?CurUser=" + $CurUser + "&page=" + page + "&pageSize=" + num + "&Status=" + status + "&myList=" + myList,
+                    dataType: 'json',
+                    success: function (data) {
+                        data = eval("(" + data + ")")
+                        var result = '';
+                        for (var i = 0; i < data.lists.length; i++) {
+                            var remark = "";
+                            switch (data.lists[i].remark) {
+                                case -1:
+                                    remark = "<font color=#d02e2e>未审核</font>";
+                                    break;
+                                case 0:
+                                    remark = "<font color=#2299ee>审核中</font>";
+                                    break;
+                                case 1:
+                                    remark = "<font color=#1fc73a>已同意</font>";
+                                    break;
+                                case 2:
+                                    remark = "<font color=#d02e2e>不同意</font>";
+                                    break;
+                                case 3:
+                                    remark = "<font color=#d02e2e>已作废</font>";
+                                    break;
+                            }
+                            result += '<li onclick="getDetail(' + data.lists[i].uid + ')" class="item opacity"><div class="l-box">'
+                                            + '<h3>' + data.lists[i].title + '</h3>'
+                                            + '<h4>' + data.lists[i].subTitle + '</h4></div>'
+                                            + '<span class="remark">' + remark + '</span>'
+                                        + '</li>';
+                        }
+                        // 为了测试，延迟1秒加载          
+                        myList = 0;
+                        setTimeout(function () {
+                            if (_fuc == "append") {
+                                $('.lists').append(result);
+                                dropload.resetload();
+
+                            } else {
+                                $('.lists').html(result);
+                            }
+
+                            if ($('.lists li').length < num) {
+                                $(".dropload-load").hide();
+                            } else {
+                                dropload.resetload();
+                            }
+                            // 每次数据加载完，必须重置
+
+                        }, 1000);
+                    },
+                    error: function (xhr, type) {
+                       // alert("数据加载错误")
+                        window.location.href = "/App/AppHome/Index?CurUser=" + $CurUser
+                    }
+                });
+            }
+            // dropload
+            var dropload = $('.inner').dropload({
+                domUp: {
+                    domClass: 'dropload-up',
+                    domRefresh: '<div class="dropload-refresh">↓下拉刷新</div>',
+                    domUpdate: '<div class="dropload-update">↑释放更新</div>',
+                    domLoad: '<div class="dropload-load"><span class="loading"></span>加载中...</div>'
+                },
+                domDown: {
+                    domClass: 'dropload-down',
+                    domRefresh: '<div class="dropload-refresh">↑上拉加载更多</div>',
+                    domLoad: '<div class="dropload-load"><span class="loading"></span>加载中...</div>',
+                    domNoData: '<div class="dropload-noData">暂无数据</div>'
+                },
+                scrollArea: window,
+                loadUpFn: function (me) {
+                    location.reload();
+                    // 每次数据加载完，必须重置
+                    dropload.resetload();
+                },
+                loadDownFn: function (me) {
+                    page++;
+                    getDom(page, "append", myList)
+                }
+            });
+            $(".r-trigger-list-status").click(function () {
+                $("#status-Box").show();
+                $("body").css("overflow", "hidden")
+            })
+            $("#status-Box").click(function () {
+                $("#status-Box").hide();
+                $("body").css("overflow", "scroll")
+            })
+            $(".select-status li").click(function (e) {
+                e.stopPropagation();
+                e.preventDefault();
+                if ($(this).attr("data-val") == 3) {
+                    myList = 1;
+                }
+                status = $(this).attr("data-val");
+                page = 1;
+                getDom(page, "html", myList)
+                $("#status-Box").hide();
+                $("body").css("overflow", "scroll")
+            });
+        });
+</script>
+    </body>
+</html>

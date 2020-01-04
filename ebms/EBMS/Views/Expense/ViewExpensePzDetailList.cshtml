@@ -1,0 +1,270 @@
+﻿@{
+    ViewBag.Title = "ViewExpensePzDetailList";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+<div class="mvctool">
+    <input id="btnSave" class="modal-btn modal-btn-save" type="submit" value="保存">
+</div>
+<table id="List"></table>
+<script type="text/javascript">
+    var grid; //定义全局变量datagrid
+    var editRow = -1;
+    $(function () {
+
+        var PZ_Direction = [{ "value": "0", "text": "借" }, { "value": "1", "text": "贷" }];
+        var PZ_Direction1 = [{ "value": "0", "text": "借" }, { "value": "1", "text": "贷" }];
+        var url = "GetViewExpenseProductList?expenseId=" + "@ViewData["expenseid"]";
+        grid = $('#List').datagrid({
+            url: url,
+            width: $(window).width() - 15,
+            method: 'post',
+            height: $(window).height() * 0.9,
+            fitColumns: true,
+            sortName: 'ID',
+            sortOrder: 'desc',
+            idField: 'id',
+            striped: true, //奇偶行是否区分
+            singleSelect: true,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+               { field: 'StoreName', title: '店铺名称', width: 120, align: 'center' },
+                    { field: 'Num', title: '数量', width: 60, align: 'center' },
+                    { field: 'Price', title: '单价', width: 60, align: 'center' },
+                    { field: 'Type', title: '类型', width: 80, align: 'center' },
+                    { field: 'Abstract', title: '摘要', width: 120, align: 'center' },
+                    { field: 'PZ_Department', title: '部门', width: 80, align: 'center' },
+                     { field: 'PZ_Subject', title: '科目', width: 80, align: 'center' },
+                     {
+                         field: 'PZ_Direction', title: '借贷方向', width: 150, align: 'center', editor: { type: 'combobox', options: { data: PZ_Direction, valueField: "value", textField: "text", editable: false, panelHeight: "auto" } },
+                         formatter: function (value, rowData, rowIndex) {
+
+                             for (var i = 0; i < PZ_Direction.length; i++) {
+                                 if (PZ_Direction[i].value == value) {
+                                     return PZ_Direction[i].text;
+                                 }
+                             }
+                         }
+                     },
+                     { field: 'PZ_Department1', title: '部门1', width: 80, align: 'center' },
+                     { field: 'PZ_Subject1', title: '科目1', width: 80, align: 'center' },
+                     {
+                         field: 'PZ_Direction1', title: '借贷方向1', width: 150, align: 'center', editor: { type: 'combobox', options: { data: PZ_Direction1, valueField: "value", textField: "text", editable: false, panelHeight: "auto" } },
+                         formatter: function (value, rowData, rowIndex) {
+
+                             for (var i = 0; i < PZ_Direction1.length; i++) {
+                                 if (PZ_Direction1[i].value == value) {
+                                     return PZ_Direction1[i].text;
+                                 }
+                             }
+                         }
+                     }
+            ]],
+            onClickCell: function (index, field) {
+                if (field == "PZ_Department") {
+                    $('#openIframeshop')[0].src = "ViewPzDepart?index=" + index;
+                    $('#shopDiv').dialog('open');
+                    grid.datagrid('endEdit', index);
+                }
+                else if (field == "PZ_Subject") {
+                    $('#openIexpenseCostType')[0].src = "ViewPzSubJect?index=" + index;
+                    $('#expenseCostTypeDiv').dialog('open');
+                    $('#List').datagrid('endEdit', index);
+                }
+                else if (field == "PZ_Department1") {
+                    $('#openIframeshop')[0].src = "ViewPzDepart1?index=" + index;
+                    $('#shopDiv').dialog('open');
+                    grid.datagrid('endEdit', index);
+                }
+                else if (field == "PZ_Subject1") {
+                    $('#openIexpenseCostType')[0].src = "ViewPzSubJect1?index=" + index;
+                    $('#expenseCostTypeDiv').dialog('open');
+                    $('#List').datagrid('endEdit', index);
+                }
+                else
+                    editCell(index, field);
+            }
+        });
+        //grid 大小随窗口变化
+        $(window).resize(function () {
+            $('#List').datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            }).datagrid('resize', {
+                width: $(window).width() - 15,
+                height: $(window).height() - 50
+            });
+        });
+
+        var sign = 0;
+        $("#btnSave").click(function () {
+            saveJson();
+            var rows = $('#List').datagrid("getRows");
+            for (var i = 0; i < rows.length; i++) {
+                //if (rows[i].PZ_Department == undefined || rows[i].PZ_Department == "" || rows[i].PZ_Department1 == undefined || rows[i].PZ_Department1 == "") {
+                //    $.messager.alert('提示', "部门不能为空", "info");
+                //    return false;
+                //}
+                if (rows[i].PZ_Subject == undefined || rows[i].PZ_Subject == "" || rows[i].PZ_Subject1 == undefined || rows[i].PZ_Subject1 == "") {
+                    $.messager.alert('提示', "科目不能为空", "info");
+                    return false;
+                }
+                if (JSON.stringify(rows[i].PZ_Direction) == undefined || JSON.stringify(rows[i].PZ_Direction) == "" || JSON.stringify(rows[i].PZ_Direction1) == undefined || JSON.stringify(rows[i].PZ_Direction1) == "") {
+                    $.messager.alert('提示', "借贷方向不能为空", "info");
+                    return false;
+                }
+            }
+            if (sign == 0) {
+                sign++;
+                loading(0);
+                $.ajax({
+                    url: "ViewPzAddSave?expenseId=" + "@ViewData["expenseid"]",
+                    type: "Post",
+                    data: $("#EditForm").serialize(),
+                    success: function (data) {
+                        loading(1);
+                        if (data.State == "Success") {
+                            $.messager.alert('提示', '操作成功', "info", function () {
+                                closeReshefTab("报销凭证")
+                                sign = 0
+                            });
+                        } else {
+                            $.messager.alert('提示', data.Message, "info", function () {
+                                closeReshefTab("报销凭证")
+                                sign = 0
+                            });
+                        }
+                    },
+                    error: function () {
+                        loading(1);
+                        sign = 0;
+                    }
+                });
+            }
+        });
+
+    });
+
+
+
+    function adddepart(rows, index) {
+        $('#shopDiv').dialog('close');
+        $('#List').datagrid('updateRow', {
+            index: index,
+            row: {
+                PZ_Department: rows[0].Name,
+            }
+        });
+        saveJson();
+    }
+
+    function adddepart1(rows, index) {
+        $('#shopDiv').dialog('close');
+        $('#List').datagrid('updateRow', {
+            index: index,
+            row: {
+                PZ_Department1: rows[0].Name,
+            }
+        });
+        saveJson();
+    }
+
+    function addPzSubject(rows, index) {
+        $('#expenseCostTypeDiv').dialog('close');
+        $('#List').datagrid('updateRow', {
+            index: index,
+            row: {
+                PZ_Subject: rows[0].Name,
+            }
+        });
+        saveJson();
+    }
+
+    function addPzSubject1(rows, index) {
+        $('#expenseCostTypeDiv').dialog('close');
+        $('#List').datagrid('updateRow', {
+            index: index,
+            row: {
+                PZ_Subject1: rows[0].Name,
+            }
+        });
+        saveJson();
+    }
+
+    function saveJson() {
+
+        JsonText = "[";
+        var rows = $('#List').datagrid('getRows');
+
+        for (var i = 0; i < rows.length; i++) {
+            JsonText += '{';
+            JsonText += '"ID":' + '"' + rows[i].ID + '",';
+            JsonText += '"Num":' + '"' + rows[i].Num + '",';
+            JsonText += '"Price":' + '"' + rows[i].Price + '",';
+            JsonText += '"PZ_Department":' + '"' + rows[i].PZ_Department + '",';
+            JsonText += '"PZ_Subject":' + '"' + rows[i].PZ_Subject + '",';
+            JsonText += '"PZ_Direction":' + '"' + rows[i].PZ_Direction + '",';
+            JsonText += '"PZ_Department1":' + '"' + rows[i].PZ_Department1 + '",';
+            JsonText += '"PZ_Subject1":' + '"' + rows[i].PZ_Subject1 + '",';
+            JsonText += '"PZ_Direction1":' + '"' + rows[i].PZ_Direction1 + '",';
+            JsonText += '"Abstract":' + '"' + rows[i].Abstract + '"},';
+        }
+        JsonText = JsonText.substring(0, JsonText.length - 1);
+        JsonText += "]";
+        $("#jsonStr").val(JsonText);
+    }
+
+    function editCell(index, field) {
+        grid.datagrid('endEdit', editRow);
+        editRow = index;
+        grid.datagrid('selectRow', index);
+        grid.datagrid('beginEdit', index);
+        var editor = grid.datagrid('getEditor', { index: index, field: field });
+        //numberbox 特殊处理
+        setTimeout(function () {
+            editor.target.focus();
+        }, 0);
+
+        var editors = grid.datagrid('getEditors', index);
+        for (var i = 0; i < editors.length; i++) {
+            editors[i].target.bind('keydown', { field: editors[i].field }, function (e) {
+                if (e.keyCode == 13) {
+                    grid.datagrid('endEdit', index);
+                    editRow = -1;;
+                } else if (e.keyCode == 38) {	// up
+
+                    if (editRow > 0) {
+                        editCell(editRow - 1, e.data.field);
+                    }
+                } else if (e.keyCode == 40) {	// down
+
+                    if (editRow < grid.datagrid('getRows').length - 1) {
+                        editCell(parseInt(editRow) + 1, e.data.field);
+                    }
+                }
+                if (i < 2) {
+                    if (!(event.keyCode == 46) && !(event.keyCode == 9) && !(event.keyCode == 8) && !(event.keyCode == 37) && !(event.keyCode == 39))
+                        if (!((event.keyCode >= 48 && event.keyCode <= 57) || (event.keyCode >= 96 && event.keyCode <= 105)))
+                            event.returnValue = false;
+                }
+            });
+        }
+    }
+    $(document).not(grid).on("click", function () {
+        grid.datagrid("endEdit", editRow);
+        grid.datagrid('unselectAll');
+    });
+
+</script>
+@using (Html.BeginForm("EditForm", "Controller", null, FormMethod.Post, new { Id = "EditForm" }))
+{ 
+    @Html.ValidationSummary(true)
+    @Html.Hidden("jsonStr")
+}
+<input type="hidden" id="jsonStr" />
+<div id="shopDiv" class="easyui-dialog" closed="true" modal="true" title="选择部门" style="width: 500px; height: 420px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIframeshop' frameborder="0" src="" style="width: 98%; height: 98%;"></iframe>
+</div>
+<div id="expenseCostTypeDiv" class="easyui-dialog" closed="true" modal="true" title="选择科目" style="width: 500px; height: 420px;" resizable="true" closable="true">
+    <iframe scrolling="auto" id='openIexpenseCostType' frameborder="0" src="" style="width: 98%; height: 98%;"></iframe>
+</div>

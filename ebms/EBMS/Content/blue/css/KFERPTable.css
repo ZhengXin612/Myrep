@@ -1,0 +1,41 @@
+*{padding:0;margin:0}
+h1{text-align:center;font-size:28px;word-spacing:8px;letter-spacing:6px;font-weight:normal;line-height:45px;margin:20px 0}
+.print-page {font-size:14px;}
+.SC-Table{ width: 794px;display: table;box-sizing: border-box; border-collapse: collapse;margin:26px auto;font-size:14px}
+.SC-Table tr{height:35px;}
+.SC-Table tr td{border: 1px solid #000}
+.td-center{text-align:center;width:160px }
+.td-left{padding:0 10px;width:217px}
+.SC-table-2{width: 100%}
+.SC-table-2 tr td{border:0}
+.SC-Table .row-2{height:70px;}
+.SC-Table .has-dDiv{padding: 0;text-align: center;}
+.has-dDiv div{float: left;height:35px;width:50%;border-left:1px solid #000;margin-left:-1px}
+.SC-Table .note{height: 660px}
+.foot-box{margin:10px auto 0 auto;}
+.foot-box tr{height:35px}
+.SC-Table .note td {height:660px}
+.SC-Table .note td div {padding: 5px;width:100%;height:100%;box-sizing:border-box}
+.table-top {height:20px;width:794px;margin:0 auto;border-bottom:1px solid #000;font-size:12px}
+.company-name {float:left}
+.company-no {float:right}
+@media print {.noprint {display: none;color:green } }
+.icon-ok {font-size:20px;color:#666;position:relative;top:30px;left:60px}
+.icon-ok:hover{color:#2299ee}
+/*领料*/
+.LL-Table{width: 794px;display: table;box-sizing: border-box; border-collapse: collapse;margin:0 auto;table-layout:fixed;}
+.LL-Table tr{height:30px;}
+.LL-Table tr td{border: 1px solid #000;padding:0 5px;}
+.label{text-align: center;}
+.line{border-bottom: 1px solid #000;width:100px;display: table;height:28px;margin-left:8px}
+.line-r{margin-right:10px;}
+.LL-Table tr th{border:1px solid #000;border-top: 0;font-weight: normal;font-style: normal;}
+.text,.font-12{font-size: 12px;text-align:center}
+/*原材料*/
+.YCL-Table{width: 794px;display: table;box-sizing: border-box; border-collapse: collapse;margin:0 auto;table-layout:fixed;}
+.YCL-Table tr{height: 30px;line-height:30px}
+.YCL-Table tr td{border: 1px solid #000;text-align: center;}
+.YCL-Top{height:40px;width:794px;display:table;margin:0 auto}
+.div-left{float:left}
+.div-right{float:right;}
+.s-line{border-bottom:1px solid #000;padding:0 10px 1px 10px;}

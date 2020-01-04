@@ -1,0 +1,89 @@
+﻿@model EBMS.Models.T_NoTicketExpense
+@{
+    ViewBag.Title = "ViewExpenceAdd";
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+<style>
+    .label-r{width:80px;text-align:right}
+    .text-box {width:300px;height:80px;resize:none}
+    
+</style>
+<div class="mvctool">
+    <input id="btnSave" class="modal-btn modal-btn-save" type="submit" value="保存">
+</div>
+@using (Html.BeginForm("EditForm", "Controller", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+      <table class="fromEditTable setTextWidth300">
+          <tr>
+              <td  class="label-r">@Html.LabelFor(a=>a.Code):</td>
+              <td  colspan="2"><input type="text" value="@ViewData["Code"]" id="Code" name="Code" readonly="true"></td>
+          </tr>
+
+          <tr>
+              <td class="label-r">@Html.LabelFor(a=>a.PostUser):</td>
+              <td><input type="text" value="@ViewData["viewUser"]" id="PostUser" name="PostUser" readonly="true"></td>
+              <td>@Html.ValidationMessageFor(model => model.PostUser)</td>
+          </tr>
+          <tr>
+              <td class="label-r">@Html.LabelFor(a=>a.TheContent):</td>
+              <td>@Html.TextAreaFor(a => a.TheContent, new { @class="text-box"})</td>
+              <td>@Html.ValidationMessageFor(model => model.TheContent)</td>
+          </tr>
+           <tr>
+              <td class="label-r">@Html.LabelFor(a=>a.Total):</td>
+              <td>@Html.TextBoxFor(a=>a.Total)</td>
+                 <td>@Html.ValidationMessageFor(model => model.Total)</td>
+          </tr>
+           <tr>
+              <td class="label-r">@Html.LabelFor(a=>a.PostAccountInfo):</td>
+              <td>@Html.TextAreaFor(a=>a.PostAccountInfo, new { @placeholder="请输入报销账号类型、报销账号，如：支付宝：666XXXXX"})</td>
+                 <td>@Html.ValidationMessageFor(model => model.PostAccountInfo)</td>
+           </tr>        
+             <tr>
+              <td class="label-r">@Html.LabelFor(a=>a.Note):</td>
+              <td>@Html.TextAreaFor(a=>a.Note, new { @class="text-box"})</td>
+                  <td>@Html.ValidationMessageFor(model => model.Note)</td>
+            </tr>
+          
+      </table>
+}
+<script type="text/javascript">
+    var flag = 0;
+    $("#btnSave").click(function () {
+        if ($.trim($("#TheContent").val()) == "")
+        {
+            $.messager.alert('提示', "报销内容不能为空", "info");
+            return false
+        }
+        if ($.trim($("#Total").val()) == "") {
+            $.messager.alert('提示', "报销金额不能为空", "info");
+            return false
+        }
+        if ($.trim($("#PostAccountInfo").val()) == "") {
+            $.messager.alert('提示', "报销账号信息不能为空", "info");
+            return false
+        }
+        if ($("#EditForm").valid()) {
+            if (flag == 0) {
+                flag++;
+                $.ajax({
+                    url: "NoTicketExpenseAddSave",
+                    type: "Post",
+                    data: $("#EditForm").serialize(),
+                    success: function (data) {
+                        $.messager.alert('提示', data.Message, "info", function () {
+                            window.location.reload();
+                        });
+                        flag = 0;
+                    },
+                    error: function (data) {
+                        $.messager.alert('提示', data.Message, "info")
+                        flag = 0;
+                    }
+                });
+            }
+        }
+    })
+
+</script>

@@ -1,0 +1,188 @@
+﻿@{
+    ViewBag.Title = "ViewRulesReader";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+}
+
+<script type="text/javascript">
+    $(function () {
+        $("#weiliulan").hide();
+        $("#wei").click(function () {
+          
+            $("#liulan").hide();
+            $("#weiliulan").show();
+            $("#wei").addClass("head1");
+            $("#yi").removeClass("head1");
+            $("#wei").removeClass("head");
+            $("#yi").addClass("head");
+           
+        })
+        $("#yi").click(function () {
+         
+            $("#liulan").show();
+            $("#weiliulan").hide();
+            $("#wei").removeClass("head1");
+            $("#yi").addClass("head1")
+            $("#wei").addClass("head");
+            $("#yi").removeClass("head");
+        })
+        $("tbody tr").mouseover(function () {
+          
+            $(this).css("background", "#f0f0f0")
+        })
+        $("tbody tr").mouseout(function () {
+            $("tbody tr").css("background", "#ffffff")
+          
+        })
+      
+    })
+   
+</script>
+<style>
+    table {
+        width:95%;
+    margin-left:5%;
+    margin-top:5%;
+    text-align:center;
+     /*border-collapse:collapse*/
+    }
+    .reader {
+     width:30%;
+    font-size:12px;
+    height:30px;
+    text-align:center;
+    border-bottom: dashed 1px #d3d2d2;
+    color:#333
+    }
+    .time {
+     width:50%;
+    font-size:12px;
+     height:30px;
+    text-align:center;
+     border-bottom: dashed 1px #d3d2d2;
+      color:#333
+    }
+    button {
+    width:25%;
+    margin-right:5%;
+    }
+    .mingdan {
+   padding-right:10px;
+   font-size:14px;
+   width:80px;
+   text-align:center;
+    }
+    span {
+   
+   height:20%;
+       font-size:18px;
+    }
+    .head1 {
+     width:35%;
+     height:35px; 
+     font-size:14px;
+    text-align:center;
+    border-left:1px solid #d3d2d2;
+    border-top:1px solid #4faffb;
+    border-right:1px solid #d3d2d2;
+    box-sizing:border-box;
+    -webkit-box-sizing:border-box;
+   border-bottom:1px solid #fff;
+    }
+    .head {
+      width:35%;
+     height:35px; 
+    color:#808080;
+     font-size:14px;
+    text-align:center;
+    box-sizing:border-box;
+    -webkit-box-sizing:border-box;
+    border-bottom:1px solid #d3d2d2;
+    }
+    .kong1 {
+    width:5%;
+    height:10%;
+    border-bottom:solid 1px #d3d2d2;
+   
+    }
+     .kong2 {
+    width:5%;
+    height:10%;
+    border-bottom:solid 1px #d3d2d2;
+    }
+    .rehead {
+         width:30%;
+    font-size:14px;
+    height:30px;
+    text-align:center;
+   
+  
+    }
+    .retime {
+     width:50%;
+    font-size:14px;
+     height:30px;
+    text-align:center;
+    
+  
+    }
+</style>
+<table>
+    <thead>
+        <tr>
+            <td class="kong1"></td><td id="yi" class="head1">浏览记录</td><td   id="wei" class="head">未浏览名单</td><td class="kong2"></td>
+        </tr>
+    </thead>
+</table>
+
+<div id="liulan" >
+    @if(ViewBag.reader!=null)
+{
+<table>
+    <thead>
+        <tr >
+             <td class="rehead">人员</td><td class="retime">浏览时间</td>
+        </tr>
+           
+           
+        </thead>
+    <tbody>
+        
+         @foreach(dynamic p in ViewBag.reader )
+            {
+             <tr ><td class="reader">@p.Reader</td><td class="time">@p.ReadTime</td></tr>
+            }
+    </tbody>
+</table>
+}
+else
+{
+<span>无浏览记录</span>
+      
+}
+</div>
+
+<div id="weiliulan">
+    @if (ViewBag.unreader != null)
+    {
+  <table>
+      
+       <thead>
+           <tr >
+            <td class="rehead">人员</td><td  class="retime">部门</td>
+           
+        </tr>
+       </thead>
+    <tbody>
+        
+         @foreach (dynamic p in ViewBag.unreader)
+         {
+             <tr ><td class="reader">@p.Nickname</td><td class="time">@p.DepartmentId</td></tr>
+         }
+    </tbody>
+</table>
+
+    }
+    else{<span>无未浏览名单</span>}
+
+</div>
+

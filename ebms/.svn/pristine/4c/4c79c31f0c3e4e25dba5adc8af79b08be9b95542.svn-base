@@ -1,0 +1,268 @@
+﻿@model EBMS.Models.T_Joined
+@using Lib
+@{
+    Layout = "~/Views/Shared/_Main_Edit.cshtml";
+}
+
+<style>
+.options-div {margin:10px 0 0 60px}
+#files-box {margin:10px 0}
+#files-box li{height:25px;line-height:25px;}
+.files-name{height:25px;overflow:hidden;  }
+.files-size{margin:0 10px;color:#999}
+#files-box li a {color:#333}
+#files-box li  .files-delete{color:#2299ee}
+    h2 {font-size:16px;color:#2299ee;text-indent:2em;margin:10px 0 }
+    #data-tr p{float:left;margin-right:15px}
+#data-tr p input[type="checkbox"]{float:left;margin:1px 5px 0 0}
+</style>
+@using (Html.BeginForm("ViewJoinedAdd", "Joined", null, FormMethod.Post, new { enctype = "multipart/form-data", Id = "EditForm" }))
+{
+    @Html.ValidationSummary(true)
+    <h2>入职信息</h2>
+    <table class="fromEditTable setTextWidth600">
+        @Html.HiddenFor(model=>model.ID)
+          <tr>
+            <td style="width:120px; text-align: right;">
+                  <input type="hidden" id="jsonStr" />
+                @Html.LabelFor(model => model.Code)：   
+            </td>
+            <td >
+                  @Html.DisplayFor(model => model.Code)
+            </td>
+        </tr>
+        <tr>
+            <td style="width:120px; text-align: right;">
+                @Html.LabelFor(model => model.PostUser)：   
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.PostUser)
+            </td>
+        </tr>
+         <tr>
+            <td style="width:120px; text-align: right;">
+                @Html.LabelFor(model => model.PostDepartment)：   
+            </td>
+            <td>
+                   @Html.DisplayFor(model => model.PostDepartment)
+            </td>
+        </tr>
+       <tr>
+           <td style="width:120px; text-align: right;">
+                  @Html.LabelFor(model => model.Nickname)：   
+           </td>
+           <td>
+                 @Html.DisplayFor(model => model.Nickname)
+           </td>
+       </tr>
+          <tr>
+           <td style="width:120px; text-align: right;">
+                  @Html.LabelFor(model => model.Name)：   
+           </td>
+           <td>
+                  @Html.DisplayFor(model => model.Name)
+           </td>
+       </tr>
+          <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.Sex)：   
+            </td>
+            <td>
+                   @Html.DisplayFor(model => model.Sex)
+            </td>
+        </tr>
+        <tr>
+           <td style="width:120px; text-align: right;">
+               @Html.LabelFor(model => model.Tel)：   
+           </td>
+           <td>
+                @Html.DisplayFor(model => model.Tel)
+           </td>
+         </tr>
+           <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.Department)：   
+            </td>
+            <td>
+                 @Html.DisplayFor(model => model.Department)
+            </td>
+        </tr>
+          <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.SetGroup)：   
+            </td>
+            <td>
+                 @Html.DisplayFor(model => model.SetGroup)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.Job)：   
+            </td>
+            <td>
+            @Html.DisplayFor(model => model.Job)
+            </td>
+        </tr>
+         <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.IdcardAddress)：   
+            </td>
+            <td>
+                 @Html.DisplayFor(model => model.IdcardAddress)
+            </td>
+        </tr>
+         <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.Address)：   
+            </td>
+            <td>
+               @Html.DisplayFor(model => model.Address)
+            </td>
+        </tr>
+         <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.EmergencyContact)：   
+            </td>
+            <td>
+               @Html.DisplayFor(model => model.EmergencyContact)
+            </td>
+        </tr>
+         <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.EmergencyTel)：   
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.EmergencyTel)
+            </td>
+        </tr>
+         <tr>
+            <td style="width: 120px; text-align: right;">
+               纸质资料是否齐全：
+            </td>
+            <td id="data-tr">
+               <p>
+                    @Html.CheckBox("DataUserRegister")
+                    @Html.LabelFor(model => model.DataUserRegister)  
+               </p>
+                <p>
+                    @Html.CheckBox("DataPost")
+                    @Html.LabelFor(model => model.DataPost)  
+               </p>
+                 <p>
+                    @Html.CheckBox("DataResult")
+                    @Html.LabelFor(model => model.DataResult)  
+               </p>
+                <p>
+                    @Html.CheckBox("DataIdcard")
+                    @Html.LabelFor(model => model.DataIdcard)  
+               </p>
+                 <p>
+                    @Html.CheckBox("DataQualifications")
+                    @Html.LabelFor(model => model.DataQualifications)  
+               </p>
+                  <p>
+                    @Html.CheckBox("DataPhoto")
+                    @Html.LabelFor(model => model.DataPhoto)  
+               </p>
+                  <p>
+                    @Html.CheckBox("DataDrivingLicense")
+                    @Html.LabelFor(model => model.DataDrivingLicense)  
+               </p>
+                  <p>
+                    @Html.CheckBox("DataExaminationReport")
+                    @Html.LabelFor(model => model.DataExaminationReport)  
+               </p>
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.Information)：   
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.Information)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.Memo)：   
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.Memo)
+            </td>
+        </tr>
+         <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.FirstApprove)：   
+            </td>
+            <td>
+                    @Html.DisplayFor(model => model.FirstApprove)
+            </td>
+             
+        </tr>
+        <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.Hiredate)：
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.Hiredate)
+            </td>
+            
+        </tr>
+        <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.ContractFirstStartTime)：
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.ContractFirstStartTime)
+                —@Html.DisplayFor(model => model.ContractFirstDeadline)
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.ProbationSalary)：
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.ProbationSalary)
+            </td>
+
+        </tr>
+        <tr>
+            <td style="width: 120px; text-align: right;">
+                @Html.LabelFor(model => model.MinSalary)：
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.MinSalary)
+            </td>
+
+        </tr>
+        
+    </table>
+}
+<h2>附件列表</h2>
+<div class="options-div"><ul id="files-box"></ul></div>
+<h2>审核详情</h2>
+<div class="history-box">@Html.Raw( ViewData["history"])</div>
+<script>
+    $.ajax({
+        url: "../Joined/GetJoinedOptin?ID=" +$("#ID").val(),
+        type: "Post",
+        data: $("#EditForm").serialize(),
+        success: function (data) {
+            var $Li = "";
+            if (data == "" || data == null)
+            {
+                $Li += "<li>没有附件...</li>"
+                $("#files-box").html($Li);
+                return;
+            }
+            var dataJson = JSON.parse(data)
+                $.each(dataJson, function (i, val) {
+                    $Li += "<li><a href="+dataJson[i].Url+" target='_blank'><span class='files-name'>" + dataJson[i].Name + "</span><span class='files-size'>(" + dataJson[i].Size + "KB)</span></a></li>"
+                })
+             $("#files-box").html($Li);
+        },
+        error:function(){
+          
+        }
+    });
+</script>

@@ -1,0 +1,25 @@
+﻿@model  EBMS.Models.T_RetreatExpressRecord
+@using Lib;
+@{
+    ViewBag.Title = "多行查询";
+    Layout = "~/Views/Shared/_Main_Layout.cshtml";
+
+}
+<script src="@Url.Content("~/Scripts/date.js")" type="text/javascript"></script>
+<div class="Company-top-box">
+    <div class="search-box">
+        <textarea rows="20" cols="150" name="MultiLine" id="MultiLine">
+          
+        </textarea>
+    
+        <input type="button" value="确定" id="btnQuery" class="icon-search">
+    </div>
+</div>
+<script type="text/javascript">
+
+    $("#btnQuery").click(function () {
+        var queryStr = $("#MultiLine").val();
+        parent.Querys(queryStr);
+    });
+</script>
+
