@@ -1012,7 +1012,7 @@ namespace EBMS.Controllers
                     //客服备注
                     string cs_remark = trades["cs_remark"].ToString();
                     //实付金额
-                    // string paid = trades["paid"].ToString();
+                    string paid = trades["paid"].ToString();
                     //商品详情
                     List<T_RetreatDetails> DetailsList = new List<T_RetreatDetails>();
                     double paid = 0.00;
